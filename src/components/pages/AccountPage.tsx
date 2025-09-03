@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -22,7 +22,11 @@ import {
   Map,
   Bookmark,
   Settings,
-  CheckCircle
+  CheckCircle,
+  Calendar,
+  X,
+  Plus,
+  Trash2
 } from "lucide-react";
 
 interface AccountPageProps {
@@ -35,21 +39,224 @@ interface AccountPageProps {
 
 const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [] }) => {
   const accountType = "Free"; // This could be dynamic based on user subscription
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Mock companion data for displaying liked companions
+  // Mock companion data for displaying liked companions with detailed info
   const companions = [
-    { id: 1, name: "Priya Sharma", profileImage: "👩‍💻" },
-    { id: 2, name: "Ananya Patel", profileImage: "👩‍🎨" },
-    { id: 3, name: "Arjun Singh", profileImage: "👨‍🦱" },
-    { id: 4, name: "Meera Reddy", profileImage: "👩‍🍳" }
+    { 
+      id: 1, 
+      name: "Priya Sharma", 
+      profileImage: "👩‍💻", 
+      age: 28, 
+      location: "Mumbai, India",
+      bio: "Tech enthusiast and travel lover",
+      interests: ["Technology", "Photography", "Hiking"],
+      gender: "Female",
+      status: "online"
+    },
+    { 
+      id: 2, 
+      name: "Ananya Patel", 
+      profileImage: "👩‍🎨", 
+      age: 25, 
+      location: "Delhi, India",
+      bio: "Artist exploring the world",
+      interests: ["Art", "Culture", "Museums"],
+      gender: "Female",
+      status: "offline"
+    },
+    { 
+      id: 3, 
+      name: "Arjun Singh", 
+      profileImage: "👨‍🦱", 
+      age: 30, 
+      location: "Bangalore, India",
+      bio: "Adventure seeker and foodie",
+      interests: ["Adventure", "Food", "Sports"],
+      gender: "Male",
+      status: "online"
+    },
+    { 
+      id: 4, 
+      name: "Meera Reddy", 
+      profileImage: "👩‍🍳", 
+      age: 26, 
+      location: "Chennai, India",
+      bio: "Chef who loves exploring cuisines",
+      interests: ["Cooking", "Culture", "Food"],
+      gender: "Female",
+      status: "offline"
+    }
   ];
+
+  // Mock user interests data
+  const userInterests = {
+    gender: userData?.preferences?.includes('Male') ? 'Male' : userData?.preferences?.includes('Female') ? 'Female' : 'Not specified',
+    age: 25, // This could be from userData
+    interests: userData?.preferences || ["Adventure", "Culture", "Food"],
+    about: "Passionate traveler looking for authentic experiences and meaningful connections."
+  };
 
   const likedCompanionProfiles = companions.filter(c => likedCompanions.includes(c.id));
 
 
+  const handleSectionClick = (sectionTitle: string) => {
+    if (['My Co-Companion', 'Travel List', 'My Interests'].includes(sectionTitle)) {
+      setActiveSection(activeSection === sectionTitle ? null : sectionTitle);
+      setIsEditing(false);
+    }
+  };
+
+  const renderDetailedSection = () => {
+    if (!activeSection) return null;
+
+    return (
+      <Card className="mb-6 shadow-soft">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg">{activeSection}</CardTitle>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              <Edit className="w-4 h-4 mr-1" />
+              {isEditing ? 'Done' : 'Edit'}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setActiveSection(null)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {activeSection === 'My Co-Companion' && (
+            <div className="space-y-4">
+              {likedCompanionProfiles.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No companions added yet</p>
+              ) : (
+                likedCompanionProfiles.map((companion) => (
+                  <div key={companion.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 text-2xl flex items-center justify-center bg-muted rounded-full">
+                          {companion.profileImage}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold">{companion.name}</h4>
+                          <p className="text-sm text-muted-foreground">{companion.age} years • {companion.location}</p>
+                        </div>
+                      </div>
+                      {isEditing && (
+                        <Button variant="destructive" size="sm">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-sm">{companion.bio}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {companion.interests.map((interest) => (
+                        <Badge key={interest} variant="secondary" className="text-xs">
+                          {interest}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${companion.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`} />
+                      <span className="text-xs text-muted-foreground capitalize">{companion.status}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {activeSection === 'Travel List' && (
+            <div className="space-y-4">
+              {bookmarkedPlaces.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No destinations saved yet</p>
+              ) : (
+                bookmarkedPlaces.map((place) => (
+                  <div key={place.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 text-2xl flex items-center justify-center bg-muted rounded-full">
+                          {place.image}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold">{place.name}</h4>
+                          <p className="text-sm text-muted-foreground">Saved destination</p>
+                        </div>
+                      </div>
+                      {isEditing && (
+                        <Button variant="destructive" size="sm">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+              {isEditing && (
+                <Button variant="outline" className="w-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Destination
+                </Button>
+              )}
+            </div>
+          )}
+
+          {activeSection === 'My Interests' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Gender</label>
+                  <p className="text-sm">{userInterests.gender}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Age</label>
+                  <p className="text-sm">{userInterests.age} years</p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Interests</label>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {userInterests.interests.map((interest) => (
+                    <Badge key={interest} variant="secondary" className="text-xs">
+                      {interest}
+                      {isEditing && (
+                        <X className="w-3 h-3 ml-1 cursor-pointer" />
+                      )}
+                    </Badge>
+                  ))}
+                  {isEditing && (
+                    <Button variant="outline" size="sm" className="h-6 px-2 text-xs">
+                      <Plus className="w-3 h-3 mr-1" />
+                      Add
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">About</label>
+                <p className="text-sm mt-1">{userInterests.about}</p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   const menuItems = [
     {
-      icon: Bookmark,
+      icon: Calendar,
       title: "My Bookings",
       description: "View and manage your travel bookings",
       color: "text-primary",
@@ -222,12 +429,19 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
           </CardContent>
         </Card>
 
+        {/* Detailed Section */}
+        {renderDetailedSection()}
+
         {/* Menu Items */}
         <div className="space-y-3 mb-6">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
-              <Card key={item.title} className="p-4 shadow-soft hover:shadow-medium transition-shadow cursor-pointer">
+              <Card 
+                key={item.title} 
+                className="p-4 shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
+                onClick={() => handleSectionClick(item.title)}
+              >
                 <div className="flex items-center gap-4">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.bgColor}`}>
                     <Icon className={`w-5 h-5 ${item.color}`} />
