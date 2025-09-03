@@ -49,11 +49,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
 
   const menuItems = [
     {
-      icon: Ticket,
-      title: "My Coupons",
-      description: "View and manage your discount coupons",
-      color: "text-warning",
-      bgColor: "bg-warning/10"
+      icon: Bookmark,
+      title: "My Bookings",
+      description: "View and manage your travel bookings",
+      color: "text-primary",
+      bgColor: "bg-primary/10"
     },
     {
       icon: Users,
@@ -71,19 +71,19 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       bgColor: "bg-accent/10"
     },
     {
-      icon: Map,
-      title: "My Maps",
-      description: "View your saved maps and routes",
-      color: "text-info",
-      bgColor: "bg-info/10"
-    },
-    {
       icon: Bookmark,
-      title: "Travellist",
+      title: "Travel List",
       description: `${bookmarkedPlaces.length} saved destinations`,
       color: "text-success",
       bgColor: "bg-success/10",
       places: bookmarkedPlaces
+    },
+    {
+      icon: Ticket,
+      title: "My Coupons",
+      description: "View and manage your discount coupons",
+      color: "text-warning",
+      bgColor: "bg-warning/10"
     },
     {
       icon: Shield,
