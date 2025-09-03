@@ -585,22 +585,24 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
               {/* Essential Hindi Phrases - Always visible when no specific section */}
               {activeLanguageSection === "phrases" && (
                 <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-muted-foreground mb-3">Essential Phrases for Solo Travelers</h4>
-                  {filteredLanguageGuides.map((guide, index) => (
-                    <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <p className="font-medium text-sm">{guide.phrase}</p>
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm text-primary">{guide.translation}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">{guide.pronunciation}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                   <h4 className="text-sm font-medium text-muted-foreground mb-3">Essential Phrases</h4>
+                   {filteredLanguageGuides.map((guide, index) => (
+                     <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                       <div className="grid grid-cols-3 gap-4">
+                         <div className="flex items-center gap-2">
+                           <Volume2 className="w-4 h-4 text-primary cursor-pointer hover:text-primary/80 transition-colors" />
+                           <p className="font-medium text-sm">{guide.phrase}</p>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <Volume2 className="w-4 h-4 text-primary cursor-pointer hover:text-primary/80 transition-colors" />
+                           <p className="font-medium text-sm text-primary">{guide.translation}</p>
+                         </div>
+                         <div>
+                           <p className="text-xs text-muted-foreground">{guide.pronunciation}</p>
+                         </div>
+                       </div>
+                     </div>
+                   ))}
                 </div>
               )}
             </Card>
