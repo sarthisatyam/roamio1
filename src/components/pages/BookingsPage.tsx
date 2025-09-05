@@ -29,6 +29,16 @@ interface BookingsPageProps {
 
 const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
   const [activeTab, setActiveTab] = useState("stay");
+  const [stayFilters, setStayFilters] = useState({
+    type: "all",
+    priceRange: "all",
+    rating: "all"
+  });
+  const [travelFilters, setTravelFilters] = useState({
+    type: "all",
+    priceRange: "all",
+    features: "all"
+  });
 
   const stayOptions = [
     {
@@ -96,35 +106,6 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
     }
   ];
 
-  const localMobilityOptions = [
-    {
-      id: 1,
-      name: "Bounce/Vogo Scooters",
-      type: "Bike sharing",
-      price: "₹3/min",
-      coverage: "Available across Hyderabad",
-      features: ["Self-drive", "Helmets provided", "App-based"],
-      available: true
-    },
-    {
-      id: 2,
-      name: "Auto Rickshaws",
-      type: "Local transport", 
-      price: "₹50-200",
-      coverage: "Throughout the city",
-      features: ["Meter available", "Quick for short distances", "Local drivers"],
-      available: true
-    },
-    {
-      id: 3,
-      name: "City Bus (TSRTC)",
-      type: "Public transport",
-      price: "₹10-25",
-      coverage: "Extensive city network",
-      features: ["Very economic", "Regular services", "Connects all areas"],
-      available: true
-    }
-  ];
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -160,14 +141,65 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
       <div className="flex-1 overflow-y-auto">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-3 mx-6 mt-4">
+          <TabsList className="grid w-full grid-cols-2 mx-6 mt-4">
             <TabsTrigger value="stay">Stay</TabsTrigger>
-            <TabsTrigger value="transport">Transport</TabsTrigger>
-            <TabsTrigger value="local">Local Mobility</TabsTrigger>
+            <TabsTrigger value="transport">Travel</TabsTrigger>
           </TabsList>
 
           {/* Stay Tab */}
           <TabsContent value="stay" className="flex-1 overflow-y-auto p-6 pt-4">
+            {/* Stay Filters */}
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+              <Button 
+                variant={stayFilters.type === "all" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setStayFilters({...stayFilters, type: "all"})}
+                className="whitespace-nowrap"
+              >
+                All Types
+              </Button>
+              <Button 
+                variant={stayFilters.type === "hostel" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setStayFilters({...stayFilters, type: "hostel"})}
+                className="whitespace-nowrap"
+              >
+                Hostels
+              </Button>
+              <Button 
+                variant={stayFilters.type === "hotel" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setStayFilters({...stayFilters, type: "hotel"})}
+                className="whitespace-nowrap"
+              >
+                Hotels
+              </Button>
+              <Button 
+                variant={stayFilters.type === "coliving" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setStayFilters({...stayFilters, type: "coliving"})}
+                className="whitespace-nowrap"
+              >
+                Co-living
+              </Button>
+              <Button 
+                variant={stayFilters.priceRange === "budget" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setStayFilters({...stayFilters, priceRange: "budget"})}
+                className="whitespace-nowrap"
+              >
+                Budget
+              </Button>
+              <Button 
+                variant={stayFilters.rating === "4+" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setStayFilters({...stayFilters, rating: "4+"})}
+                className="whitespace-nowrap"
+              >
+                4+ Rating
+              </Button>
+            </div>
+            
             <div className="space-y-4">
               {stayOptions.map((stay) => (
                 <Card key={stay.id} className="p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
@@ -221,8 +253,60 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
             </div>
           </TabsContent>
 
-          {/* Transport Tab */}
+          {/* Travel Tab */}
           <TabsContent value="transport" className="flex-1 overflow-y-auto p-6 pt-4">
+            {/* Travel Filters */}
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+              <Button 
+                variant={travelFilters.type === "all" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setTravelFilters({...travelFilters, type: "all"})}
+                className="whitespace-nowrap"
+              >
+                All Types
+              </Button>
+              <Button 
+                variant={travelFilters.type === "public" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setTravelFilters({...travelFilters, type: "public"})}
+                className="whitespace-nowrap"
+              >
+                Public Transport
+              </Button>
+              <Button 
+                variant={travelFilters.type === "ride" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setTravelFilters({...travelFilters, type: "ride"})}
+                className="whitespace-nowrap"
+              >
+                Ride Sharing
+              </Button>
+              <Button 
+                variant={travelFilters.priceRange === "budget" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setTravelFilters({...travelFilters, priceRange: "budget"})}
+                className="whitespace-nowrap"
+              >
+                Budget
+              </Button>
+              <Button 
+                variant={travelFilters.features === "fast" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setTravelFilters({...travelFilters, features: "fast"})}
+                className="whitespace-nowrap"
+              >
+                Fast
+              </Button>
+              <Button 
+                variant={travelFilters.features === "comfort" ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setTravelFilters({...travelFilters, features: "comfort"})}
+                className="whitespace-nowrap"
+              >
+                Comfort
+              </Button>
+            </div>
+            
             <div className="space-y-4">
               {transportOptions.map((transport) => (
                 <Card key={transport.id} className="p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
@@ -255,39 +339,6 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
             </div>
           </TabsContent>
 
-          {/* Local Mobility Tab */}
-          <TabsContent value="local" className="flex-1 overflow-y-auto p-6 pt-4">
-            <div className="space-y-4">
-              {localMobilityOptions.map((option) => (
-                <Card key={option.id} className="p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold">{option.name}</h3>
-                      <p className="text-sm text-muted-foreground">{option.type}</p>
-                      <p className="text-sm text-muted-foreground mt-1">{option.coverage}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-primary">{option.price}</p>
-                      <Button size="sm" className="mt-2 bg-gradient-primary text-white border-0">
-                        Book
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Features:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {option.features.map((feature) => (
-                        <Badge key={feature} variant="secondary" className="text-xs">
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
         </Tabs>
       </div>
     </div>
