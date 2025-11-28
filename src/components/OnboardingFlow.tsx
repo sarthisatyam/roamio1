@@ -104,7 +104,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
       case 1: // Quick Setup
         return formData.name.trim() !== "" && formData.emailOrPhone.trim() !== "";
       case 2: // OTP Verification
-        return formData.otp.length === 4;
+        return formData.otp.length === 4 && formData.otp === "1234";
       case 3: // Preferences
         return formData.preferences.length > 0;
       default:
@@ -277,6 +277,9 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 We sent a 4-digit code to<br />
                 <span className="font-medium text-foreground">{formData.emailOrPhone}</span>
               </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Demo OTP: <span className="font-mono font-semibold text-primary">1234</span>
+              </p>
             </div>
 
             <div className="space-y-6">
@@ -306,11 +309,16 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
               onClick={handleNext}
               className="w-full mt-8 bg-gradient-primary text-primary-foreground font-bold hover:scale-[1.02] transition-all"
               size="lg"
-              disabled={formData.otp.length !== 4}
+              disabled={!isStepValid()}
             >
               Verify & Next
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
+            {formData.otp.length === 4 && formData.otp !== "1234" && (
+              <p className="text-xs text-destructive text-center mt-2">
+                Invalid OTP. Please use demo OTP: 1234
+              </p>
+            )}
           </Card>
         </div>
       )}
