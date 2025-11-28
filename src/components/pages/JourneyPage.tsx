@@ -127,27 +127,6 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
   const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
   const totalBudget = expenses.reduce((sum, exp) => sum + exp.budget, 0);
 
-  const pastTrips = [
-    {
-      id: 1,
-      destination: "Rajasthan, India",
-      dates: "Mar 15-22, 2024",
-      duration: "7 days",
-      image: "🏰",
-      highlights: ["Amber Fort", "City Palace", "Hawa Mahal"],
-      rating: 5
-    },
-    {
-      id: 2,
-      destination: "Kerala Backwaters", 
-      dates: "Feb 8-12, 2024",
-      duration: "4 days",
-      image: "🌴",
-      highlights: ["Houseboat Stay", "Spice Gardens", "Kathakali Show"],
-      rating: 4
-    }
-  ];
-
   const languageGuides = [
     { phrase: "Hello", translation: "नमस्ते (Namaste)", pronunciation: "na-mas-te" },
     { phrase: "Thank you", translation: "धन्यवाद (Dhanyawad)", pronunciation: "dhan-ya-wad" },
@@ -243,11 +222,10 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
       <div className="flex-1 overflow-y-auto">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col h-full">
-          <TabsList className="grid w-full grid-cols-4 mx-6 mt-4">
+          <TabsList className="grid w-full grid-cols-3 mx-6 mt-4">
           <TabsTrigger value="guide">Guide</TabsTrigger>
           <TabsTrigger value="planner">Planner</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="trips">Past Trips</TabsTrigger>
         </TabsList>
 
           {/* Activity Planner Tab */}
@@ -410,54 +388,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
           </div>
         </TabsContent>
 
-          {/* Past Trips Tab */}
-          <TabsContent value="trips" className="flex-1 overflow-y-auto p-6 pt-4">
-          <div className="space-y-4">
-            {pastTrips.map((trip) => (
-              <Card key={trip.id} className="p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
-                <div className="flex items-start gap-4">
-                  <div className="text-4xl">{trip.image}</div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold">{trip.destination}</h3>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <div
-                            key={i}
-                            className={cn(
-                              "w-4 h-4",
-                              i < trip.rating ? "text-yellow-500" : "text-muted-foreground"
-                            )}
-                          >
-                            ⭐
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">{trip.dates} • {trip.duration}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {trip.highlights.map((highlight) => (
-                        <Badge key={highlight} variant="secondary" className="text-xs">
-                          {highlight}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Bookmark className="w-4 h-4 mr-2" />
-                    View Itinerary
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Camera className="w-4 h-4 mr-2" />
-                    Photos
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
+          {/* Past Trips Tab - Removed */}
 
           {/* Language Guide Tab */}
           <TabsContent value="guide" className="flex-1 overflow-y-auto p-6 pt-4">

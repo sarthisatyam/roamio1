@@ -22,7 +22,9 @@ import {
   Fuel,
   Stethoscope,
   Building2,
-  Utensils
+  Utensils,
+  Calendar,
+  Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -80,10 +82,47 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
     { icon: Utensils, label: "Restaurants", color: "bg-orange-100 text-orange-700" }
   ];
 
-  const trendingSpots = [
-    { name: "Chai Point", type: "Chai Shop", distance: "0.3 km", rating: 4.6 },
-    { name: "Zostel Delhi", type: "Accommodation", distance: "0.8 km", rating: 4.4 },
-    { name: "WeWork BKC", type: "Coworking", distance: "1.2 km", rating: 4.7 }
+  const hotspots = [
+    { 
+      name: "Live Music Night at Hard Rock Cafe", 
+      type: "Live Event", 
+      distance: "2.5 km", 
+      date: "Today, 8:00 PM",
+      duration: "3 hours",
+      rating: 4.5, 
+      reviews: "12k",
+      bookingUrl: "#"
+    },
+    { 
+      name: "Stand-up Comedy Show", 
+      type: "Entertainment", 
+      distance: "4.2 km", 
+      date: "Tomorrow, 7:30 PM",
+      duration: "2 hours",
+      rating: 4.3, 
+      reviews: "8.5k",
+      bookingUrl: "#"
+    },
+    { 
+      name: "Food Festival at Kingdom of Dreams", 
+      type: "Food & Culture", 
+      distance: "8.5 km", 
+      date: "Mar 25-26",
+      duration: "All Day",
+      rating: 4.6, 
+      reviews: "15k",
+      bookingUrl: "#"
+    },
+    { 
+      name: "Art Exhibition - Modern India", 
+      type: "Art & Culture", 
+      distance: "3.1 km", 
+      date: "This Week",
+      duration: "4 hours",
+      rating: 4.4, 
+      reviews: "20k",
+      bookingUrl: "#"
+    }
   ];
 
   return (
@@ -219,37 +258,52 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           </div>
         </section>
 
-        {/* Trending Nearby */}
+        {/* Hotspots - Live Events */}
         <section className="px-6 pb-6">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-semibold">Trending Nearby</h2>
+            <h2 className="text-lg font-semibold">Hotspots</h2>
           </div>
           
           <div className="space-y-3">
-            {trendingSpots.map((spot, index) => (
-              <Card key={index} className="p-3 shadow-soft">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-10 h-10">
-                      <AvatarFallback className="bg-gradient-primary text-white text-sm">
-                        {spot.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-sm">{spot.name}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>{spot.type}</span>
-                        <span>•</span>
-                        <span>{spot.distance}</span>
-                      </div>
+            {hotspots.map((spot, index) => (
+              <Card key={index} className="p-4 shadow-soft hover:shadow-medium transition-all">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h3 className="font-medium mb-2 text-sm sm:text-base">{spot.name}</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground mb-2">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {spot.date}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {spot.duration}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {spot.distance}
+                      </span>
+                      <span>{spot.type}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 fill-current text-yellow-500" />
-                    <span className="text-xs font-medium">{spot.rating}</span>
+                  <div className="text-right ml-3">
+                    <div className="flex items-center gap-1 text-sm font-medium">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      {spot.rating}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{spot.reviews}</div>
                   </div>
                 </div>
+                <Button 
+                  size="sm" 
+                  className="w-full bg-gradient-primary text-white border-0 hover:opacity-90"
+                  onClick={() => window.open(spot.bookingUrl, '_blank')}
+                >
+                  Book Now
+                </Button>
               </Card>
             ))}
           </div>
