@@ -12,20 +12,26 @@ import {
   Home, 
   Car, 
   Train, 
-  Bike, 
   Star, 
   MapPin, 
   Search,
-  Filter,
   Clock,
-  Users,
   Wifi,
   Coffee,
   CheckCircle,
   User,
-  Bed,
   Calendar as CalendarIcon,
-  Plane
+  Plane,
+  Building2,
+  Bed,
+  Shield,
+  Utensils,
+  Zap,
+  TrendingDown,
+  ExternalLink,
+  Sparkles,
+  Award,
+  ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -43,11 +49,6 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
     priceRange: "all",
     rating: "all"
   });
-  const [travelFilters, setTravelFilters] = useState({
-    type: "all",
-    priceRange: "all",
-    features: "all"
-  });
 
   const stayOptions = [
     {
@@ -56,7 +57,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
       location: "Banjara Hills, Hyderabad",
       price: "₹800/night",
       rating: 4.7,
-      image: "🏨",
+      icon: Bed,
       amenities: ["Free WiFi", "AC", "Lockers", "Common Kitchen"],
       verified: true,
       category: "hostel"
@@ -67,7 +68,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
       location: "Gachibowli, Hyderabad", 
       price: "₹1,200/night",
       rating: 4.8,
-      image: "🏢",
+      icon: Building2,
       amenities: ["Co-working space", "Gym", "Rooftop", "24/7 security"],
       verified: true,
       category: "coliving"
@@ -78,7 +79,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
       location: "Jubilee Hills, Hyderabad",
       price: "₹2,500/night", 
       rating: 4.9,
-      image: "🏰",
+      icon: Home,
       amenities: ["Heritage rooms", "Pool", "Spa", "Restaurant"],
       verified: true,
       category: "hotel"
@@ -181,89 +182,93 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
     type: 'stay' 
   });
 
+  const platformIcons: Record<string, React.ReactNode> = {
+    makemytrip: <span className="text-lg">🔵</span>,
+    booking: <span className="text-lg">🔷</span>,
+    goibibo: <span className="text-lg">🟢</span>,
+    agoda: <span className="text-lg">🟣</span>,
+    zolo: <span className="text-lg">🟡</span>,
+    irctc: <span className="text-lg">🚆</span>,
+    cleartrip: <span className="text-lg">✈️</span>,
+    ixigo: <span className="text-lg">🎯</span>,
+    redbus: <span className="text-lg">🚌</span>,
+    ola: <span className="text-lg">🚕</span>,
+    uber: <span className="text-lg">🚗</span>,
+    rapido: <span className="text-lg">🏍️</span>,
+    blablacar: <span className="text-lg">🤝</span>,
+    abhibus: <span className="text-lg">🚐</span>
+  };
+
   const stayComparisons = {
     1: {
-      makemytrip: "₹750/night",
-      booking: "₹820/night", 
-      goibibo: "₹780/night",
-      agoda: "₹800/night",
+      makemytrip: { price: "₹750/night", savings: "₹50" },
+      booking: { price: "₹820/night", savings: "₹0" }, 
+      goibibo: { price: "₹780/night", savings: "₹20" },
+      agoda: { price: "₹800/night", savings: "₹0" },
       features: ["Solo female friendly", "24/7 security", "Common areas"]
     },
     2: {
-      makemytrip: "₹1,150/night",
-      booking: "₹1,200/night",
-      goibibo: "₹1,180/night", 
-      zolo: "₹1,100/night",
+      makemytrip: { price: "₹1,150/night", savings: "₹50" },
+      booking: { price: "₹1,200/night", savings: "₹0" },
+      goibibo: { price: "₹1,180/night", savings: "₹20" }, 
+      zolo: { price: "₹1,100/night", savings: "₹100" },
       features: ["Co-working space", "Solo events", "Networking"]
     },
     3: {
-      makemytrip: "₹2,300/night",
-      booking: "₹2,500/night",
-      goibibo: "₹2,400/night",
-      agoda: "₹2,450/night", 
+      makemytrip: { price: "₹2,300/night", savings: "₹200" },
+      booking: { price: "₹2,500/night", savings: "₹0" },
+      goibibo: { price: "₹2,400/night", savings: "₹100" },
+      agoda: { price: "₹2,450/night", savings: "₹50" }, 
       features: ["Heritage experience", "Solo dining", "Guided tours"]
     }
   };
 
-  const travelComparisons = {
-    1: {
-      makemytrip: "₹4,200",
-      goibibo: "₹4,150",
-      cleartrip: "₹4,300",
-      ixigo: "₹4,180",
-      features: ["Solo check-in", "Seat selection", "Flexible booking"]
-    },
-    2: {
-      irctc: "₹1,250",
-      makemytrip: "₹1,280", 
-      goibibo: "₹1,260",
-      redbus: "₹1,240",
-      features: ["Tatkal booking", "Food delivery", "Travel insurance"]
-    },
-    3: {
-      redbus: "₹1,800",
-      makemytrip: "₹1,850",
-      goibibo: "₹1,820",
-      abhibus: "₹1,780",
-      features: ["Live tracking", "Solo safety", "Rest stops"]
-    },
-    4: {
-      ola: "₹2,800",
-      uber: "₹2,900",
-      rapido: "₹2,700", 
-      blablacar: "₹2,200",
-      features: ["Ride sharing", "Solo verification", "Split costs"]
-    }
+  const getBestPrice = (comparison: Record<string, any>) => {
+    let minPrice = Infinity;
+    let bestPlatform = '';
+    
+    Object.entries(comparison).forEach(([platform, data]) => {
+      if (platform === 'features') return;
+      const priceNum = parseInt((data as any).price?.replace(/[₹,]/g, '') || '0');
+      if (priceNum < minPrice) {
+        minPrice = priceNum;
+        bestPlatform = platform;
+      }
+    });
+    
+    return { minPrice, bestPlatform };
   };
-
 
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="bg-gradient-hero p-4 sm:p-6 pb-6 sm:pb-8">
-        <div className="flex items-center justify-between mb-4 sm:mb-6">
+      <div className="bg-gradient-hero p-3 pb-5">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">Book Your Journey</h1>
-            <p className="text-white/80 text-xs sm:text-sm">Safe accommodations & transport for solo travelers</p>
+            <h1 className="text-lg font-bold text-white flex items-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              Book Journey
+            </h1>
+            <p className="text-white/80 text-xs">Safe stays & transport</p>
           </div>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={onNavigateToAccount}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-secondary/90 text-foreground hover:bg-secondary border-secondary"
+            className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30"
           >
-            <User className="w-4 h-4 sm:w-5 sm:h-5" />
+            <User className="w-4 h-4" />
           </Button>
         </div>
         
         {/* Search */}
-        <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
               placeholder="Delhi to Hyderabad"
               value="Delhi to Hyderabad"
-              className="pl-9 sm:pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-9 sm:h-10"
+              className="pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
             />
           </div>
           
@@ -275,9 +280,9 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="flex-1 justify-start text-left font-normal bg-white/95 backdrop-blur border-0 shadow-medium h-9 sm:h-10 text-xs sm:text-sm"
+                      className="flex-1 justify-start text-left font-normal bg-white/95 backdrop-blur border-0 shadow-medium h-10 text-xs rounded-xl"
                     >
-                      <CalendarIcon className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
                       {checkInDate ? format(checkInDate, "MMM dd") : "Check-in"}
                     </Button>
                   </PopoverTrigger>
@@ -296,9 +301,9 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="flex-1 justify-start text-left font-normal bg-white/95 backdrop-blur border-0 shadow-medium h-9 sm:h-10 text-xs sm:text-sm"
+                      className="flex-1 justify-start text-left font-normal bg-white/95 backdrop-blur border-0 shadow-medium h-10 text-xs rounded-xl"
                     >
-                      <CalendarIcon className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
                       {checkOutDate ? format(checkOutDate, "MMM dd") : "Check-out"}
                     </Button>
                   </PopoverTrigger>
@@ -318,10 +323,10 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="flex-1 justify-start text-left font-normal bg-white/95 backdrop-blur border-0 shadow-medium h-9 sm:h-10 text-xs sm:text-sm"
+                    className="flex-1 justify-start text-left font-normal bg-white/95 backdrop-blur border-0 shadow-medium h-10 text-xs rounded-xl"
                   >
-                    <CalendarIcon className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    {departureDate ? format(departureDate, "MMM dd") : "Departure"}
+                    <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
+                    {departureDate ? format(departureDate, "MMM dd") : "Departure Date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -343,282 +348,291 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
       <div className="flex-1 overflow-y-auto">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 mx-4 sm:mx-6 mt-4">
-            <TabsTrigger value="stay" className="text-xs sm:text-sm">Stay</TabsTrigger>
-            <TabsTrigger value="transport" className="text-xs sm:text-sm">Travel</TabsTrigger>
+          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl">
+            <TabsTrigger value="stay" className="text-xs rounded-lg flex items-center gap-1.5">
+              <Bed className="w-4 h-4" />
+              Stay
+            </TabsTrigger>
+            <TabsTrigger value="transport" className="text-xs rounded-lg flex items-center gap-1.5">
+              <Plane className="w-4 h-4" />
+              Travel
+            </TabsTrigger>
           </TabsList>
 
           {/* Stay Tab */}
-          <TabsContent value="stay" className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
+          <TabsContent value="stay" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
             {/* Stay Filters */}
-            <div className="flex gap-1.5 sm:gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
-              <Button 
-                variant={stayFilters.type === "all" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setStayFilters({...stayFilters, type: "all"})}
-                className="whitespace-nowrap text-xs h-8"
-              >
-                All Types
-              </Button>
-              <Button 
-                variant={stayFilters.type === "hostel" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setStayFilters({...stayFilters, type: "hostel"})}
-                className="whitespace-nowrap text-xs h-8"
-              >
-                Hostels
-              </Button>
-              <Button 
-                variant={stayFilters.type === "hotel" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setStayFilters({...stayFilters, type: "hotel"})}
-                className="whitespace-nowrap text-xs h-8"
-              >
-                Hotels
-              </Button>
-              <Button 
-                variant={stayFilters.type === "coliving" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setStayFilters({...stayFilters, type: "coliving"})}
-                className="whitespace-nowrap text-xs h-8"
-              >
-                Co-living
-              </Button>
-              <Button 
-                variant={stayFilters.priceRange === "budget" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setStayFilters({...stayFilters, priceRange: "budget"})}
-                className="whitespace-nowrap text-xs h-8"
-              >
-                Budget
-              </Button>
-              <Button 
-                variant={stayFilters.rating === "4+" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setStayFilters({...stayFilters, rating: "4+"})}
-                className="whitespace-nowrap text-xs h-8"
-              >
-                4+ Rating
-              </Button>
+            <div className="flex gap-2 mb-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+              {[
+                { key: "all", label: "All", icon: Home },
+                { key: "hostel", label: "Hostels", icon: Bed },
+                { key: "hotel", label: "Hotels", icon: Building2 },
+                { key: "coliving", label: "Co-living", icon: Building2 },
+              ].map(({ key, label, icon: Icon }) => (
+                <Button 
+                  key={key}
+                  variant={stayFilters.type === key ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => setStayFilters({...stayFilters, type: key})}
+                  className="whitespace-nowrap text-xs h-9 rounded-xl px-3 flex items-center gap-1.5"
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {label}
+                </Button>
+              ))}
             </div>
             
-            <div className="space-y-3 sm:space-y-4">
-              {stayOptions.map((stay) => (
-                <Card key={stay.id} className="p-3 sm:p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-3">
-                    <div className="flex items-start gap-2 sm:gap-3 flex-1">
-                      <div className="text-2xl sm:text-3xl mt-1">{stay.image}</div>
+            <div className="space-y-3">
+              {stayOptions.map((stay) => {
+                const IconComponent = stay.icon;
+                const comparison = stayComparisons[stay.id as keyof typeof stayComparisons];
+                const { minPrice, bestPlatform } = getBestPrice(comparison || {});
+                
+                return (
+                  <Card key={stay.id} className="p-3 shadow-soft hover:shadow-medium transition-all rounded-2xl border-0">
+                    <div className="flex gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <IconComponent className="w-6 h-6 text-primary" />
+                      </div>
+                      
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h3 className="font-semibold text-sm sm:text-base">{stay.name}</h3>
-                          {stay.verified && (
-                            <Badge className="bg-success text-success-foreground text-[10px] sm:text-xs py-0 px-1.5">
-                              <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
-                              Verified
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
-                          <MapPin className="w-3 h-3 flex-shrink-0" />
-                          <span className="truncate">{stay.location}</span>
-                        </div>
-                        <div className="flex items-center gap-2 sm:gap-3 mt-1">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-current text-yellow-500" />
-                            <span className="text-xs">{stay.rating}</span>
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <h3 className="font-semibold text-sm truncate">{stay.name}</h3>
+                              {stay.verified && (
+                                <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <MapPin className="w-3 h-3" />
+                              <span className="truncate">{stay.location}</span>
+                            </div>
                           </div>
-                          <Badge variant="secondary" className="text-[10px] sm:text-xs capitalize">
-                            {stay.category}
-                          </Badge>
+                          <div className="flex items-center gap-1 text-xs bg-warning/10 px-2 py-1 rounded-lg">
+                            <Star className="w-3 h-3 fill-warning text-warning" />
+                            <span className="font-semibold">{stay.rating}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-1 my-2">
+                          {stay.amenities.slice(0, 3).map((amenity) => (
+                            <Badge key={amenity} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">
+                              {amenity.includes("WiFi") && <Wifi className="w-2.5 h-2.5 mr-1" />}
+                              {amenity.includes("Kitchen") && <Utensils className="w-2.5 h-2.5 mr-1" />}
+                              {amenity.includes("security") && <Shield className="w-2.5 h-2.5 mr-1" />}
+                              {amenity}
+                            </Badge>
+                          ))}
+                        </div>
+                        
+                        <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                          <div className="text-sm font-bold text-primary">{stay.price}</div>
+                          <Button 
+                            size="sm" 
+                            onClick={() => setSelectedStay(selectedStay === stay.id ? null : stay.id)}
+                            className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Compare
+                          </Button>
                         </div>
                       </div>
                     </div>
-                    <div className="flex sm:flex-col gap-2 sm:text-right items-center sm:items-end">
-                      <Button 
-                        size="sm" 
-                        onClick={() => setSelectedStay(selectedStay === stay.id ? null : stay.id)}
-                        className="text-xs h-8 px-3"
-                      >
-                        Compare
-                      </Button>
-                    </div>
-                  </div>
-                  
-                   <div className="flex flex-wrap gap-1.5">
-                     {stay.amenities.map((amenity) => (
-                       <Badge key={amenity} variant="outline" className="text-[10px] sm:text-xs py-0.5 px-2">
-                         {amenity.includes("WiFi") && <Wifi className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />}
-                         {amenity.includes("Kitchen") && <Coffee className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />}
-                         {amenity}
-                       </Badge>
-                     ))}
-                   </div>
-                   
-                   {selectedStay === stay.id && (
-                     <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
-                       <h4 className="font-semibold text-sm sm:text-base mb-2 sm:mb-3">Price Comparison</h4>
-                       <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-3">
-                         {Object.entries(stayComparisons[stay.id as keyof typeof stayComparisons] || {}).map(([platform, price]) => {
-                           if (platform === 'features') return null;
-                           return (
-                             <div key={platform} className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                               <span className="font-medium capitalize truncate">{platform}</span>
-                               <span className="font-bold text-primary whitespace-nowrap ml-2">{price as string}</span>
-                             </div>
-                           );
-                         })}
-                       </div>
-                       <div className="mb-3">
-                         <p className="text-xs sm:text-sm font-medium mb-2">Solo Traveler Features:</p>
-                         <div className="flex flex-wrap gap-1">
-                           {stayComparisons[stay.id as keyof typeof stayComparisons]?.features?.map((feature) => (
-                             <Badge key={feature} variant="secondary" className="text-[10px] sm:text-xs">
-                               {feature}
-                             </Badge>
-                           ))}
-                         </div>
-                       </div>
-                        <div className="flex gap-2 items-center">
-                          <Button 
-                            size="sm" 
-                            className="flex-1 bg-gradient-primary text-white text-xs sm:text-sm h-8 sm:h-9"
-                            onClick={() => {
-                              const prices = Object.entries(stayComparisons[stay.id as keyof typeof stayComparisons] || {})
-                                .filter(([platform]) => platform !== 'features')
-                                .map(([, price]) => parseInt((price as string).replace(/[₹,]/g, '')));
-                              const minPrice = Math.min(...prices);
-                              const platform = Object.entries(stayComparisons[stay.id as keyof typeof stayComparisons] || {})
-                                .find(([platform, price]) => platform !== 'features' && parseInt((price as string).replace(/[₹,]/g, '')) === minPrice)?.[0];
-                              setBookingDialog({ 
-                                open: true, 
-                                data: { stay, platform, price: minPrice, comparison: stayComparisons[stay.id as keyof typeof stayComparisons] }, 
-                                type: 'stay' 
-                              });
-                            }}
-                          >
-                            Book ₹{Math.min(...Object.entries(stayComparisons[stay.id as keyof typeof stayComparisons] || {})
-                              .filter(([platform]) => platform !== 'features')
-                              .map(([, price]) => parseInt((price as string).replace(/[₹,]/g, ''))))}
-                          </Button>
-                          <Badge className="bg-primary/10 text-primary px-2 sm:px-3 py-1 text-[10px] sm:text-xs whitespace-nowrap">
-                            Best
-                          </Badge>
+                    
+                    {selectedStay === stay.id && comparison && (
+                      <div className="mt-3 p-3 bg-muted/50 rounded-xl">
+                        <div className="flex items-center gap-2 mb-3">
+                          <TrendingDown className="w-4 h-4 text-success" />
+                          <h4 className="font-semibold text-sm">Best Prices</h4>
                         </div>
-                     </div>
-                   )}
-                 </Card>
-              ))}
+                        
+                        <div className="space-y-2 mb-3">
+                          {Object.entries(comparison).map(([platform, data]) => {
+                            if (platform === 'features') return null;
+                            const isBest = platform === bestPlatform;
+                            return (
+                              <div 
+                                key={platform} 
+                                className={cn(
+                                  "flex items-center justify-between p-2.5 rounded-xl transition-all",
+                                  isBest ? "bg-success/10 border border-success/30" : "bg-background"
+                                )}
+                              >
+                                <div className="flex items-center gap-2">
+                                  {platformIcons[platform] || <span>📦</span>}
+                                  <span className="font-medium text-sm capitalize">{platform}</span>
+                                  {isBest && (
+                                    <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
+                                      <Award className="w-2.5 h-2.5 mr-0.5" />
+                                      Best
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-bold text-primary text-sm">{(data as any).price}</div>
+                                  {(data as any).savings !== "₹0" && (
+                                    <div className="text-[10px] text-success">Save {(data as any).savings}</div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        
+                        <Button 
+                          className="w-full bg-gradient-primary text-white h-10 rounded-xl text-sm"
+                          onClick={() => setBookingDialog({ 
+                            open: true, 
+                            data: { stay, platform: bestPlatform, price: minPrice, comparison }, 
+                            type: 'stay' 
+                          })}
+                        >
+                          Book via {bestPlatform} • ₹{minPrice}
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                      </div>
+                    )}
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
 
           {/* Travel Tab */}
-          <TabsContent value="transport" className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
+          <TabsContent value="transport" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
             {/* Travel Type Selection */}
-            <div className="flex gap-1.5 sm:gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
-              <Button 
-                variant={selectedTravelType === "flight" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setSelectedTravelType(selectedTravelType === "flight" ? null : "flight")}
-                className="whitespace-nowrap text-xs h-8"
-              >
-                <Plane className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                Flight
-              </Button>
-              <Button 
-                variant={selectedTravelType === "train" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setSelectedTravelType(selectedTravelType === "train" ? null : "train")}
-                className="whitespace-nowrap text-xs h-8"
-              >
-                <Train className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                Train
-              </Button>
-              <Button 
-                variant={selectedTravelType === "cab" ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setSelectedTravelType(selectedTravelType === "cab" ? null : "cab")}
-                className="whitespace-nowrap text-xs h-8"
-              >
-                <Car className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                Cab
-              </Button>
+            <div className="flex gap-2 mb-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+              {[
+                { key: "flight", label: "Flight", icon: Plane },
+                { key: "train", label: "Train", icon: Train },
+                { key: "cab", label: "Cab", icon: Car },
+              ].map(({ key, label, icon: Icon }) => (
+                <Button 
+                  key={key}
+                  variant={selectedTravelType === key ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => setSelectedTravelType(selectedTravelType === key ? null : key as any)}
+                  className="whitespace-nowrap text-xs h-9 rounded-xl px-4 flex items-center gap-1.5"
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </Button>
+              ))}
             </div>
+            
+            {!selectedTravelType && (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Plane className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-base mb-1">Select Transport Type</h3>
+                <p className="text-xs text-muted-foreground">Choose between flight, train or cab</p>
+              </div>
+            )}
             
             {/* Flight Options */}
             {selectedTravelType === "flight" && (
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="font-semibold text-base sm:text-lg">Delhi to Hyderabad Flights</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Plane className="w-4 h-4 text-primary" />
+                  <h3 className="font-semibold text-sm">Delhi → Hyderabad</h3>
+                </div>
+                
                 {flightOptions.map((flight) => (
-                  <Card key={flight.id} className="p-3 sm:p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-                      <div className="flex items-start gap-2 sm:gap-3 flex-1">
-                        <div className="text-xl sm:text-2xl mt-0.5">✈️</div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm sm:text-base">{flight.name}</h4>
-                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground mt-1">
-                            <span className="whitespace-nowrap">{flight.departure} → {flight.arrival}</span>
-                            <span className="whitespace-nowrap">{flight.duration}</span>
-                            <Badge variant="outline" className="text-[10px] sm:text-xs">{flight.type}</Badge>
+                  <Card key={flight.id} className="p-3 shadow-soft rounded-2xl border-0">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Plane className="w-5 h-5 text-primary" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <div>
+                            <h4 className="font-semibold text-sm">{flight.name}</h4>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                              <Clock className="w-3 h-3" />
+                              <span>{flight.departure} → {flight.arrival}</span>
+                              <Badge variant="outline" className="text-[10px] py-0 px-1.5">{flight.duration}</Badge>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-base font-bold text-primary">{flight.price}</div>
+                            <Badge variant="secondary" className="text-[10px]">{flight.type}</Badge>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between sm:flex-col sm:text-right gap-2">
-                        <div className="text-base sm:text-lg font-bold text-primary">{flight.price}</div>
+                        
+                        <div className="flex flex-wrap gap-1 my-2">
+                          {flight.features.slice(0, 2).map((feature) => (
+                            <Badge key={feature} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
+                              {feature}
+                            </Badge>
+                          ))}
+                        </div>
+                        
                         <Button 
                           size="sm" 
                           onClick={() => setSelectedOption(selectedOption === flight.id ? null : flight.id)}
-                          className="text-xs h-8 px-3"
+                          className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
                         >
-                          Compare
+                          <Zap className="w-3 h-3 mr-1" />
+                          Compare Prices
                         </Button>
                       </div>
                     </div>
                     
-                    <div className="flex flex-wrap gap-1.5">
-                      {flight.features.map((feature) => (
-                        <Badge key={feature} variant="outline" className="text-[10px] sm:text-xs">
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                    
                     {selectedOption === flight.id && (
-                      <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
-                        <h5 className="font-semibold text-sm sm:text-base mb-2 sm:mb-3">Price Comparison</h5>
-                        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-3">
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">MakeMyTrip</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">₹4,200</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">Goibibo</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">₹4,150</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">Cleartrip</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">₹4,300</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">Ixigo</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">₹4,180</span>
-                          </div>
+                      <div className="mt-3 p-3 bg-muted/50 rounded-xl">
+                        <div className="flex items-center gap-2 mb-3">
+                          <TrendingDown className="w-4 h-4 text-success" />
+                          <h5 className="font-semibold text-sm">Platform Comparison</h5>
                         </div>
-                        <div className="flex gap-2 items-center">
-                          <Button 
-                            size="sm" 
-                            className="flex-1 bg-gradient-primary text-white text-xs sm:text-sm h-8 sm:h-9"
-                            onClick={() => setBookingDialog({ 
-                              open: true, 
-                              data: { flight, platform: 'Goibibo', price: 4150, options: { makemytrip: 4200, goibibo: 4150, cleartrip: 4300, ixigo: 4180 } }, 
-                              type: 'travel' 
-                            })}
-                          >
-                            Book ₹4,150
-                          </Button>
-                          <Badge className="bg-primary/10 text-primary px-2 sm:px-3 py-1 text-[10px] sm:text-xs whitespace-nowrap">
-                            Best
-                          </Badge>
+                        
+                        <div className="space-y-2 mb-3">
+                          {[
+                            { name: "goibibo", price: "₹4,150", savings: "₹50", best: true },
+                            { name: "ixigo", price: "₹4,180", savings: "₹20", best: false },
+                            { name: "makemytrip", price: "₹4,200", savings: "₹0", best: false },
+                            { name: "cleartrip", price: "₹4,300", savings: "₹0", best: false },
+                          ].map((platform) => (
+                            <div 
+                              key={platform.name} 
+                              className={cn(
+                                "flex items-center justify-between p-2.5 rounded-xl transition-all",
+                                platform.best ? "bg-success/10 border border-success/30" : "bg-background"
+                              )}
+                            >
+                              <div className="flex items-center gap-2">
+                                {platformIcons[platform.name]}
+                                <span className="font-medium text-sm capitalize">{platform.name}</span>
+                                {platform.best && (
+                                  <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
+                                    <Award className="w-2.5 h-2.5 mr-0.5" />
+                                    Best
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-primary text-sm">{platform.price}</div>
+                                {platform.savings !== "₹0" && (
+                                  <div className="text-[10px] text-success">Save {platform.savings}</div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
                         </div>
+                        
+                        <Button 
+                          className="w-full bg-gradient-primary text-white h-10 rounded-xl text-sm"
+                          onClick={() => setBookingDialog({ 
+                            open: true, 
+                            data: { flight, platform: 'Goibibo', price: 4150 }, 
+                            type: 'travel' 
+                          })}
+                        >
+                          Book via Goibibo • ₹4,150
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
                       </div>
                     )}
                   </Card>
@@ -628,87 +642,106 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
             
             {/* Train Options */}
             {selectedTravelType === "train" && (
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="font-semibold text-base sm:text-lg">Delhi to Hyderabad Trains</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Train className="w-4 h-4 text-primary" />
+                  <h3 className="font-semibold text-sm">Delhi → Hyderabad</h3>
+                </div>
+                
                 {trainOptions.map((train) => (
-                  <Card key={train.id} className="p-3 sm:p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-                      <div className="flex items-start gap-2 sm:gap-3 flex-1">
-                        <div className="text-xl sm:text-2xl mt-0.5">🚆</div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm sm:text-base">{train.name}</h4>
-                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground mt-1">
-                            <span className="whitespace-nowrap">{train.departure} → {train.arrival}</span>
-                            <span className="whitespace-nowrap">{train.duration}</span>
-                            <Badge variant="outline" className="text-[10px] sm:text-xs">{train.type}</Badge>
+                  <Card key={train.id} className="p-3 shadow-soft rounded-2xl border-0">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Train className="w-5 h-5 text-primary" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <div>
+                            <h4 className="font-semibold text-sm">{train.name}</h4>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                              <Clock className="w-3 h-3" />
+                              <span>{train.departure} → {train.arrival}</span>
+                              <Badge variant="outline" className="text-[10px] py-0 px-1.5">{train.duration}</Badge>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-base font-bold text-primary">{train.price}</div>
+                            <Badge variant="secondary" className="text-[10px]">{train.type}</Badge>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between sm:flex-col sm:text-right gap-2">
-                        <div className="text-base sm:text-lg font-bold text-primary">{train.price}</div>
+                        
+                        <div className="flex flex-wrap gap-1 my-2">
+                          {train.features.slice(0, 2).map((feature) => (
+                            <Badge key={feature} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
+                              {feature}
+                            </Badge>
+                          ))}
+                        </div>
+                        
                         <Button 
                           size="sm" 
                           onClick={() => setSelectedOption(selectedOption === train.id + 100 ? null : train.id + 100)}
-                          className="text-xs h-8 px-3"
+                          className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
                         >
-                          Compare
+                          <Zap className="w-3 h-3 mr-1" />
+                          Compare Prices
                         </Button>
                       </div>
                     </div>
                     
-                    <div className="flex flex-wrap gap-1.5">
-                      {train.features.map((feature) => (
-                        <Badge key={feature} variant="outline" className="text-[10px] sm:text-xs">
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                    
                     {selectedOption === train.id + 100 && (
-                      <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
-                        <h5 className="font-semibold text-sm sm:text-base mb-2 sm:mb-3">Price Comparison</h5>
-                        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-3">
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">IRCTC</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">{train.price}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">MakeMyTrip</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">₹{parseInt(train.price.replace(/[₹,]/g, '')) + 30}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">Goibibo</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">₹{parseInt(train.price.replace(/[₹,]/g, '')) + 20}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">RedBus</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">₹{parseInt(train.price.replace(/[₹,]/g, '')) + 10}</span>
-                          </div>
+                      <div className="mt-3 p-3 bg-muted/50 rounded-xl">
+                        <div className="flex items-center gap-2 mb-3">
+                          <TrendingDown className="w-4 h-4 text-success" />
+                          <h5 className="font-semibold text-sm">Platform Comparison</h5>
                         </div>
-                        <div className="flex gap-2 items-center">
-                          <Button 
-                            size="sm" 
-                            className="flex-1 bg-gradient-primary text-white text-xs sm:text-sm h-8 sm:h-9"
-                            onClick={() => {
-                              const basePrice = parseInt(train.price.replace(/[₹,]/g, ''));
-                              setBookingDialog({ 
-                                open: true, 
-                                data: { 
-                                  train, 
-                                  platform: 'IRCTC', 
-                                  price: basePrice,
-                                  options: { irctc: basePrice, makemytrip: basePrice + 30, goibibo: basePrice + 20, redbus: basePrice + 10 }
-                                }, 
-                                type: 'travel' 
-                              });
-                            }}
-                          >
-                            Book {train.price}
-                          </Button>
-                          <Badge className="bg-primary/10 text-primary px-2 sm:px-3 py-1 text-[10px] sm:text-xs whitespace-nowrap">
-                            Best
-                          </Badge>
+                        
+                        <div className="space-y-2 mb-3">
+                          {[
+                            { name: "irctc", price: train.price, savings: "₹30", best: true },
+                            { name: "redbus", price: `₹${parseInt(train.price.replace(/[₹,]/g, '')) + 10}`, savings: "₹20", best: false },
+                            { name: "goibibo", price: `₹${parseInt(train.price.replace(/[₹,]/g, '')) + 20}`, savings: "₹10", best: false },
+                            { name: "makemytrip", price: `₹${parseInt(train.price.replace(/[₹,]/g, '')) + 30}`, savings: "₹0", best: false },
+                          ].map((platform) => (
+                            <div 
+                              key={platform.name} 
+                              className={cn(
+                                "flex items-center justify-between p-2.5 rounded-xl transition-all",
+                                platform.best ? "bg-success/10 border border-success/30" : "bg-background"
+                              )}
+                            >
+                              <div className="flex items-center gap-2">
+                                {platformIcons[platform.name]}
+                                <span className="font-medium text-sm capitalize">{platform.name}</span>
+                                {platform.best && (
+                                  <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
+                                    <Award className="w-2.5 h-2.5 mr-0.5" />
+                                    Best
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-primary text-sm">{platform.price}</div>
+                                {platform.savings !== "₹0" && (
+                                  <div className="text-[10px] text-success">Save {platform.savings}</div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
                         </div>
+                        
+                        <Button 
+                          className="w-full bg-gradient-primary text-white h-10 rounded-xl text-sm"
+                          onClick={() => setBookingDialog({ 
+                            open: true, 
+                            data: { train, platform: 'IRCTC', price: parseInt(train.price.replace(/[₹,]/g, '')) }, 
+                            type: 'travel' 
+                          })}
+                        >
+                          Book via IRCTC • {train.price}
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
                       </div>
                     )}
                   </Card>
@@ -718,193 +751,186 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
             
             {/* Cab Options */}
             {selectedTravelType === "cab" && (
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="font-semibold text-base sm:text-lg">Delhi to Hyderabad Cabs</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Car className="w-4 h-4 text-primary" />
+                  <h3 className="font-semibold text-sm">Delhi → Hyderabad</h3>
+                </div>
+                
                 {cabOptions.map((cab) => (
-                  <Card key={cab.id} className="p-3 sm:p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-                      <div className="flex items-start gap-2 sm:gap-3 flex-1">
-                        <div className="text-xl sm:text-2xl mt-0.5">🚗</div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm sm:text-base">{cab.name}</h4>
-                          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground mt-1">
-                            <span className="whitespace-nowrap">{cab.type}</span>
-                            <span className="whitespace-nowrap">{cab.duration}</span>
-                            <Badge variant="outline" className="text-[10px] sm:text-xs">{cab.service}</Badge>
+                  <Card key={cab.id} className="p-3 shadow-soft rounded-2xl border-0">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Car className="w-5 h-5 text-primary" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <div>
+                            <h4 className="font-semibold text-sm">{cab.name}</h4>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                              <Clock className="w-3 h-3" />
+                              <span>{cab.type}</span>
+                              <Badge variant="outline" className="text-[10px] py-0 px-1.5">{cab.duration}</Badge>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-base font-bold text-primary">{cab.price}</div>
+                            <Badge variant="secondary" className="text-[10px]">{cab.service}</Badge>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between sm:flex-col sm:text-right gap-2">
-                        <div className="text-base sm:text-lg font-bold text-primary">{cab.price}</div>
+                        
+                        <div className="flex flex-wrap gap-1 my-2">
+                          {cab.features.slice(0, 2).map((feature) => (
+                            <Badge key={feature} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
+                              {feature}
+                            </Badge>
+                          ))}
+                        </div>
+                        
                         <Button 
                           size="sm" 
                           onClick={() => setSelectedOption(selectedOption === cab.id + 200 ? null : cab.id + 200)}
-                          className="text-xs h-8 px-3"
+                          className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
                         >
-                          Compare
+                          <Zap className="w-3 h-3 mr-1" />
+                          Compare Prices
                         </Button>
                       </div>
                     </div>
                     
-                    <div className="flex flex-wrap gap-1.5">
-                      {cab.features.map((feature) => (
-                        <Badge key={feature} variant="outline" className="text-[10px] sm:text-xs">
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                    
                     {selectedOption === cab.id + 200 && (
-                      <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
-                        <h5 className="font-semibold text-sm sm:text-base mb-2 sm:mb-3">Price Comparison</h5>
-                        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-3">
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">Ola</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">{cab.price}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">Uber</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">₹{parseInt(cab.price.replace(/[₹,]/g, '')) + 500}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">Rapido</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">₹{parseInt(cab.price.replace(/[₹,]/g, '')) - 300}</span>
-                          </div>
-                          <div className="flex justify-between items-center p-2 bg-background rounded text-xs sm:text-sm">
-                            <span className="font-medium truncate">BlaBlaCar</span>
-                            <span className="font-bold text-primary whitespace-nowrap ml-2">₹{parseInt(cab.price.replace(/[₹,]/g, '')) - 800}</span>
-                          </div>
+                      <div className="mt-3 p-3 bg-muted/50 rounded-xl">
+                        <div className="flex items-center gap-2 mb-3">
+                          <TrendingDown className="w-4 h-4 text-success" />
+                          <h5 className="font-semibold text-sm">Platform Comparison</h5>
                         </div>
-                        <div className="flex gap-2 items-center">
-                          <Button 
-                            size="sm" 
-                            className="flex-1 bg-gradient-primary text-white text-xs sm:text-sm h-8 sm:h-9"
-                            onClick={() => {
-                              const basePrice = parseInt(cab.price.replace(/[₹,]/g, ''));
-                              setBookingDialog({ 
-                                open: true, 
-                                data: { 
-                                  cab, 
-                                  platform: 'BlaBlaCar', 
-                                  price: basePrice - 800,
-                                  options: { ola: basePrice, uber: basePrice + 500, rapido: basePrice - 300, blablacar: basePrice - 800 }
-                                }, 
-                                type: 'travel' 
-                              });
-                            }}
-                          >
-                            Book ₹{parseInt(cab.price.replace(/[₹,]/g, '')) - 800}
-                          </Button>
-                          <Badge className="bg-primary/10 text-primary px-2 sm:px-3 py-1 text-[10px] sm:text-xs whitespace-nowrap">
-                            Best
-                          </Badge>
+                        
+                        <div className="space-y-2 mb-3">
+                          {[
+                            { name: "ola", price: cab.price, savings: "₹500", best: true },
+                            { name: "uber", price: `₹${parseInt(cab.price.replace(/[₹,]/g, '')) + 300}`, savings: "₹200", best: false },
+                            { name: "rapido", price: `₹${parseInt(cab.price.replace(/[₹,]/g, '')) + 500}`, savings: "₹0", best: false },
+                          ].map((platform) => (
+                            <div 
+                              key={platform.name} 
+                              className={cn(
+                                "flex items-center justify-between p-2.5 rounded-xl transition-all",
+                                platform.best ? "bg-success/10 border border-success/30" : "bg-background"
+                              )}
+                            >
+                              <div className="flex items-center gap-2">
+                                {platformIcons[platform.name]}
+                                <span className="font-medium text-sm capitalize">{platform.name}</span>
+                                {platform.best && (
+                                  <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
+                                    <Award className="w-2.5 h-2.5 mr-0.5" />
+                                    Best
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-primary text-sm">{platform.price}</div>
+                                {platform.savings !== "₹0" && (
+                                  <div className="text-[10px] text-success">Save {platform.savings}</div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
                         </div>
+                        
+                        <Button 
+                          className="w-full bg-gradient-primary text-white h-10 rounded-xl text-sm"
+                          onClick={() => setBookingDialog({ 
+                            open: true, 
+                            data: { cab, platform: 'Ola', price: parseInt(cab.price.replace(/[₹,]/g, '')) }, 
+                            type: 'travel' 
+                          })}
+                        >
+                          Book via Ola • {cab.price}
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
                       </div>
                     )}
                   </Card>
                 ))}
               </div>
             )}
-            
-            {/* Default view when no travel type is selected */}
-            {!selectedTravelType && (
-              <div className="text-center py-8 px-4">
-                <p className="text-muted-foreground text-sm">Select a travel type to view available options from Delhi to Hyderabad</p>
-              </div>
-            )}
           </TabsContent>
-
         </Tabs>
       </div>
 
       {/* Booking Dialog */}
       <Dialog open={bookingDialog.open} onOpenChange={(open) => setBookingDialog({ ...bookingDialog, open })}>
-        <DialogContent className="max-w-md mx-4">
-          <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl">Complete Your Booking</DialogTitle>
-            <DialogDescription className="text-xs sm:text-sm">
-              Review the best price and choose your preferred platform
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-w-[95vw] sm:max-w-md rounded-2xl p-0 overflow-hidden">
+          <div className="bg-gradient-hero p-4 text-white">
+            <DialogHeader className="text-left">
+              <DialogTitle className="text-white flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                Confirm Booking
+              </DialogTitle>
+              <DialogDescription className="text-white/80 text-sm">
+                You're booking the best available deal
+              </DialogDescription>
+            </DialogHeader>
+          </div>
           
-          {bookingDialog.data && (
-            <div className="space-y-4">
-              {/* Item Details */}
-              <div className="p-3 sm:p-4 bg-muted/50 rounded-lg">
-                <h4 className="font-semibold text-sm sm:text-base mb-2">
-                  {bookingDialog.type === 'stay' 
-                    ? bookingDialog.data.stay?.name 
-                    : bookingDialog.data.flight?.name || bookingDialog.data.train?.name || bookingDialog.data.cab?.name}
-                </h4>
-                {bookingDialog.type === 'stay' && (
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    {bookingDialog.data.stay?.location}
-                  </p>
-                )}
-              </div>
-
-              {/* Best Price */}
-              <div className="flex items-center justify-between p-3 sm:p-4 bg-primary/5 rounded-lg border-2 border-primary/20">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Best Price on</p>
-                  <p className="font-semibold text-sm sm:text-base capitalize">{bookingDialog.data.platform}</p>
+          <div className="p-4 space-y-4">
+            {bookingDialog.data && (
+              <>
+                <div className="p-3 bg-muted/50 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                      {bookingDialog.type === 'stay' ? (
+                        <Bed className="w-6 h-6 text-primary" />
+                      ) : (
+                        <Plane className="w-6 h-6 text-primary" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-sm">
+                        {bookingDialog.data.stay?.name || 
+                         bookingDialog.data.flight?.name || 
+                         bookingDialog.data.train?.name || 
+                         bookingDialog.data.cab?.name}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        via {bookingDialog.data.platform}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-primary">₹{bookingDialog.data.price}</div>
+                      <Badge className="bg-success/10 text-success text-[10px]">
+                        Best Deal
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-xl sm:text-2xl font-bold text-primary">₹{bookingDialog.data.price}</p>
-                  <Badge className="bg-primary/10 text-primary text-[10px] sm:text-xs mt-1">
-                    Best Deal
-                  </Badge>
+                
+                <div className="flex items-center gap-2 p-3 bg-success/5 rounded-xl border border-success/20">
+                  <Shield className="w-5 h-5 text-success" />
+                  <div>
+                    <p className="text-xs font-medium">Solo Traveler Verified</p>
+                    <p className="text-[10px] text-muted-foreground">Safety certified booking</p>
+                  </div>
                 </div>
-              </div>
-
-              {/* All Platform Options */}
-              <div>
-                <p className="text-xs sm:text-sm font-medium mb-2">All Platform Prices:</p>
-                <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
-                  {Object.entries(bookingDialog.data.comparison || bookingDialog.data.options || {}).map(([platform, price]: [string, any]) => {
-                    if (platform === 'features') return null;
-                    const numPrice = typeof price === 'number' ? price : parseInt((price as string).replace(/[₹,]/g, ''));
-                    return (
-                      <div 
-                        key={platform} 
-                        className={cn(
-                          "flex justify-between items-center p-2 rounded text-xs sm:text-sm",
-                          numPrice === bookingDialog.data.price 
-                            ? "bg-primary/10 border border-primary/30" 
-                            : "bg-muted"
-                        )}
-                      >
-                        <span className="font-medium capitalize truncate">{platform}</span>
-                        <span className="font-bold whitespace-nowrap ml-2">
-                          {typeof price === 'number' ? `₹${price}` : price}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2 pt-2">
+                
                 <Button 
-                  variant="outline" 
-                  onClick={() => setBookingDialog({ ...bookingDialog, open: false })}
-                  className="flex-1 text-xs sm:text-sm h-9 sm:h-10"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  className="flex-1 bg-gradient-primary text-white text-xs sm:text-sm h-9 sm:h-10"
+                  className="w-full bg-gradient-primary text-white h-12 rounded-xl text-sm font-semibold"
                   onClick={() => {
-                    console.log('Proceeding to booking on', bookingDialog.data.platform);
-                    setBookingDialog({ ...bookingDialog, open: false });
+                    setBookingDialog({ open: false, data: null, type: 'stay' });
                   }}
                 >
-                  Proceed to Book
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Continue to {bookingDialog.data.platform}
                 </Button>
-              </div>
-            </div>
-          )}
+                
+                <p className="text-[10px] text-center text-muted-foreground">
+                  You'll be redirected to complete your booking securely
+                </p>
+              </>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
