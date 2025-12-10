@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
@@ -22,9 +21,14 @@ import {
   Music,
   CheckCircle,
   Heart,
-  Plus,
   UserPlus,
-  User
+  User,
+  Compass,
+  Globe,
+  Sparkles,
+  Star,
+  Zap,
+  Mountain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,7 +49,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
     status: 'all',
     radius: [5],
     ageRange: [18, 65],
-    interests: []
+    interests: [] as string[]
   });
 
   const companions = [
@@ -113,6 +117,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       name: "Delhi Digital Nomads",
       members: 324,
       category: "Coworking",
+      icon: Briefcase,
       description: "Community for remote workers exploring Delhi NCR",
       lastActivity: "2 hours ago",
       joined: true
@@ -122,6 +127,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       name: "Solo Female Travelers - India",
       members: 189,
       category: "Safety",
+      icon: Shield,
       description: "Safe space for women traveling solo across India",
       lastActivity: "1 hour ago", 
       joined: false
@@ -131,6 +137,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       name: "Street Food Adventures",
       members: 256,
       category: "Food",
+      icon: Coffee,
       description: "Discover the best Indian street food experiences together",
       lastActivity: "30 minutes ago",
       joined: true
@@ -138,27 +145,18 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
   ];
 
   const filteredCompanions = companions.filter(companion => {
-    // Gender filter
     if (filters.gender !== 'all' && companion.gender !== filters.gender) {
       return false;
     }
-    
-    // Status filter
     if (filters.status === 'online' && !companion.online) {
       return false;
     }
-    
-    // Radius filter
     if (companion.distance > filters.radius[0]) {
       return false;
     }
-    
-    // Age filter
     if (companion.age < filters.ageRange[0] || companion.age > filters.ageRange[1]) {
       return false;
     }
-    
-    // Interests filter
     if (filters.interests.length > 0) {
       const hasMatchingInterest = filters.interests.some(interest => 
         companion.interests.includes(interest)
@@ -167,35 +165,50 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
         return false;
       }
     }
-    
     return true;
   });
+
+  const interestIcons: Record<string, React.ReactNode> = {
+    "Coworking": <Briefcase className="w-3 h-3" />,
+    "Chai Spots": <Coffee className="w-3 h-3" />,
+    "Photography": <Camera className="w-3 h-3" />,
+    "Temples": <Mountain className="w-3 h-3" />,
+    "Heritage": <Globe className="w-3 h-3" />,
+    "Local Markets": <MapPin className="w-3 h-3" />,
+    "Trekking": <Compass className="w-3 h-3" />,
+    "Adventure Sports": <Zap className="w-3 h-3" />,
+    "Street Food": <Coffee className="w-3 h-3" />,
+    "Cultural Events": <Music className="w-3 h-3" />,
+  };
 
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="bg-gradient-hero p-4 sm:p-6 pb-6 sm:pb-8">
-        <div className="flex items-center justify-between mb-4 sm:mb-6">
+      <div className="bg-gradient-hero p-3 pb-5">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">Find Companions</h1>
-            <p className="text-white/80 text-xs sm:text-sm">Connect with verified solo travelers near you</p>
+            <h1 className="text-lg font-bold text-white flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Companions
+            </h1>
+            <p className="text-white/80 text-xs">Connect with verified travelers</p>
           </div>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={onNavigateToAccount}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-secondary/90 text-foreground hover:bg-secondary border-secondary flex-shrink-0"
+            className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30"
           >
-            <User className="w-4 h-4 sm:w-5 sm:h-5" />
+            <User className="w-4 h-4" />
           </Button>
         </div>
         
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
-            placeholder="Search by interests or Indian cities..."
-            className="pl-9 sm:pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-9 sm:h-10"
+            placeholder="Search by interests or cities..."
+            className="pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
           />
         </div>
       </div>
@@ -204,55 +217,57 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       <div className="flex-1 overflow-y-auto">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-3 mx-4 sm:mx-6 mt-4">
-            <TabsTrigger value="discover" className="text-xs sm:text-sm">Discover</TabsTrigger>
-            <TabsTrigger value="groups" className="text-xs sm:text-sm">Groups</TabsTrigger>
-            <TabsTrigger value="community" className="text-xs sm:text-sm">Community</TabsTrigger>
+          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-3 mx-4 mt-3 h-11 rounded-xl">
+            <TabsTrigger value="discover" className="text-xs rounded-lg flex items-center gap-1">
+              <Compass className="w-3.5 h-3.5" />
+              Discover
+            </TabsTrigger>
+            <TabsTrigger value="groups" className="text-xs rounded-lg flex items-center gap-1">
+              <Users className="w-3.5 h-3.5" />
+              Groups
+            </TabsTrigger>
+            <TabsTrigger value="community" className="text-xs rounded-lg flex items-center gap-1">
+              <Globe className="w-3.5 h-3.5" />
+              Community
+            </TabsTrigger>
           </TabsList>
 
           {/* Filters - only show on Discover tab */}
           {activeTab === "discover" && (
-            <div className="px-4 sm:px-6 py-3 sm:py-4">
+            <div className="px-4 py-3">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex gap-1.5 sm:gap-2 flex-wrap overflow-x-auto scrollbar-hide">
-                  <Badge variant="outline" className="gap-1 text-[10px] sm:text-xs whitespace-nowrap py-0.5 px-2">
-                    <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                    {filters.gender === 'all' ? 'All' : filters.gender === 'female' ? 'Females' : 'Males'}
+                <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
+                  <Badge variant="outline" className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg">
+                    <Users className="w-3 h-3" />
+                    {filters.gender === 'all' ? 'All' : filters.gender === 'female' ? 'Female' : 'Male'}
                   </Badge>
-                  <Badge variant="outline" className="gap-1 text-[10px] sm:text-xs whitespace-nowrap py-0.5 px-2">
-                    <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                    Within {filters.radius[0]}km
+                  <Badge variant="outline" className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg">
+                    <MapPin className="w-3 h-3" />
+                    {filters.radius[0]}km
                   </Badge>
-                  <Badge variant="outline" className="gap-1 text-[10px] sm:text-xs whitespace-nowrap py-0.5 px-2">
-                    <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                    {filters.status === 'all' ? 'All' : 'Online only'}
+                  <Badge variant="outline" className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg">
+                    <Clock className="w-3 h-3" />
+                    {filters.status === 'all' ? 'All' : 'Online'}
                   </Badge>
-                  <Badge variant="outline" className="gap-1 text-[10px] sm:text-xs whitespace-nowrap py-0.5 px-2">
-                    Ages {filters.ageRange[0]}-{filters.ageRange[1]}
-                  </Badge>
-                  {filters.interests.length > 0 && (
-                    <Badge variant="outline" className="gap-1 text-[10px] sm:text-xs whitespace-nowrap py-0.5 px-2">
-                      {filters.interests.length} interests
-                    </Badge>
-                  )}
                 </div>
                 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex-shrink-0 h-7 sm:h-9 text-xs">
-                      <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                      Filters
+                    <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg px-3 flex-shrink-0">
+                      <Filter className="w-3.5 h-3.5 mr-1.5" />
+                      Filter
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-80 p-4" align="end">
+                  <PopoverContent className="w-72 p-4 rounded-xl" align="end">
                     <div className="space-y-4">
-                      <div>
-                        <h4 className="font-medium mb-3">Filters</h4>
-                      </div>
+                      <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <Filter className="w-4 h-4 text-primary" />
+                        Filters
+                      </h4>
                       
                       {/* Gender Filter */}
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Gender</label>
+                        <label className="text-xs font-medium mb-2 block">Gender</label>
                         <div className="grid grid-cols-3 gap-2">
                           {['all', 'female', 'male'].map((gender) => (
                             <Button
@@ -261,7 +276,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                               size="sm"
                               onClick={() => setFilters(prev => ({ ...prev, gender }))}
                               className={cn(
-                                "capitalize",
+                                "capitalize text-xs h-8 rounded-lg",
                                 filters.gender === gender && "bg-gradient-primary text-white border-0"
                               )}
                             >
@@ -275,7 +290,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                       
                       {/* Status Filter */}
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Status</label>
+                        <label className="text-xs font-medium mb-2 block">Status</label>
                         <div className="grid grid-cols-2 gap-2">
                           {['all', 'online'].map((status) => (
                             <Button
@@ -284,10 +299,11 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                               size="sm"
                               onClick={() => setFilters(prev => ({ ...prev, status }))}
                               className={cn(
-                                "capitalize",
+                                "capitalize text-xs h-8 rounded-lg",
                                 filters.status === status && "bg-gradient-primary text-white border-0"
                               )}
                             >
+                              {status === 'online' && <div className="w-2 h-2 rounded-full bg-success mr-1.5" />}
                               {status}
                             </Button>
                           ))}
@@ -298,7 +314,8 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                       
                       {/* Radius Filter */}
                       <div>
-                        <label className="text-sm font-medium mb-2 block">
+                        <label className="text-xs font-medium mb-2 block flex items-center gap-1.5">
+                          <MapPin className="w-3 h-3 text-primary" />
                           Radius: {filters.radius[0]}km
                         </label>
                         <Slider
@@ -315,8 +332,8 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                       
                       {/* Age Range Filter */}
                       <div>
-                        <label className="text-sm font-medium mb-2 block">
-                          Age: {filters.ageRange[0]}-{filters.ageRange[1]} years
+                        <label className="text-xs font-medium mb-2 block">
+                          Age: {filters.ageRange[0]}-{filters.ageRange[1]}
                         </label>
                         <Slider
                           value={filters.ageRange}
@@ -326,34 +343,6 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                           step={1}
                           className="w-full"
                         />
-                      </div>
-                      
-                      <Separator />
-                      
-                      {/* Interests Filter */}
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">Interests</label>
-                        <div className="flex flex-wrap gap-2">
-                          {["Coworking", "Chai Spots", "Photography", "Temples", "Heritage", "Local Markets", "Trekking", "Adventure Sports", "Street Food", "Cultural Events"].map((interest) => (
-                            <Button
-                              key={interest}
-                              variant={filters.interests.includes(interest) ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => setFilters(prev => ({
-                                ...prev,
-                                interests: prev.interests.includes(interest)
-                                  ? prev.interests.filter(i => i !== interest)
-                                  : [...prev.interests, interest]
-                              }))}
-                              className={cn(
-                                "text-xs",
-                                filters.interests.includes(interest) && "bg-gradient-primary text-white border-0"
-                              )}
-                            >
-                              {interest}
-                            </Button>
-                          ))}
-                        </div>
                       </div>
                       
                       <Separator />
@@ -369,9 +358,9 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                           ageRange: [18, 65],
                           interests: []
                         })}
-                        className="w-full"
+                        className="w-full text-xs h-9 rounded-lg"
                       >
-                        Reset Filters
+                        Reset All Filters
                       </Button>
                     </div>
                   </PopoverContent>
@@ -381,158 +370,244 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
           )}
 
           {/* Discover Tab */}
-          <TabsContent value="discover" className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
-          <div className="space-y-3 sm:space-y-4">
-            {filteredCompanions.map((companion) => (
-              <Card key={companion.id} className="p-3 sm:p-4 shadow-soft hover:shadow-medium transition-all">
-                <div className="flex items-start gap-2 sm:gap-4">
-                  <div className="relative flex-shrink-0">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 text-3xl sm:text-4xl flex items-center justify-center">
-                      {companion.profileImage}
-                    </div>
-                    {companion.online && (
-                      <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-success rounded-full border-2 border-white" />
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
-                      <h3 className="font-semibold text-sm sm:text-base">{companion.name}, {companion.age}</h3>
-                      {companion.verified && (
-                        <Badge className="bg-success text-success-foreground text-[10px] sm:text-xs py-0 px-1.5">
-                          <CheckCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
-                          Verified
-                        </Badge>
+          <TabsContent value="discover" className="flex-1 overflow-y-auto px-4 pt-1 pb-20">
+            <div className="space-y-3">
+              {filteredCompanions.map((companion) => (
+                <Card key={companion.id} className="p-3 shadow-soft rounded-2xl border-0">
+                  <div className="flex gap-3">
+                    <div className="relative flex-shrink-0">
+                      <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center text-2xl">
+                        {companion.profileImage}
+                      </div>
+                      {companion.online && (
+                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-background" />
                       )}
                     </div>
                     
-                    <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground mb-2">
-                      <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
-                      <span className="truncate">{companion.location}</span>
-                      {companion.mutualInterests > 0 && (
-                        <>
-                          <span>•</span>
-                          <span className="text-primary truncate">{companion.mutualInterests} mutual</span>
-                        </>
-                      )}
-                    </div>
-                    
-                    <p className="text-xs sm:text-sm text-foreground mb-2 sm:mb-3 line-clamp-2">{companion.bio}</p>
-                    
-                    <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
-                      {companion.interests.map((interest) => (
-                        <Badge key={interest} variant="secondary" className="text-[10px] sm:text-xs py-0.5 px-1.5">
-                          {interest}
-                        </Badge>
-                      ))}
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button size="sm" className="bg-gradient-primary text-white border-0 text-xs h-8 px-3">
-                        <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                        Connect
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => onToggleLike?.(companion.id)}
-                        className={cn(
-                          "h-8 w-8 p-0",
-                          likedCompanions.includes(companion.id) && "text-red-500 border-red-500 hover:bg-red-50"
-                        )}
-                      >
-                        <Heart 
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <h3 className="font-semibold text-sm truncate">{companion.name}, {companion.age}</h3>
+                            {companion.verified && (
+                              <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                            <MapPin className="w-3 h-3" />
+                            <span>{companion.location}</span>
+                            {companion.mutualInterests > 0 && (
+                              <>
+                                <span>•</span>
+                                <span className="text-primary font-medium">{companion.mutualInterests} mutual</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => onToggleLike?.(companion.id)}
                           className={cn(
-                            "w-3.5 h-3.5 sm:w-4 sm:h-4",
-                            likedCompanions.includes(companion.id) && "fill-red-500"
+                            "w-8 h-8 rounded-full",
+                            likedCompanions.includes(companion.id) && "text-destructive"
                           )}
-                        />
-                      </Button>
+                        >
+                          <Heart className={cn("w-4 h-4", likedCompanions.includes(companion.id) && "fill-current")} />
+                        </Button>
+                      </div>
+                      
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{companion.bio}</p>
+                      
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {companion.interests.map((interest) => (
+                          <Badge key={interest} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg flex items-center gap-1">
+                            {interestIcons[interest]}
+                            {interest}
+                          </Badge>
+                        ))}
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button size="sm" className="flex-1 bg-gradient-primary text-white border-0 text-xs h-9 rounded-xl">
+                          <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
+                          Connect
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="text-xs h-9 rounded-xl px-3"
+                        >
+                          <User className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                </Card>
+              ))}
+              
+              {filteredCompanions.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="font-semibold text-base mb-1">No companions found</h3>
+                  <p className="text-xs text-muted-foreground">Try adjusting your filters</p>
                 </div>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-          {/* Community Tab */}
-          <TabsContent value="community" className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
-            <div className="text-center py-8 px-4">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-base sm:text-lg font-semibold mb-2">Community Features</h3>
-              <p className="text-muted-foreground text-xs sm:text-sm mb-4">
-                Share tips, ask questions, and connect with fellow travelers
-              </p>
-              <Button className="bg-gradient-primary text-white border-0 text-xs sm:text-sm h-9">
-                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                Create Post
-              </Button>
+              )}
             </div>
           </TabsContent>
 
           {/* Groups Tab */}
-          <TabsContent value="groups" className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
-            <div className="mb-4">
-              <Button className="bg-gradient-primary text-white border-0 w-full text-xs sm:text-sm h-9 sm:h-10">
-                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                Create New Group
-              </Button>
-            </div>
-            <div className="space-y-3 sm:space-y-4">
-              {groups.map((group) => (
-                <Card key={group.id} className="p-3 sm:p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
-                  <div className="flex items-start sm:items-center justify-between mb-2 sm:mb-3 gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm sm:text-base truncate">{group.name}</h3>
-                      <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
-                        <span className="whitespace-nowrap">{group.members} members</span>
-                        <span>•</span>
-                        <Badge variant="outline" className="text-[10px] sm:text-xs py-0 px-1.5">
-                          {group.category}
-                        </Badge>
+          <TabsContent value="groups" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
+            <div className="space-y-3">
+              {groups.map((group) => {
+                const IconComponent = group.icon;
+                return (
+                  <Card key={group.id} className="p-3 shadow-soft rounded-2xl border-0">
+                    <div className="flex gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <IconComponent className="w-6 h-6 text-primary" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm truncate">{group.name}</h3>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                              <Users className="w-3 h-3" />
+                              <span>{group.members} members</span>
+                              <Badge variant="secondary" className="text-[10px] py-0 px-1.5">{group.category}</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{group.description}</p>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <Clock className="w-3 h-3" />
+                            <span>Active {group.lastActivity}</span>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant={group.joined ? "outline" : "default"}
+                            className={cn(
+                              "text-xs h-8 rounded-xl px-4",
+                              !group.joined && "bg-gradient-primary text-white border-0"
+                            )}
+                          >
+                            {group.joined ? (
+                              <>
+                                <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+                                Joined
+                              </>
+                            ) : (
+                              <>
+                                <UserPlus className="w-3.5 h-3.5 mr-1.5" />
+                                Join
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    <Button 
-                      size="sm" 
-                      variant={group.joined ? "outline" : "default"}
-                      className={cn(
-                        "flex-shrink-0 text-xs h-7 sm:h-9 px-2 sm:px-3",
-                        !group.joined && "bg-gradient-primary text-white border-0"
-                      )}
-                    >
-                      {group.joined ? "Joined" : (
-                        <>
-                          <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-2" />
-                          <span className="hidden sm:inline">Join</span>
-                        </>
-                      )}
-                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Community Tab */}
+          <TabsContent value="community" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
+            <div className="space-y-4">
+              {/* Community Stats */}
+              <Card className="p-4 shadow-soft rounded-2xl border-0 bg-gradient-to-br from-primary/5 to-accent/5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-primary" />
                   </div>
-                  
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">{group.description}</p>
-                  
-                  <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
-                    <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                    <span>Last activity {group.lastActivity}</span>
+                  <div>
+                    <h3 className="font-semibold text-sm">Community Stats</h3>
+                    <p className="text-xs text-muted-foreground">Your travel network</p>
                   </div>
-                </Card>
-              ))}
+                </div>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="text-center p-3 bg-background rounded-xl">
+                    <div className="text-xl font-bold text-primary">156</div>
+                    <div className="text-[10px] text-muted-foreground">Connections</div>
+                  </div>
+                  <div className="text-center p-3 bg-background rounded-xl">
+                    <div className="text-xl font-bold text-primary">12</div>
+                    <div className="text-[10px] text-muted-foreground">Trips Shared</div>
+                  </div>
+                  <div className="text-center p-3 bg-background rounded-xl">
+                    <div className="text-xl font-bold text-primary">4.8</div>
+                    <div className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5">
+                      <Star className="w-3 h-3 fill-warning text-warning" />
+                      Rating
+                    </div>
+                  </div>
+                </div>
+              </Card>
+              
+              {/* Recent Activity */}
+              <div>
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary" />
+                  Recent Activity
+                </h4>
+                
+                <div className="space-y-2">
+                  {[
+                    { icon: "👋", text: "Priya connected with you", time: "2 hours ago" },
+                    { icon: "🎉", text: "You joined Delhi Digital Nomads", time: "1 day ago" },
+                    { icon: "⭐", text: "Arjun rated your trip 5 stars", time: "3 days ago" },
+                  ].map((activity, idx) => (
+                    <Card key={idx} className="p-3 shadow-soft rounded-xl border-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-lg">
+                          {activity.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm truncate">{activity.text}</p>
+                          <p className="text-[10px] text-muted-foreground">{activity.time}</p>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Safety Features */}
+              <Card className="p-4 shadow-soft rounded-2xl border-0">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm">Safety First</h3>
+                    <p className="text-xs text-muted-foreground">Your safety is our priority</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  {[
+                    { icon: CheckCircle, text: "All companions are ID verified" },
+                    { icon: Shield, text: "24/7 emergency support available" },
+                    { icon: MapPin, text: "Live location sharing with trusted contacts" },
+                  ].map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-xs">
+                      <feature.icon className="w-4 h-4 text-success" />
+                      <span>{feature.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
-
-        {/* Safety Notice */}
-        <div className="p-3 sm:p-4 bg-muted/30 border-t border-border">
-          <div className="flex items-center gap-2 text-xs sm:text-sm">
-            <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
-            <span className="text-muted-foreground">
-              Always meet in public places. Your safety is our priority.
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );
