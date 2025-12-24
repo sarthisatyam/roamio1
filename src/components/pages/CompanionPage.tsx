@@ -555,63 +555,91 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                 const IconComponent = group.icon;
                 const isJoined = joinedGroups.includes(group.id);
                 return (
-                  <Card key={group.id} className="p-3 shadow-soft rounded-2xl border-0">
-                    <div className="flex gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <IconComponent className="w-6 h-6 text-primary" />
+                  <Card 
+                    key={group.id} 
+                    className={cn(
+                      "p-4 shadow-soft rounded-2xl border-0 transition-all hover:shadow-medium hover:scale-[1.01]",
+                      isJoined && "ring-2 ring-primary/20 bg-primary/5"
+                    )}
+                  >
+                    <div className="flex gap-4">
+                      {/* Icon */}
+                      <div className={cn(
+                        "w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm",
+                        isJoined 
+                          ? "bg-gradient-to-br from-primary to-primary/80" 
+                          : "bg-gradient-to-br from-primary/20 to-primary/5"
+                      )}>
+                        <IconComponent className={cn(
+                          "w-7 h-7",
+                          isJoined ? "text-white" : "text-primary"
+                        )} />
                       </div>
                       
-                      <div className="flex-1 min-w-0">
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        {/* Header */}
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm truncate">{group.name}</h3>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                              <Users className="w-3 h-3" />
-                              <span>{group.members} members</span>
-                              <Badge variant="secondary" className="text-[10px] py-0 px-1.5">{group.category}</Badge>
+                            <h3 className="font-bold text-base text-foreground truncate">{group.name}</h3>
+                            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground mt-1">
+                              <div className="flex items-center gap-1">
+                                <Users className="w-3.5 h-3.5" />
+                                <span className="font-medium">{group.members}</span>
+                              </div>
+                              <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                              <Badge 
+                                variant="secondary" 
+                                className="text-[10px] py-0.5 px-2 rounded-full bg-secondary/80 font-medium"
+                              >
+                                {group.category}
+                              </Badge>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground flex-shrink-0">
-                            <Clock className="w-3 h-3" />
+                          {/* Activity Badge */}
+                          <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted/50 text-[10px] text-muted-foreground flex-shrink-0">
+                            <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                             <span>{group.lastActivity}</span>
                           </div>
                         </div>
                         
-                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{group.description}</p>
+                        {/* Description */}
+                        <p className="text-xs text-muted-foreground mb-3 line-clamp-2 leading-relaxed">{group.description}</p>
                         
-                        <div className="flex justify-end gap-2">
-                          {isJoined && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="text-xs h-8 rounded-xl px-3"
-                              onClick={() => toast.info(`Opening ${group.name} chat...`)}
-                            >
-                              <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
-                              Chat
-                            </Button>
-                          )}
+                        {/* Actions */}
+                        <div className="flex items-center gap-2">
                           <Button 
                             size="sm" 
                             variant={isJoined ? "outline" : "default"}
                             className={cn(
-                              "text-xs h-8 rounded-xl px-4",
-                              !isJoined && "bg-gradient-primary text-white border-0"
+                              "text-xs h-9 rounded-xl px-4 flex-1",
+                              !isJoined && "bg-gradient-primary text-white border-0 shadow-sm"
                             )}
                             onClick={() => handleJoinGroup(group.id)}
                           >
                             {isJoined ? (
                               <>
-                                <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+                                <CheckCircle className="w-4 h-4 mr-1.5" />
                                 Joined
                               </>
                             ) : (
                               <>
-                                <UserPlus className="w-3.5 h-3.5 mr-1.5" />
-                                Join
+                                <UserPlus className="w-4 h-4 mr-1.5" />
+                                Join Group
                               </>
                             )}
                           </Button>
+                          {isJoined && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="text-xs h-9 rounded-xl px-4"
+                              onClick={() => toast.info(`Opening ${group.name} chat...`)}
+                            >
+                              <MessageCircle className="w-4 h-4 mr-1.5" />
+                              Chat
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
