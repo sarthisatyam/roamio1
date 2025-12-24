@@ -18,6 +18,7 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [showAccount, setShowAccount] = useState(false);
   const [likedCompanions, setLikedCompanions] = useState<number[]>([]);
   const [bookmarkedPlaces, setBookmarkedPlaces] = useState<{ id: number; name: string; image: string }[]>([]);
+  const [plannerActivities, setPlannerActivities] = useState<{ title: string; location: string; type: string }[]>([]);
 
   const handleToggleLike = (companionId: number) => {
     setLikedCompanions(prev => 
@@ -33,6 +34,10 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
         ? prev.filter(p => p.id !== place.id)
         : [...prev, place]
     );
+  };
+
+  const handleAddToPlanner = (activity: { title: string; location: string; type: string }) => {
+    setPlannerActivities(prev => [...prev, activity]);
   };
 
   const tabs = [
@@ -64,10 +69,10 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
     <div className="h-screen flex flex-col bg-background">
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === 0 && <HomePage userData={userData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} />}
+        {activeTab === 0 && <HomePage userData={userData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} />}
         {activeTab === 1 && <BookingsPage onNavigateToAccount={handleNavigateToAccount} />}
         {activeTab === 2 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} likedCompanions={likedCompanions} onToggleLike={handleToggleLike} />}
-        {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} />}
+        {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
 
       {/* Bottom Navigation */}
