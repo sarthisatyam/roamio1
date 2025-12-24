@@ -446,12 +446,17 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                         <span>{companion.location}</span>
                       </div>
                       {companion.sharedInterests.length > 0 && (
-                        <div className="flex items-center gap-1 mt-1 text-xs text-primary">
-                          <Heart className="w-3 h-3" />
-                          <span className="font-medium truncate">
-                            {companion.sharedInterests.slice(0, 2).join(", ")}
-                            {companion.sharedInterests.length > 2 && ` +${companion.sharedInterests.length - 2}`}
-                          </span>
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {companion.sharedInterests.slice(0, 3).map((interest) => (
+                            <Badge key={interest} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg bg-primary/10 text-primary border-0">
+                              {interest}
+                            </Badge>
+                          ))}
+                          {companion.sharedInterests.length > 3 && (
+                            <Badge variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg bg-muted text-muted-foreground border-0">
+                              +{companion.sharedInterests.length - 3}
+                            </Badge>
+                          )}
                         </div>
                       )}
                     </div>
