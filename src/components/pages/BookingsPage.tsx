@@ -283,14 +283,14 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="bg-gradient-hero p-3 pb-5">
+      <div className="bg-gradient-hero px-4 py-3 pb-5">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-5 h-5" />
+              <Sparkles className="w-4 h-4" />
               Book Journey
             </h1>
-            <p className="text-white/80 text-xs">Safe stays & transport</p>
+            <p className="text-white/80 text-[10px]">Safe stays & transport</p>
           </div>
           <Button
             variant="ghost"
@@ -305,12 +305,12 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
         {/* Search */}
         <div className="space-y-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
               placeholder="Search destination..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
+              className="pl-10 text-xs bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
             />
           </div>
           
@@ -390,12 +390,12 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
       <div className="flex-1 overflow-y-auto">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl">
-            <TabsTrigger value="stay" className="text-xs rounded-lg flex items-center gap-1.5">
+          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl bg-muted">
+            <TabsTrigger value="stay" className="text-xs rounded-lg flex items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Bed className="w-4 h-4" />
               Stay
             </TabsTrigger>
-            <TabsTrigger value="transport" className="text-xs rounded-lg flex items-center gap-1.5">
+            <TabsTrigger value="transport" className="text-xs rounded-lg flex items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Plane className="w-4 h-4" />
               Travel
             </TabsTrigger>
@@ -433,8 +433,8 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                 return (
                   <Card key={stay.id} className="p-3 shadow-soft hover:shadow-medium transition-all rounded-2xl border-0">
                     <div className="flex gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <IconComponent className="w-6 h-6 text-primary" />
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <IconComponent className="w-5 h-5 text-primary" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
@@ -443,15 +443,15 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                             <div className="flex items-center gap-1.5 mb-0.5">
                               <h3 className="font-semibold text-sm truncate">{stay.name}</h3>
                               {stay.verified && (
-                                <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
+                                <CheckCircle className="w-3.5 h-3.5 text-success flex-shrink-0" />
                               )}
                             </div>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                               <MapPin className="w-3 h-3" />
                               <span className="truncate">{stay.location}</span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 text-xs bg-warning/10 px-2 py-1 rounded-lg">
+                          <div className="flex items-center gap-1 text-[10px] bg-warning/10 px-2 py-1 rounded-lg">
                             <Star className="w-3 h-3 fill-warning text-warning" />
                             <span className="font-semibold">{stay.rating}</span>
                           </div>
@@ -609,13 +609,13 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                           <div className="flex items-start justify-between gap-2 mb-1">
                             <div>
                               <h4 className="font-semibold text-sm">{flight.name}</h4>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                              <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
                                 <Clock className="w-3 h-3" />
                                 <span>{flight.departure} → {flight.arrival}</span>
-                                <Badge variant="outline" className="text-[10px] py-0 px-1.5">{flight.duration}</Badge>
+                                <Badge variant="outline" className="text-[10px] py-0 px-1.5 rounded-lg">{flight.duration}</Badge>
                               </div>
                             </div>
-                            <Badge variant="secondary" className="text-[10px]">{flight.type}</Badge>
+                            <Badge variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">{flight.type}</Badge>
                           </div>
                           
                           <div className="flex flex-wrap gap-1 my-2">
@@ -720,13 +720,13 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                           <div className="flex items-start justify-between gap-2 mb-1">
                             <div>
                               <h4 className="font-semibold text-sm">{train.name}</h4>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                              <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
                                 <Clock className="w-3 h-3" />
                                 <span>{train.departure} → {train.arrival}</span>
-                                <Badge variant="outline" className="text-[10px] py-0 px-1.5">{train.duration}</Badge>
+                                <Badge variant="outline" className="text-[10px] py-0 px-1.5 rounded-lg">{train.duration}</Badge>
                               </div>
                             </div>
-                            <Badge variant="secondary" className="text-[10px]">{train.type}</Badge>
+                            <Badge variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">{train.type}</Badge>
                           </div>
                           
                           <div className="flex flex-wrap gap-1 my-2">
