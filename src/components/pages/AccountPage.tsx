@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { 
   ArrowLeft, 
   Edit, 
@@ -23,9 +22,6 @@ import {
   Settings,
   CheckCircle,
   Calendar,
-  X,
-  Plus,
-  Trash2,
   Languages
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -34,7 +30,10 @@ import {
   ParentalControlDialog, 
   VerifyDialog, 
   SupportDialog, 
-  MyBookingsDialog 
+  MyBookingsDialog,
+  MyCoCompanionDialog,
+  MyInterestsDialog,
+  TravelListDialog
 } from "@/components/dialogs/AccountSectionDialogs";
 import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
 
@@ -49,8 +48,6 @@ interface AccountPageProps {
 
 const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [], onLocationToggle }) => {
   const accountType = "Free";
-  const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   
   // Dialog states
   const [emergencyDialogOpen, setEmergencyDialogOpen] = useState(false);
@@ -59,6 +56,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [supportDialogOpen, setSupportDialogOpen] = useState(false);
   const [bookingsDialogOpen, setBookingsDialogOpen] = useState(false);
   const [travelGuideDialogOpen, setTravelGuideDialogOpen] = useState(false);
+  const [coCompanionDialogOpen, setCoCompanionDialogOpen] = useState(false);
+  const [interestsDialogOpen, setInterestsDialogOpen] = useState(false);
+  const [travelListDialogOpen, setTravelListDialogOpen] = useState(false);
 
   // Mock companion data for displaying liked companions with detailed info
   const companions = [
@@ -118,162 +118,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
 
   const likedCompanionProfiles = companions.filter(c => likedCompanions.includes(c.id));
 
-
-
-
-  const handleSectionClick = (sectionTitle: string) => {
-    if (['My Co-Companion', 'Travel List', 'My Interests'].includes(sectionTitle)) {
-      setActiveSection(activeSection === sectionTitle ? null : sectionTitle);
-      setIsEditing(false);
-    }
-  };
-
-  const renderDetailedSection = () => {
-    if (!activeSection) return null;
-
-    return (
-      <Card className="mb-6 shadow-soft">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">{activeSection}</CardTitle>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              <Edit className="w-4 h-4 mr-1" />
-              {isEditing ? 'Done' : 'Edit'}
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setActiveSection(null)}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {activeSection === 'My Co-Companion' && (
-            <div className="space-y-4">
-              {likedCompanionProfiles.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No companions added yet</p>
-              ) : (
-                likedCompanionProfiles.map((companion) => (
-                  <div key={companion.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 text-2xl flex items-center justify-center bg-muted rounded-full">
-                          {companion.profileImage}
-                        </div>
-                        <div>
-                          <h4 className="font-semibold">{companion.name}</h4>
-                          <p className="text-sm text-muted-foreground">{companion.age} years • {companion.location}</p>
-                        </div>
-                      </div>
-                      {isEditing && (
-                        <Button variant="destructive" size="sm">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-sm">{companion.bio}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {companion.interests.map((interest) => (
-                        <Badge key={interest} variant="secondary" className="text-xs">
-                          {interest}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${companion.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`} />
-                      <span className="text-xs text-muted-foreground capitalize">{companion.status}</span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
-          {activeSection === 'Travel List' && (
-            <div className="space-y-4">
-              {bookmarkedPlaces.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No destinations saved yet</p>
-              ) : (
-                bookmarkedPlaces.map((place) => (
-                  <div key={place.id} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 text-2xl flex items-center justify-center bg-muted rounded-full">
-                          {place.image}
-                        </div>
-                        <div>
-                          <h4 className="font-semibold">{place.name}</h4>
-                          <p className="text-sm text-muted-foreground">Saved destination</p>
-                        </div>
-                      </div>
-                      {isEditing && (
-                        <Button variant="destructive" size="sm">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-              {isEditing && (
-                <Button variant="outline" className="w-full">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Destination
-                </Button>
-              )}
-            </div>
-          )}
-
-          {activeSection === 'My Interests' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Gender</label>
-                  <p className="text-sm">{userInterests.gender}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Age</label>
-                  <p className="text-sm">{userInterests.age} years</p>
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Interests</label>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {userInterests.interests.map((interest) => (
-                    <Badge key={interest} variant="secondary" className="text-xs">
-                      {interest}
-                      {isEditing && (
-                        <X className="w-3 h-3 ml-1 cursor-pointer" />
-                      )}
-                    </Badge>
-                  ))}
-                  {isEditing && (
-                    <Button variant="outline" size="sm" className="h-6 px-2 text-xs">
-                      <Plus className="w-3 h-3 mr-1" />
-                      Add
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">About</label>
-                <p className="text-sm mt-1">{userInterests.about}</p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
-
   const menuItems = [
     {
       icon: Calendar,
@@ -289,6 +133,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       description: `${likedCompanionProfiles.length} saved companions`,
       color: "text-primary",
       bgColor: "bg-primary/10",
+      action: () => setCoCompanionDialogOpen(true),
       companions: likedCompanionProfiles
     },
     {
@@ -296,7 +141,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       title: "My Interests",
       description: "Manage your travel preferences and interests",
       color: "text-accent",
-      bgColor: "bg-accent/10"
+      bgColor: "bg-accent/10",
+      action: () => setInterestsDialogOpen(true)
     },
     {
       icon: Bookmark,
@@ -304,6 +150,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       description: `${bookmarkedPlaces.length} saved destinations`,
       color: "text-success",
       bgColor: "bg-success/10",
+      action: () => setTravelListDialogOpen(true),
       places: bookmarkedPlaces
     },
     {
@@ -387,7 +234,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setActiveSection('My Interests')}
+            onClick={() => setInterestsDialogOpen(true)}
             className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30 border-0"
           >
             <Edit className="w-4 h-4" />
@@ -462,10 +309,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
           </CardContent>
         </Card>
 
-        {/* Detailed Section */}
-        {renderDetailedSection()}
-
-
 
         <div className="space-y-3 mb-4">
           {menuItems.map((item) => {
@@ -474,13 +317,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
               <Card 
                 key={item.title} 
                 className="p-3 shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0"
-                onClick={() => {
-                  if (item.action) {
-                    item.action();
-                  } else {
-                    handleSectionClick(item.title);
-                  }
-                }}
+                onClick={() => item.action()}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.bgColor}`}>
@@ -538,7 +375,17 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       </div>
 
       {/* Dialogs */}
-      <MyBookingsDialog open={bookingsDialogOpen} onOpenChange={setBookingsDialogOpen} />
+      <MyBookingsDialog open={bookingsDialogOpen} onOpenChange={setBookingsDialogOpen} bookings={[]} />
+      <MyCoCompanionDialog open={coCompanionDialogOpen} onOpenChange={setCoCompanionDialogOpen} companions={likedCompanionProfiles} />
+      <MyInterestsDialog 
+        open={interestsDialogOpen} 
+        onOpenChange={setInterestsDialogOpen} 
+        interests={userData?.preferences || []}
+        gender={userData?.preferences?.includes('Male') ? 'Male' : userData?.preferences?.includes('Female') ? 'Female' : 'Not specified'}
+        age={25}
+        about="Passionate traveler looking for authentic experiences and meaningful connections."
+      />
+      <TravelListDialog open={travelListDialogOpen} onOpenChange={setTravelListDialogOpen} places={bookmarkedPlaces} />
       <EmergencyDialog open={emergencyDialogOpen} onOpenChange={setEmergencyDialogOpen} />
       <ParentalControlDialog open={parentalDialogOpen} onOpenChange={setParentalDialogOpen} />
       <VerifyDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen} />
