@@ -181,6 +181,33 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
     data: null, 
     type: 'stay' 
   });
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter stays based on search
+  const filteredStayOptions = stayOptions.filter(stay =>
+    stay.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    stay.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    stay.amenities.some(a => a.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  // Filter flights based on search
+  const filteredFlightOptions = flightOptions.filter(flight =>
+    flight.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    flight.features.some(f => f.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  // Filter trains based on search
+  const filteredTrainOptions = trainOptions.filter(train =>
+    train.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    train.features.some(f => f.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  // Filter cabs based on search
+  const filteredCabOptions = cabOptions.filter(cab =>
+    cab.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cab.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cab.service.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const platformIcons: Record<string, React.ReactNode> = {
     makemytrip: <span className="text-lg">🔵</span>,
@@ -264,9 +291,11 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
         {/* Search */}
         <div className="space-y-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
             <Input 
               placeholder="Search destination..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
             />
           </div>
@@ -382,7 +411,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
             </div>
             
             <div className="space-y-3">
-              {stayOptions.map((stay) => {
+              {filteredStayOptions.length > 0 ? filteredStayOptions.map((stay) => {
                 const IconComponent = stay.icon;
                 const comparison = stayComparisons[stay.id as keyof typeof stayComparisons];
                 const { minPrice, bestPlatform } = getBestPrice(comparison || {});
@@ -494,7 +523,13 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     )}
                   </Card>
                 );
-              })}
+              }) : searchQuery && (
+                <Card className="p-6 text-center">
+                  <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">No stays found for "{searchQuery}"</p>
+                  <p className="text-xs text-muted-foreground mt-1">Try searching for "Hyderabad", "WiFi", or "Hotel"</p>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
@@ -540,7 +575,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     <Plane className="w-4 h-4 text-primary" />
                     <h3 className="font-semibold text-sm">Flights</h3>
                   </div>
-                  {flightOptions.map((flight) => (
+                  {filteredFlightOptions.map((flight) => (
                     <Card key={`all-flight-${flight.id}`} className="p-3 shadow-soft rounded-2xl border-0">
                       <div className="flex gap-3">
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -638,6 +673,11 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                       )}
                     </Card>
                   ))}
+                  {filteredFlightOptions.length === 0 && searchQuery && (
+                    <Card className="p-4 text-center">
+                      <p className="text-sm text-muted-foreground">No flights found for "{searchQuery}"</p>
+                    </Card>
+                  )}
                 </div>
                 
                 {/* Trains Section */}
@@ -646,7 +686,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     <Train className="w-4 h-4 text-primary" />
                     <h3 className="font-semibold text-sm">Trains</h3>
                   </div>
-                  {trainOptions.map((train) => (
+                  {filteredTrainOptions.map((train) => (
                     <Card key={`all-train-${train.id}`} className="p-3 shadow-soft rounded-2xl border-0">
                       <div className="flex gap-3">
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -740,6 +780,11 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                       )}
                     </Card>
                   ))}
+                  {filteredTrainOptions.length === 0 && searchQuery && (
+                    <Card className="p-4 text-center">
+                      <p className="text-sm text-muted-foreground">No trains found for "{searchQuery}"</p>
+                    </Card>
+                  )}
                 </div>
                 
                 {/* Cabs Section */}
@@ -748,7 +793,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     <Car className="w-4 h-4 text-primary" />
                     <h3 className="font-semibold text-sm">Cabs</h3>
                   </div>
-                  {cabOptions.map((cab) => (
+                  {filteredCabOptions.map((cab) => (
                     <Card key={`all-cab-${cab.id}`} className="p-3 shadow-soft rounded-2xl border-0">
                       <div className="flex gap-3">
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -845,6 +890,11 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                       )}
                     </Card>
                   ))}
+                  {filteredCabOptions.length === 0 && searchQuery && (
+                    <Card className="p-4 text-center">
+                      <p className="text-sm text-muted-foreground">No cabs found for "{searchQuery}"</p>
+                    </Card>
+                  )}
                 </div>
               </div>
             )}
@@ -857,7 +907,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                   <h3 className="font-semibold text-sm">Delhi → Hyderabad</h3>
                 </div>
                 
-                {flightOptions.map((flight) => (
+                {filteredFlightOptions.map((flight) => (
                   <Card key={flight.id} className="p-3 shadow-soft rounded-2xl border-0">
                     <div className="flex gap-3">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -955,6 +1005,13 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     )}
                   </Card>
                 ))}
+                {filteredFlightOptions.length === 0 && searchQuery && (
+                  <Card className="p-6 text-center">
+                    <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">No flights found for "{searchQuery}"</p>
+                    <p className="text-xs text-muted-foreground mt-1">Try searching for "IndiGo", "Air India", or "Vistara"</p>
+                  </Card>
+                )}
               </div>
             )}
             
@@ -966,7 +1023,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                   <h3 className="font-semibold text-sm">Delhi → Hyderabad</h3>
                 </div>
                 
-                {trainOptions.map((train) => (
+                {filteredTrainOptions.map((train) => (
                   <Card key={train.id} className="p-3 shadow-soft rounded-2xl border-0">
                     <div className="flex gap-3">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -1064,6 +1121,13 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     )}
                   </Card>
                 ))}
+                {filteredTrainOptions.length === 0 && searchQuery && (
+                  <Card className="p-6 text-center">
+                    <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">No trains found for "{searchQuery}"</p>
+                    <p className="text-xs text-muted-foreground mt-1">Try searching for "Rajdhani", "Express", or "AC"</p>
+                  </Card>
+                )}
               </div>
             )}
             
@@ -1075,7 +1139,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                   <h3 className="font-semibold text-sm">Delhi → Hyderabad</h3>
                 </div>
                 
-                {cabOptions.map((cab) => (
+                {filteredCabOptions.map((cab) => (
                   <Card key={cab.id} className="p-3 shadow-soft rounded-2xl border-0">
                     <div className="flex gap-3">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -1172,6 +1236,13 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     )}
                   </Card>
                 ))}
+                {filteredCabOptions.length === 0 && searchQuery && (
+                  <Card className="p-6 text-center">
+                    <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">No cabs found for "{searchQuery}"</p>
+                    <p className="text-xs text-muted-foreground mt-1">Try searching for "Sedan", "SUV", or "Ola"</p>
+                  </Card>
+                )}
               </div>
             )}
           </TabsContent>
