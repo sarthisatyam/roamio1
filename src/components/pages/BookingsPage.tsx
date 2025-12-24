@@ -34,6 +34,8 @@ import {
   ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAISearch } from "@/hooks/useAISearch";
+import AISearchResults from "@/components/AISearchResults";
 
 interface BookingsPageProps {
   onNavigateToAccount?: () => void;
@@ -265,6 +267,18 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
     
     return { minPrice, bestPlatform };
   };
+
+  // AI Search hook
+  const { results: aiResults, isLoading: aiLoading, error: aiError } = useAISearch(searchQuery, {
+    pageContext: 'bookings'
+  });
+
+  // Check if we should show AI results
+  const showAIStayResults = searchQuery.length >= 2 && filteredStayOptions.length === 0;
+  const showAITravelResults = searchQuery.length >= 2 && 
+    filteredFlightOptions.length === 0 && 
+    filteredTrainOptions.length === 0 && 
+    filteredCabOptions.length === 0;
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -523,13 +537,22 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     )}
                   </Card>
                 );
-              }) : searchQuery && (
+              }) : showAIStayResults ? (
+                <AISearchResults
+                  results={aiResults}
+                  isLoading={aiLoading}
+                  error={aiError}
+                  searchQuery={searchQuery}
+                  showDestinations={false}
+                  showStays={true}
+                  showTravel={true}
+                />
+              ) : searchQuery ? (
                 <Card className="p-6 text-center">
                   <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">No stays found for "{searchQuery}"</p>
-                  <p className="text-xs text-muted-foreground mt-1">Try searching for "Hyderabad", "WiFi", or "Hotel"</p>
                 </Card>
-              )}
+              ) : null}
             </div>
           </TabsContent>
 

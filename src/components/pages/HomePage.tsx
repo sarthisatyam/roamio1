@@ -33,6 +33,8 @@ import {
 import { cn } from "@/lib/utils";
 import BookingDialog from "@/components/dialogs/BookingDialog";
 import DestinationDialog from "@/components/dialogs/DestinationDialog";
+import { useAISearch, AIDestination } from "@/hooks/useAISearch";
+import AISearchResults from "@/components/AISearchResults";
 
 interface HomePageProps {
   userData?: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
@@ -227,6 +229,11 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
     }
   ];
 
+  // AI Search hook
+  const { results: aiResults, isLoading: aiLoading, error: aiError } = useAISearch(searchQuery, {
+    pageContext: 'home'
+  });
+
   // Filter destinations based on search
   const filteredDestinations = destinations.filter(dest =>
     dest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -238,6 +245,14 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
     spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     spot.type.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Check if we should show AI results (no static matches and search is active)
+  const showAIResults = searchQuery.length >= 2 && filteredDestinations.length === 0;
+
+  const handleAIDestinationSelect = (dest: AIDestination) => {
+    setSelectedDestination(dest);
+    setDestinationDialogOpen(true);
+  };
 
   const getHotspotPlatforms = (spot: typeof hotspots[0]) => [
     { name: "BookMyShow", price: "₹800", savings: "₹100", url: "https://bookmyshow.com", icon: "🎬" },
@@ -386,12 +401,18 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                 </Card>
               ))}
             </div>
-          ) : searchQuery && (
-            <Card className="p-6 text-center">
-              <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">No destinations found for "{searchQuery}"</p>
-              <p className="text-xs text-muted-foreground mt-1">Try searching for "Goa", "Manali", or "Udaipur"</p>
-            </Card>
+          ) : showAIResults && (
+            <AISearchResults
+              results={aiResults}
+              isLoading={aiLoading}
+              error={aiError}
+              searchQuery={searchQuery}
+              onSelectDestination={handleAIDestinationSelect}
+              showDestinations={true}
+              showStays={true}
+              showTravel={true}
+              bookmarkedIds={bookmarkedPlaces.map(p => p.id)}
+            />
           )}
         </section>
 
@@ -468,13 +489,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                 );
               })}
             </div>
-          ) : searchQuery && (
-            <Card className="p-6 text-center">
-              <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">No events found for "{searchQuery}"</p>
-              <p className="text-xs text-muted-foreground mt-1">Try searching for "Music", "Food", or "Art"</p>
-            </Card>
-          )}
+          ) : null}
         </section>
       </div>
 
