@@ -12,7 +12,6 @@ import {
   Edit,
   CheckCircle,
   Camera,
-  Map as MapIcon,
   User,
   Home,
   UtensilsCrossed,
@@ -245,12 +244,8 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" className="h-20 flex flex-col gap-2">
-              <MapIcon className="w-6 h-6" />
-              <span className="text-sm">View on Map</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col gap-2">
+          <div className="flex justify-center">
+            <Button variant="outline" className="h-20 w-full max-w-xs flex flex-col gap-2">
               <Camera className="w-6 h-6" />
               <span className="text-sm">Add Photos</span>
             </Button>

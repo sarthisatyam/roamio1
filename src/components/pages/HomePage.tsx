@@ -183,7 +183,8 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       reviews: "12k",
       bookingUrl: "#",
       icon: Music,
-      isLive: true
+      isLive: true,
+      fillingFast: false
     },
     { 
       name: "Stand-up Comedy Show", 
@@ -195,7 +196,8 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       reviews: "8.5k",
       bookingUrl: "#",
       icon: Laugh,
-      isLive: false
+      isLive: false,
+      fillingFast: true
     },
     { 
       name: "Food Festival at Kingdom of Dreams", 
@@ -207,7 +209,8 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       reviews: "15k",
       bookingUrl: "#",
       icon: UtensilsCrossed,
-      isLive: true
+      isLive: true,
+      fillingFast: true
     },
     { 
       name: "Art Exhibition - Modern India", 
@@ -219,7 +222,8 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       reviews: "20k",
       bookingUrl: "#",
       icon: Palette,
-      isLive: false
+      isLive: false,
+      fillingFast: false
     }
   ];
 
@@ -396,30 +400,34 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
               return (
                 <Card 
                   key={index} 
-                  className={cn(
-                    "p-3 shadow-soft hover:shadow-medium transition-all",
-                    spot.isLive && "border-l-4 border-l-success"
-                  )}
+                  className="p-3 shadow-soft hover:shadow-medium transition-all"
                 >
                   <div className="flex items-start gap-2.5 mb-2.5">
                     <div className={cn(
                       "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
-                      spot.isLive ? "bg-success/10" : "bg-primary/10"
+                      spot.isLive ? "bg-warning/10" : "bg-primary/10"
                     )}>
                       <IconComponent className={cn(
                         "w-4 h-4",
-                        spot.isLive ? "text-success" : "text-primary"
+                        spot.isLive ? "text-warning" : "text-primary"
                       )} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-medium text-sm leading-tight line-clamp-2">{spot.name}</h3>
-                        {spot.isLive && (
-                          <Badge className="bg-success text-success-foreground text-[9px] px-1.5 py-0 flex-shrink-0 flex items-center gap-0.5">
-                            <Radio className="w-2 h-2" />
-                            Live
-                          </Badge>
-                        )}
+                        <div className="flex flex-col gap-0.5 items-end flex-shrink-0">
+                          {spot.isLive && (
+                            <Badge className="bg-warning text-warning-foreground text-[9px] px-1.5 py-0 flex items-center gap-0.5">
+                              <Radio className="w-2 h-2" />
+                              Live
+                            </Badge>
+                          )}
+                          {spot.fillingFast && (
+                            <Badge className="bg-destructive text-destructive-foreground text-[9px] px-1.5 py-0">
+                              Filling Fast
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground mt-1">
                         <span className="flex items-center gap-0.5">
@@ -438,7 +446,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                     </div>
                   </div>
                   <Button 
-                    size="sm" 
+                    size="sm"
                     className="w-full h-8 text-xs bg-gradient-primary text-white border-0 hover:opacity-90"
                     onClick={() => {
                       setSelectedHotspot(spot);
