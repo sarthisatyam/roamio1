@@ -615,10 +615,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                                 <Badge variant="outline" className="text-[10px] py-0 px-1.5">{flight.duration}</Badge>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <div className="text-base font-bold text-primary">{flight.price}</div>
-                              <Badge variant="secondary" className="text-[10px]">{flight.type}</Badge>
-                            </div>
+                            <Badge variant="secondary" className="text-[10px]">{flight.type}</Badge>
                           </div>
                           
                           <div className="flex flex-wrap gap-1 my-2">
@@ -729,10 +726,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                                 <Badge variant="outline" className="text-[10px] py-0 px-1.5">{train.duration}</Badge>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <div className="text-base font-bold text-primary">{train.price}</div>
-                              <Badge variant="secondary" className="text-[10px]">{train.type}</Badge>
-                            </div>
+                            <Badge variant="secondary" className="text-[10px]">{train.type}</Badge>
                           </div>
                           
                           <div className="flex flex-wrap gap-1 my-2">
@@ -839,10 +833,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                                 <Badge variant="outline" className="text-[10px] py-0 px-1.5">{cab.type}</Badge>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <div className="text-base font-bold text-primary">{cab.price}</div>
-                              <Badge variant="secondary" className="text-[10px]">{cab.service}</Badge>
-                            </div>
+                            <Badge variant="secondary" className="text-[10px]">{cab.service}</Badge>
                           </div>
                           
                           <div className="flex flex-wrap gap-1 my-2">
@@ -956,10 +947,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                               <Badge variant="outline" className="text-[10px] py-0 px-1.5">{flight.duration}</Badge>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-base font-bold text-primary">{flight.price}</div>
-                            <Badge variant="secondary" className="text-[10px]">{flight.type}</Badge>
-                          </div>
+                          <Badge variant="secondary" className="text-[10px]">{flight.type}</Badge>
                         </div>
                         
                         <div className="flex flex-wrap gap-1 my-2">
@@ -1075,10 +1063,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                               <Badge variant="outline" className="text-[10px] py-0 px-1.5">{train.duration}</Badge>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-base font-bold text-primary">{train.price}</div>
-                            <Badge variant="secondary" className="text-[10px]">{train.type}</Badge>
-                          </div>
+                          <Badge variant="secondary" className="text-[10px]">{train.type}</Badge>
                         </div>
                         
                         <div className="flex flex-wrap gap-1 my-2">
@@ -1194,10 +1179,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                               <Badge variant="outline" className="text-[10px] py-0 px-1.5">{cab.duration}</Badge>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-base font-bold text-primary">{cab.price}</div>
-                            <Badge variant="secondary" className="text-[10px]">{cab.service}</Badge>
-                          </div>
+                          <Badge variant="secondary" className="text-[10px]">{cab.service}</Badge>
                         </div>
                         
                         <div className="flex flex-wrap gap-1 my-2">
