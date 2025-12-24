@@ -467,19 +467,19 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                             </Badge>
                           ))}
                         </div>
+                        
+                        <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                          <div className="text-sm font-bold text-primary">{stay.price}</div>
+                          <Button 
+                            size="sm" 
+                            onClick={() => setSelectedStay(selectedStay === stay.id ? null : stay.id)}
+                            className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Compare
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
-                      <div className="text-sm font-bold text-primary">{stay.price}</div>
-                      <Button 
-                        size="sm" 
-                        onClick={() => setSelectedStay(selectedStay === stay.id ? null : stay.id)}
-                        className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
-                      >
-                        <Zap className="w-3 h-3 mr-1" />
-                        Compare
-                      </Button>
                     </div>
                     
                     {selectedStay === stay.id && comparison && (
