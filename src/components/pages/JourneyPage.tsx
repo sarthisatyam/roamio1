@@ -243,13 +243,6 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="flex justify-center">
-            <Button variant="outline" className="h-20 w-full max-w-xs flex flex-col gap-2">
-              <Camera className="w-6 h-6" />
-              <span className="text-sm">Add Photos</span>
-            </Button>
-          </div>
         </TabsContent>
 
           {/* Expense Tracker Tab */}
