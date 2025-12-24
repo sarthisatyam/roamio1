@@ -528,13 +528,14 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
               ))}
               
               {filteredCompanions.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-muted-foreground" />
-                  </div>
+                <Card className="p-6 text-center">
+                  <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                   <h3 className="font-semibold text-base mb-1">No companions found</h3>
-                  <p className="text-xs text-muted-foreground">Try adjusting your filters</p>
-                </div>
+                  <p className="text-sm text-muted-foreground">
+                    {searchQuery ? `No results for "${searchQuery}"` : "Try adjusting your filters"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Try searching for "Photography", "Food", or "Trekking"</p>
+                </Card>
               )}
             </div>
           </TabsContent>

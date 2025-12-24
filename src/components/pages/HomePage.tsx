@@ -332,59 +332,67 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
             </Button>
           </div>
           
-          <div className="space-y-3">
-            {filteredDestinations.map((dest) => (
-              <Card 
-                key={dest.id} 
-                className="p-3 shadow-soft hover:shadow-medium transition-all cursor-pointer"
-                onClick={() => {
-                  setSelectedDestination(dest);
-                  setDestinationDialogOpen(true);
-                }}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                    <div className="text-2xl flex-shrink-0">{dest.image}</div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm truncate">{dest.name}</h3>
-                      <Badge variant="outline" className="text-[10px] mt-1 bg-success/10 text-success border-success">
-                        <Shield className="w-2.5 h-2.5 mr-0.5" />
-                        {dest.safety}% Safe
-                      </Badge>
+          {filteredDestinations.length > 0 ? (
+            <div className="space-y-3">
+              {filteredDestinations.map((dest) => (
+                <Card 
+                  key={dest.id} 
+                  className="p-3 shadow-soft hover:shadow-medium transition-all cursor-pointer"
+                  onClick={() => {
+                    setSelectedDestination(dest);
+                    setDestinationDialogOpen(true);
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      <div className="text-2xl flex-shrink-0">{dest.image}</div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm truncate">{dest.name}</h3>
+                        <Badge variant="outline" className="text-[10px] mt-1 bg-success/10 text-success border-success">
+                          <Shield className="w-2.5 h-2.5 mr-0.5" />
+                          {dest.safety}% Safe
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-semibold text-sm text-primary">{dest.price}</p>
+                      <Bookmark 
+                        className={cn(
+                          "w-4 h-4 ml-auto mt-1 cursor-pointer transition-colors",
+                          bookmarkedPlaces.find(p => p.id === dest.id)
+                            ? "text-primary fill-current"
+                            : "text-muted-foreground hover:text-primary"
+                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleBookmark?.({ id: dest.id, name: dest.name, image: dest.image });
+                        }}
+                      />
                     </div>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-semibold text-sm text-primary">{dest.price}</p>
-                    <Bookmark 
-                      className={cn(
-                        "w-4 h-4 ml-auto mt-1 cursor-pointer transition-colors",
-                        bookmarkedPlaces.find(p => p.id === dest.id)
-                          ? "text-primary fill-current"
-                          : "text-muted-foreground hover:text-primary"
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleBookmark?.({ id: dest.id, name: dest.name, image: dest.image });
-                      }}
-                    />
+                  
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {dest.tags.slice(0, 2).map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0">
+                        {tag}
+                      </Badge>
+                    ))}
+                    {dest.tags.length > 2 && (
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        +{dest.tags.length - 2}
+                      </Badge>
+                    )}
                   </div>
-                </div>
-                
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {dest.tags.slice(0, 2).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0">
-                      {tag}
-                    </Badge>
-                  ))}
-                  {dest.tags.length > 2 && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                      +{dest.tags.length - 2}
-                    </Badge>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          ) : searchQuery && (
+            <Card className="p-6 text-center">
+              <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">No destinations found for "{searchQuery}"</p>
+              <p className="text-xs text-muted-foreground mt-1">Try searching for "Goa", "Manali", or "Udaipur"</p>
+            </Card>
+          )}
         </section>
 
         {/* Hotspots - Live Events */}
@@ -394,71 +402,79 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
             <h2 className="text-base font-semibold">Hotspots</h2>
           </div>
           
-          <div className="space-y-2.5">
-            {filteredHotspots.map((spot, index) => {
-              const IconComponent = spot.icon;
-              return (
-                <Card 
-                  key={index} 
-                  className="p-3 shadow-soft hover:shadow-medium transition-all"
-                >
-                  <div className="flex items-start gap-2.5 mb-2.5">
-                    <div className={cn(
-                      "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
-                      spot.isLive ? "bg-warning/10" : "bg-primary/10"
-                    )}>
-                      <IconComponent className={cn(
-                        "w-4 h-4",
-                        spot.isLive ? "text-warning" : "text-primary"
-                      )} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-medium text-sm leading-tight line-clamp-2">{spot.name}</h3>
-                        <div className="flex flex-col gap-0.5 items-end flex-shrink-0">
-                          {spot.isLive && (
-                            <Badge className="bg-warning text-warning-foreground text-[9px] px-1.5 py-0 flex items-center gap-0.5">
-                              <Radio className="w-2 h-2" />
-                              Live
-                            </Badge>
-                          )}
-                          {spot.fillingFast && (
-                            <Badge className="bg-destructive text-destructive-foreground text-[9px] px-1.5 py-0">
-                              Filling Fast
-                            </Badge>
-                          )}
+          {filteredHotspots.length > 0 ? (
+            <div className="space-y-2.5">
+              {filteredHotspots.map((spot, index) => {
+                const IconComponent = spot.icon;
+                return (
+                  <Card 
+                    key={index} 
+                    className="p-3 shadow-soft hover:shadow-medium transition-all"
+                  >
+                    <div className="flex items-start gap-2.5 mb-2.5">
+                      <div className={cn(
+                        "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
+                        spot.isLive ? "bg-warning/10" : "bg-primary/10"
+                      )}>
+                        <IconComponent className={cn(
+                          "w-4 h-4",
+                          spot.isLive ? "text-warning" : "text-primary"
+                        )} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-medium text-sm leading-tight line-clamp-2">{spot.name}</h3>
+                          <div className="flex flex-col gap-0.5 items-end flex-shrink-0">
+                            {spot.isLive && (
+                              <Badge className="bg-warning text-warning-foreground text-[9px] px-1.5 py-0 flex items-center gap-0.5">
+                                <Radio className="w-2 h-2" />
+                                Live
+                              </Badge>
+                            )}
+                            {spot.fillingFast && (
+                              <Badge className="bg-destructive text-destructive-foreground text-[9px] px-1.5 py-0">
+                                Filling Fast
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground mt-1">
+                          <span className="flex items-center gap-0.5">
+                            <Calendar className="w-2.5 h-2.5" />
+                            {spot.date}
+                          </span>
+                          <span className="flex items-center gap-0.5">
+                            <Clock className="w-2.5 h-2.5" />
+                            {spot.duration}
+                          </span>
+                          <span className="flex items-center gap-0.5">
+                            <MapPin className="w-2.5 h-2.5" />
+                            {spot.distance}
+                          </span>
                         </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground mt-1">
-                        <span className="flex items-center gap-0.5">
-                          <Calendar className="w-2.5 h-2.5" />
-                          {spot.date}
-                        </span>
-                        <span className="flex items-center gap-0.5">
-                          <Clock className="w-2.5 h-2.5" />
-                          {spot.duration}
-                        </span>
-                        <span className="flex items-center gap-0.5">
-                          <MapPin className="w-2.5 h-2.5" />
-                          {spot.distance}
-                        </span>
-                      </div>
                     </div>
-                  </div>
-                  <Button 
-                    size="sm"
-                    className="w-full h-8 text-xs bg-gradient-primary text-white border-0 hover:opacity-90"
-                    onClick={() => {
-                      setSelectedHotspot(spot);
-                      setBookingDialogOpen(true);
-                    }}
-                  >
-                    Book Now
-                  </Button>
-                </Card>
-              );
-            })}
-          </div>
+                    <Button 
+                      size="sm"
+                      className="w-full h-8 text-xs bg-gradient-primary text-white border-0 hover:opacity-90"
+                      onClick={() => {
+                        setSelectedHotspot(spot);
+                        setBookingDialogOpen(true);
+                      }}
+                    >
+                      Book Now
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : searchQuery && (
+            <Card className="p-6 text-center">
+              <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">No events found for "{searchQuery}"</p>
+              <p className="text-xs text-muted-foreground mt-1">Try searching for "Music", "Food", or "Art"</p>
+            </Card>
+          )}
         </section>
       </div>
 
