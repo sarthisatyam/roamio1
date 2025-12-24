@@ -652,24 +652,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
                 </div>
               )}
 
-              {/* Essential Hindi Phrases */}
-              {activeLanguageSection === "phrases" && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground mb-3">Essential Phrases</h4>
-                  {filteredLanguageGuides.map((guide, index) => (
-                    <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{guide.phrase}</p>
-                          <p className="text-sm text-primary">{guide.translation}</p>
-                          <p className="text-xs text-muted-foreground">{guide.pronunciation}</p>
-                        </div>
-                        <Volume2 className="w-4 h-4 text-primary cursor-pointer hover:text-primary/80 flex-shrink-0" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
 
               {/* Solo Travel Tips */}
               <div className="mt-4 pt-4 border-t">

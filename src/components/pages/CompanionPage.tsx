@@ -557,10 +557,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                 return (
                   <Card 
                     key={group.id} 
-                    className={cn(
-                      "p-4 shadow-soft rounded-2xl border-0 transition-all hover:shadow-medium hover:scale-[1.01]",
-                      isJoined && "ring-2 ring-primary/20 bg-primary/5"
-                    )}
+                    className="p-4 shadow-soft rounded-2xl border-0 transition-all hover:shadow-medium hover:scale-[1.01]"
                   >
                     <div className="flex gap-4">
                       {/* Icon */}
