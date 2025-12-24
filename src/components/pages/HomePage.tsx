@@ -27,6 +27,7 @@ import {
   Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import BookingDialog from "@/components/dialogs/BookingDialog";
 
 interface HomePageProps {
   userData?: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
@@ -37,6 +38,9 @@ interface HomePageProps {
 
 const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, bookmarkedPlaces = [], onToggleBookmark }) => {
   const [showMoreCategories, setShowMoreCategories] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
 
   const destinations = [
     {
@@ -125,6 +129,24 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
     }
   ];
 
+  // Filter destinations based on search
+  const filteredDestinations = destinations.filter(dest =>
+    dest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    dest.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  // Filter hotspots based on search
+  const filteredHotspots = hotspots.filter(spot =>
+    spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    spot.type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const getHotspotPlatforms = (spot: typeof hotspots[0]) => [
+    { name: "BookMyShow", price: "₹800", savings: "₹100", url: "https://bookmyshow.com", icon: "🎬" },
+    { name: "Paytm", price: "₹850", savings: "₹50", url: "https://paytm.com", icon: "💳" },
+    { name: "MakeMyTrip", price: "₹900", savings: "₹0", url: "https://makemytrip.com", icon: "🔵" }
+  ];
+
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header with Search */}
@@ -153,6 +175,8 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
             placeholder="Search destinations, stays, or activities in India..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 bg-white/95 backdrop-blur border-0 shadow-medium"
           />
         </div>
@@ -211,7 +235,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           </div>
           
           <div className="space-y-4">
-            {destinations.map((dest) => (
+            {filteredDestinations.map((dest) => (
               <Card key={dest.id} className="p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -266,7 +290,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           </div>
           
           <div className="space-y-3">
-            {hotspots.map((spot, index) => (
+            {filteredHotspots.map((spot, index) => (
               <Card key={index} className="p-4 shadow-soft hover:shadow-medium transition-all">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
@@ -300,7 +324,10 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                 <Button 
                   size="sm" 
                   className="w-full bg-gradient-primary text-white border-0 hover:opacity-90"
-                  onClick={() => window.open(spot.bookingUrl, '_blank')}
+                  onClick={() => {
+                    setSelectedHotspot(spot);
+                    setBookingDialogOpen(true);
+                  }}
                 >
                   Book Now
                 </Button>
@@ -309,6 +336,24 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           </div>
         </section>
       </div>
+
+      {/* Booking Dialog */}
+      {selectedHotspot && (
+        <BookingDialog
+          open={bookingDialogOpen}
+          onOpenChange={setBookingDialogOpen}
+          title={selectedHotspot.name}
+          subtitle="Compare prices across platforms"
+          platforms={getHotspotPlatforms(selectedHotspot)}
+          eventDetails={{
+            date: selectedHotspot.date,
+            duration: selectedHotspot.duration,
+            location: selectedHotspot.distance,
+            rating: selectedHotspot.rating,
+            reviews: selectedHotspot.reviews
+          }}
+        />
+      )}
     </div>
   );
 };
