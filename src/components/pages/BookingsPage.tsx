@@ -629,12 +629,12 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                             ))}
                           </div>
                           
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center justify-between pt-2 border-t border-border/50">
                             <div className="text-sm font-bold text-primary">{flight.price}</div>
                             <Button 
                               size="sm" 
                               onClick={() => setSelectedOption(selectedOption === flight.id ? null : flight.id)}
-                              className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                              className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
                             >
                               <Zap className="w-3 h-3 mr-1" />
                               Compare
@@ -743,12 +743,12 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                             ))}
                           </div>
                           
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center justify-between pt-2 border-t border-border/50">
                             <div className="text-sm font-bold text-primary">{train.price}</div>
                             <Button 
                               size="sm" 
                               onClick={() => setSelectedOption(selectedOption === train.id + 100 ? null : train.id + 100)}
-                              className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                              className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
                             >
                               <Zap className="w-3 h-3 mr-1" />
                               Compare
@@ -853,12 +853,12 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                             ))}
                           </div>
                           
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center justify-between pt-2 border-t border-border/50">
                             <div className="text-sm font-bold text-primary">{cab.price}</div>
                             <Button 
                               size="sm" 
                               onClick={() => setSelectedOption(selectedOption === cab.id + 200 ? null : cab.id + 200)}
-                              className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                              className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
                             >
                               <Zap className="w-3 h-3 mr-1" />
                               Compare
@@ -970,12 +970,12 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                           ))}
                         </div>
                         
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center justify-between pt-2 border-t border-border/50">
                           <div className="text-sm font-bold text-primary">{flight.price}</div>
                           <Button 
                             size="sm" 
                             onClick={() => setSelectedOption(selectedOption === flight.id ? null : flight.id)}
-                            className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                            className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
                           >
                             <Zap className="w-3 h-3 mr-1" />
                             Compare
@@ -1089,12 +1089,12 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                           ))}
                         </div>
                         
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center justify-between pt-2 border-t border-border/50">
                           <div className="text-sm font-bold text-primary">{train.price}</div>
                           <Button 
                             size="sm" 
                             onClick={() => setSelectedOption(selectedOption === train.id + 100 ? null : train.id + 100)}
-                            className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                            className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
                           >
                             <Zap className="w-3 h-3 mr-1" />
                             Compare
@@ -1208,12 +1208,12 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                           ))}
                         </div>
                         
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center justify-between pt-2 border-t border-border/50">
                           <div className="text-sm font-bold text-primary">{cab.price}</div>
                           <Button 
                             size="sm" 
                             onClick={() => setSelectedOption(selectedOption === cab.id + 200 ? null : cab.id + 200)}
-                            className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                            className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
                           >
                             <Zap className="w-3 h-3 mr-1" />
                             Compare
