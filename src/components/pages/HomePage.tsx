@@ -8,7 +8,6 @@ import {
   Search, 
   User, 
   MapPin, 
-  Star, 
   Shield, 
   Wifi, 
   Coffee, 
@@ -245,34 +244,34 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header with Search */}
-      <div className="bg-gradient-hero p-6 pb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-white mb-1">
+      <div className="bg-gradient-hero px-4 py-4 pb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold text-white mb-0.5 truncate">
               Good morning{userData?.name ? `, ${userData.name}` : ''}! 👋
             </h1>
-            <p className="text-white/80 text-sm flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
+            <p className="text-white/80 text-xs sm:text-sm flex items-center gap-1">
+              <MapPin className="w-3 h-3 flex-shrink-0" />
               Delhi
             </p>
           </div>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={onNavigateToAccount}
-            className="w-10 h-10 rounded-full bg-secondary/90 text-foreground hover:bg-secondary border-secondary"
+            className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30 flex-shrink-0"
           >
-            <User className="w-5 h-5" />
+            <User className="w-4 h-4" />
           </Button>
         </div>
         
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
-            placeholder="Search destinations, stays, or activities in India..."
+            placeholder="Search destinations, activities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white/95 backdrop-blur border-0 shadow-medium"
+            className="pl-10 h-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium rounded-xl"
           />
         </div>
       </div>
@@ -280,20 +279,20 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {/* Quick Access */}
-        <div className="px-4 pt-2 mb-6">
-          <div className="grid grid-cols-4 gap-2 sm:gap-3">
+        <div className="px-4 py-3">
+          <div className="grid grid-cols-4 gap-2">
             {quickAccess.map((item) => {
               const Icon = item.icon;
               return (
                 <Card 
                   key={item.label} 
-                  className="p-3 sm:p-4 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
+                  className="p-2.5 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
                   onClick={item.onClick}
                 >
-                  <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-xl mx-auto mb-2 flex items-center justify-center", item.color)}>
-                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <div className={cn("w-8 h-8 rounded-lg mx-auto mb-1.5 flex items-center justify-center", item.color)}>
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <p className="text-xs font-medium leading-tight">{item.label}</p>
+                  <p className="text-[10px] sm:text-xs font-medium leading-tight">{item.label}</p>
                 </Card>
               );
             })}
@@ -301,15 +300,15 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           
           {/* Additional Categories */}
           {showMoreCategories && (
-            <div className="grid grid-cols-4 gap-2 sm:gap-3 mt-4">
+            <div className="grid grid-cols-4 gap-2 mt-3">
               {moreCategories.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <Card key={item.label} className="p-3 sm:p-4 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer">
-                    <div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-xl mx-auto mb-2 flex items-center justify-center", item.color)}>
-                      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Card key={item.label} className="p-2.5 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer">
+                    <div className={cn("w-8 h-8 rounded-lg mx-auto mb-1.5 flex items-center justify-center", item.color)}>
+                      <Icon className="w-4 h-4" />
                     </div>
-                    <p className="text-xs font-medium leading-tight">{item.label}</p>
+                    <p className="text-[10px] sm:text-xs font-medium leading-tight">{item.label}</p>
                   </Card>
                 );
               })}
@@ -318,45 +317,40 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
         </div>
 
         {/* Safe Destinations */}
-        <section className="px-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
+        <section className="px-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-lg font-semibold">Safe Destinations</h2>
-              <p className="text-sm text-muted-foreground">Verified solo-friendly places</p>
+              <h2 className="text-base font-semibold">Safe Destinations</h2>
+              <p className="text-xs text-muted-foreground">Verified solo-friendly places</p>
             </div>
-            <Button variant="ghost" size="sm" className="text-primary">
-              See all <ArrowRight className="w-4 h-4 ml-1" />
+            <Button variant="ghost" size="sm" className="text-primary text-xs h-8 px-2">
+              See all <ArrowRight className="w-3 h-3 ml-1" />
             </Button>
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-3">
             {filteredDestinations.map((dest) => (
               <Card 
                 key={dest.id} 
-                className="p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer"
+                className="p-3 shadow-soft hover:shadow-medium transition-all cursor-pointer"
                 onClick={() => {
                   setSelectedDestination(dest);
                   setDestinationDialogOpen(true);
                 }}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="text-3xl">{dest.image}</div>
-                    <div>
-                      <h3 className="font-semibold">{dest.name}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-current text-yellow-500" />
-                          <span className="text-xs">{dest.rating}</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs bg-success/10 text-success border-success">
-                          {dest.safety}% Safe
-                        </Badge>
-                      </div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                    <div className="text-2xl flex-shrink-0">{dest.image}</div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm truncate">{dest.name}</h3>
+                      <Badge variant="outline" className="text-[10px] mt-1 bg-success/10 text-success border-success">
+                        <Shield className="w-2.5 h-2.5 mr-0.5" />
+                        {dest.safety}% Safe
+                      </Badge>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-primary">{dest.price}</p>
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-semibold text-sm text-primary">{dest.price}</p>
                     <Bookmark 
                       className={cn(
                         "w-4 h-4 ml-auto mt-1 cursor-pointer transition-colors",
@@ -372,12 +366,17 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap gap-1">
-                  {dest.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {dest.tags.slice(0, 2).map((tag) => (
+                    <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0">
                       {tag}
                     </Badge>
                   ))}
+                  {dest.tags.length > 2 && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                      +{dest.tags.length - 2}
+                    </Badge>
+                  )}
                 </div>
               </Card>
             ))}
@@ -385,74 +384,62 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
         </section>
 
         {/* Hotspots - Live Events */}
-        <section className="px-6 pb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-semibold">Hotspots</h2>
+        <section className="px-4 pb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            <h2 className="text-base font-semibold">Hotspots</h2>
           </div>
           
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {filteredHotspots.map((spot, index) => {
               const IconComponent = spot.icon;
               return (
                 <Card 
                   key={index} 
                   className={cn(
-                    "p-4 shadow-soft hover:shadow-medium transition-all",
+                    "p-3 shadow-soft hover:shadow-medium transition-all",
                     spot.isLive && "border-l-4 border-l-success"
                   )}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex gap-3 flex-1">
-                      <div className={cn(
-                        "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-                        spot.isLive ? "bg-success/10" : "bg-primary/10"
-                      )}>
-                        <IconComponent className={cn(
-                          "w-5 h-5",
-                          spot.isLive ? "text-success" : "text-primary"
-                        )} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-sm sm:text-base truncate">{spot.name}</h3>
-                          {spot.isLive && (
-                            <Badge className="bg-success text-success-foreground text-[10px] px-1.5 py-0 flex items-center gap-1">
-                              <Radio className="w-2.5 h-2.5" />
-                              Live
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs sm:text-sm text-muted-foreground mb-2">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {spot.date}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {spot.duration}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            {spot.distance}
-                          </span>
-                          <span>{spot.type}</span>
-                        </div>
-                      </div>
+                  <div className="flex items-start gap-2.5 mb-2.5">
+                    <div className={cn(
+                      "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
+                      spot.isLive ? "bg-success/10" : "bg-primary/10"
+                    )}>
+                      <IconComponent className={cn(
+                        "w-4 h-4",
+                        spot.isLive ? "text-success" : "text-primary"
+                      )} />
                     </div>
-                    <div className="text-right ml-3">
-                      <div className="flex items-center gap-1 text-sm font-medium">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        {spot.rating}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-medium text-sm leading-tight line-clamp-2">{spot.name}</h3>
+                        {spot.isLive && (
+                          <Badge className="bg-success text-success-foreground text-[9px] px-1.5 py-0 flex-shrink-0 flex items-center gap-0.5">
+                            <Radio className="w-2 h-2" />
+                            Live
+                          </Badge>
+                        )}
                       </div>
-                      <div className="text-xs text-muted-foreground">{spot.reviews}</div>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground mt-1">
+                        <span className="flex items-center gap-0.5">
+                          <Calendar className="w-2.5 h-2.5" />
+                          {spot.date}
+                        </span>
+                        <span className="flex items-center gap-0.5">
+                          <Clock className="w-2.5 h-2.5" />
+                          {spot.duration}
+                        </span>
+                        <span className="flex items-center gap-0.5">
+                          <MapPin className="w-2.5 h-2.5" />
+                          {spot.distance}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <Button 
                     size="sm" 
-                    className="w-full bg-gradient-primary text-white border-0 hover:opacity-90"
+                    className="w-full h-8 text-xs bg-gradient-primary text-white border-0 hover:opacity-90"
                     onClick={() => {
                       setSelectedHotspot(spot);
                       setBookingDialogOpen(true);
