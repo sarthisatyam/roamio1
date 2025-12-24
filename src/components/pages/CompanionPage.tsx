@@ -24,9 +24,6 @@ import {
   UserPlus,
   User,
   Compass,
-  Globe,
-  Sparkles,
-  Star,
   Zap,
   Mountain
 } from "lucide-react";
@@ -173,7 +170,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
     "Chai Spots": <Coffee className="w-3 h-3" />,
     "Photography": <Camera className="w-3 h-3" />,
     "Temples": <Mountain className="w-3 h-3" />,
-    "Heritage": <Globe className="w-3 h-3" />,
+    "Heritage": <Compass className="w-3 h-3" />,
     "Local Markets": <MapPin className="w-3 h-3" />,
     "Trekking": <Compass className="w-3 h-3" />,
     "Adventure Sports": <Zap className="w-3 h-3" />,
@@ -217,7 +214,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       <div className="flex-1 overflow-y-auto">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-3 mx-4 mt-3 h-11 rounded-xl">
+          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl">
             <TabsTrigger value="discover" className="text-xs rounded-lg flex items-center gap-1">
               <Compass className="w-3.5 h-3.5" />
               Discover
@@ -225,10 +222,6 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
             <TabsTrigger value="groups" className="text-xs rounded-lg flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />
               Groups
-            </TabsTrigger>
-            <TabsTrigger value="community" className="text-xs rounded-lg flex items-center gap-1">
-              <Globe className="w-3.5 h-3.5" />
-              Community
             </TabsTrigger>
           </TabsList>
 
@@ -518,95 +511,6 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
             </div>
           </TabsContent>
 
-          {/* Community Tab */}
-          <TabsContent value="community" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
-            <div className="space-y-4">
-              {/* Community Stats */}
-              <Card className="p-4 shadow-soft rounded-2xl border-0 bg-gradient-to-br from-primary/5 to-accent/5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sm">Community Stats</h3>
-                    <p className="text-xs text-muted-foreground">Your travel network</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="text-center p-3 bg-background rounded-xl">
-                    <div className="text-xl font-bold text-primary">156</div>
-                    <div className="text-[10px] text-muted-foreground">Connections</div>
-                  </div>
-                  <div className="text-center p-3 bg-background rounded-xl">
-                    <div className="text-xl font-bold text-primary">12</div>
-                    <div className="text-[10px] text-muted-foreground">Trips Shared</div>
-                  </div>
-                  <div className="text-center p-3 bg-background rounded-xl">
-                    <div className="text-xl font-bold text-primary">4.8</div>
-                    <div className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5">
-                      <Star className="w-3 h-3 fill-warning text-warning" />
-                      Rating
-                    </div>
-                  </div>
-                </div>
-              </Card>
-              
-              {/* Recent Activity */}
-              <div>
-                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary" />
-                  Recent Activity
-                </h4>
-                
-                <div className="space-y-2">
-                  {[
-                    { icon: "👋", text: "Priya connected with you", time: "2 hours ago" },
-                    { icon: "🎉", text: "You joined Delhi Digital Nomads", time: "1 day ago" },
-                    { icon: "⭐", text: "Arjun rated your trip 5 stars", time: "3 days ago" },
-                  ].map((activity, idx) => (
-                    <Card key={idx} className="p-3 shadow-soft rounded-xl border-0">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-lg">
-                          {activity.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{activity.text}</p>
-                          <p className="text-[10px] text-muted-foreground">{activity.time}</p>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Safety Features */}
-              <Card className="p-4 shadow-soft rounded-2xl border-0">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-success" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sm">Safety First</h3>
-                    <p className="text-xs text-muted-foreground">Your safety is our priority</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  {[
-                    { icon: CheckCircle, text: "All companions are ID verified" },
-                    { icon: Shield, text: "24/7 emergency support available" },
-                    { icon: MapPin, text: "Live location sharing with trusted contacts" },
-                  ].map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-xs">
-                      <feature.icon className="w-4 h-4 text-success" />
-                      <span>{feature.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
-          </TabsContent>
         </Tabs>
       </div>
     </div>
