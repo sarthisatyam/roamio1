@@ -307,6 +307,14 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                   </Card>
                 );
               })}
+              
+              {filteredActivities.length === 0 && searchQuery && (
+                <Card className="p-6 text-center">
+                  <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">No activities found for "{searchQuery}"</p>
+                  <p className="text-xs text-muted-foreground mt-1">Try searching for "Walk", "Fort", or "Food"</p>
+                </Card>
+              )}
             </div>
           </div>
 
@@ -355,6 +363,14 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                 </Card>
               );
             })}
+            
+            {filteredExpenses.length === 0 && searchQuery && (
+              <Card className="p-6 text-center">
+                <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">No expenses found for "{searchQuery}"</p>
+                <p className="text-xs text-muted-foreground mt-1">Try searching for "Food", "Transport", or "Shopping"</p>
+              </Card>
+            )}
           </div>
         </TabsContent>
 
