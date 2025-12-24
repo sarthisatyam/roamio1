@@ -579,7 +579,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                         {/* Header */}
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-base text-foreground truncate">{group.name}</h3>
+                            <h3 className="font-semibold text-sm text-foreground truncate">{group.name}</h3>
                             <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground mt-1">
                               <div className="flex items-center gap-1">
                                 <Users className="w-3.5 h-3.5" />
