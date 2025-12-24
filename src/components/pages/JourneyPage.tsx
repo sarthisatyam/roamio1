@@ -113,14 +113,14 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="bg-gradient-hero p-3 pb-5">
+      <div className="bg-gradient-hero px-4 py-3 pb-5">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
+              <Calendar className="w-4 h-4" />
               Your Journey
             </h1>
-            <p className="text-white/80 text-xs">Track, plan, and remember</p>
+            <p className="text-white/80 text-[10px]">Track, plan, and remember</p>
           </div>
           <Button
             variant="ghost"
@@ -134,12 +134,12 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
         
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
             placeholder="Search activities, expenses..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
+            className="pl-10 text-xs bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
           />
         </div>
       </div>
@@ -148,45 +148,45 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
       <div className="flex-1 overflow-y-auto">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col h-full">
-          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl">
-            <TabsTrigger value="planner" className="text-xs rounded-lg flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
+          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl bg-muted">
+            <TabsTrigger value="planner" className="text-xs rounded-lg flex items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Calendar className="w-4 h-4" />
               Planner
             </TabsTrigger>
-            <TabsTrigger value="expenses" className="text-xs rounded-lg flex items-center gap-1">
-              <ShoppingBag className="w-3.5 h-3.5" />
+            <TabsTrigger value="expenses" className="text-xs rounded-lg flex items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <ShoppingBag className="w-4 h-4" />
               Expenses
             </TabsTrigger>
           </TabsList>
 
           {/* Activity Planner Tab */}
-          <TabsContent value="planner" className="flex-1 overflow-y-auto p-6 pt-4">
+          <TabsContent value="planner" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
           {/* Current Trip Overview */}
-          <Card className="p-4 mb-6 bg-gradient-card">
-            <div className="flex items-center justify-between mb-3">
+          <Card className="p-3 mb-4 bg-gradient-card rounded-2xl border-0 shadow-soft">
+            <div className="flex items-center justify-between mb-2">
               <div>
-                <h3 className="font-semibold">Current Trip: Delhi</h3>
-                <p className="text-sm text-muted-foreground">March 20-25, 2024 • 3 days left</p>
+                <h3 className="font-semibold text-sm">Current Trip: Delhi</h3>
+                <p className="text-[10px] text-muted-foreground">March 20-25, 2024 • 3 days left</p>
               </div>
-              <Badge className="bg-success text-success-foreground">
+              <Badge className="bg-success text-success-foreground text-[10px] py-0.5 px-2 rounded-lg">
                 <Calendar className="w-3 h-3 mr-1" />
                 Active
               </Badge>
             </div>
             
-            <Progress value={progressPercent} className="mb-3" />
-            <p className="text-sm text-muted-foreground">{progressPercent}% of activities completed</p>
+            <Progress value={progressPercent} className="mb-2 h-2" />
+            <p className="text-[10px] text-muted-foreground">{progressPercent}% of activities completed</p>
           </Card>
 
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Activities Timeline</h2>
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold">Activities Timeline</h2>
               <Button 
                 size="sm" 
-                className="bg-gradient-primary text-white border-0"
+                className="bg-gradient-primary text-white border-0 h-8 text-xs rounded-xl px-3"
                 onClick={() => { setActivityDialogMode("add"); setSelectedActivity(null); setActivityDialogOpen(true); }}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-3.5 h-3.5 mr-1" />
                 Add Activity
               </Button>
             </div>
@@ -200,25 +200,25 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                   <Card 
                     key={activity.id} 
                     className={cn(
-                      "p-4 shadow-soft rounded-2xl border-0 transition-all hover:shadow-medium",
+                      "p-3 shadow-soft rounded-2xl border-0 transition-all hover:shadow-medium",
                       isCompleted && "opacity-70"
                     )}
                   >
-                    <div className="flex gap-4">
+                    <div className="flex gap-3">
                       {/* Status Icon */}
                       <div className={cn(
-                        "w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm",
+                        "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
                         isCompleted 
                           ? "bg-success/20" 
                           : isFuture 
                             ? "bg-muted"
-                            : "bg-gradient-to-br from-primary/20 to-primary/5"
+                            : "bg-primary/10"
                       )}>
                         {isCompleted ? (
-                          <CheckCircle className="w-6 h-6 text-success" />
+                          <CheckCircle className="w-5 h-5 text-success" />
                         ) : (
                           <span className={cn(
-                            "font-bold text-lg",
+                            "font-bold text-sm",
                             isFuture ? "text-muted-foreground" : "text-primary"
                           )}>
                             {index + 1}
@@ -232,7 +232,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <h4 className={cn(
-                                "font-bold text-base",
+                                "font-semibold text-sm",
                                 isCompleted && "line-through text-muted-foreground"
                               )}>
                                 {activity.title}
@@ -240,7 +240,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                               <Badge 
                                 variant="secondary" 
                                 className={cn(
-                                  "text-[10px] py-0.5 px-2 rounded-full",
+                                  "text-[10px] py-0.5 px-2 rounded-lg",
                                   isCompleted 
                                     ? "bg-success/10 text-success" 
                                     : isFuture 
@@ -251,14 +251,14 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                                 {activity.date}
                               </Badge>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-1">
                               <div className="flex items-center gap-1">
-                                <Clock className="w-3.5 h-3.5" />
+                                <Clock className="w-3 h-3" />
                                 <span>{activity.time}</span>
                               </div>
                               <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
                               <div className="flex items-center gap-1">
-                                <MapPin className="w-3.5 h-3.5" />
+                                <MapPin className="w-3 h-3" />
                                 <span className="truncate">{activity.location}</span>
                               </div>
                             </div>
@@ -273,7 +273,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                                 className="w-8 h-8 rounded-xl"
                                 onClick={() => { setActivityDialogMode("edit"); setSelectedActivity(activity); setActivityDialogOpen(true); }}
                               >
-                                <Edit className="w-4 h-4" />
+                                <Edit className="w-3.5 h-3.5" />
                               </Button>
                               <Button 
                                 variant="outline" 
@@ -281,7 +281,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                                 className="w-8 h-8 rounded-xl text-success hover:bg-success/10 hover:text-success"
                                 onClick={() => handleCompleteActivity(activity.id)}
                               >
-                                <CheckCircle className="w-4 h-4" />
+                                <CheckCircle className="w-3.5 h-3.5" />
                               </Button>
                             </div>
                           )}
@@ -291,13 +291,13 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           <Badge 
                             variant="secondary" 
-                            className="text-[10px] py-1 px-2.5 rounded-full bg-secondary/80 font-medium"
+                            className="text-[10px] py-0.5 px-2 rounded-lg"
                           >
                             {activity.type}
                           </Badge>
                           <Badge 
                             variant="outline" 
-                            className="text-[10px] py-1 px-2.5 rounded-full"
+                            className="text-[10px] py-0.5 px-2 rounded-lg"
                           >
                             {activity.duration}
                           </Badge>
@@ -309,10 +309,10 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
               })}
               
               {filteredActivities.length === 0 && searchQuery && (
-                <Card className="p-6 text-center">
-                  <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">No activities found for "{searchQuery}"</p>
-                  <p className="text-xs text-muted-foreground mt-1">Try searching for "Walk", "Fort", or "Food"</p>
+                <Card className="p-4 text-center rounded-2xl border-0 shadow-soft">
+                  <Search className="w-6 h-6 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-xs text-muted-foreground">No activities found for "{searchQuery}"</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Try searching for "Walk", "Fort", or "Food"</p>
                 </Card>
               )}
             </div>
@@ -321,23 +321,23 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
         </TabsContent>
 
           {/* Expense Tracker Tab */}
-          <TabsContent value="expenses" className="flex-1 overflow-y-auto p-6 pt-4">
+          <TabsContent value="expenses" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
           {/* Budget Overview */}
-          <Card className="p-4 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">Trip Budget</h3>
-              <Button size="sm" variant="outline" onClick={() => setExpenseDialogOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
+          <Card className="p-3 mb-4 rounded-2xl border-0 shadow-soft">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm">Trip Budget</h3>
+              <Button size="sm" variant="outline" onClick={() => setExpenseDialogOpen(true)} className="h-8 text-xs rounded-xl px-3">
+                <Plus className="w-3.5 h-3.5 mr-1" />
                 Add Expense
               </Button>
             </div>
             
-            <div className="text-center mb-4">
-              <div className="text-3xl font-bold text-primary mb-1">₹{totalSpent.toLocaleString()}</div>
-              <div className="text-sm text-muted-foreground">
+            <div className="text-center mb-3">
+              <div className="text-2xl font-bold text-primary mb-0.5">₹{totalSpent.toLocaleString()}</div>
+              <div className="text-[10px] text-muted-foreground">
                 of ₹{totalBudget.toLocaleString()} budget ({Math.round((totalSpent / totalBudget) * 100)}% used)
               </div>
-              <Progress value={(totalSpent / totalBudget) * 100} className="mt-3" />
+              <Progress value={(totalSpent / totalBudget) * 100} className="mt-2 h-2" />
             </div>
           </Card>
 
@@ -346,17 +346,17 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
             {filteredExpenses.map((expense) => {
               const IconComponent = expense.icon;
               return (
-                <Card key={expense.category} className="p-4">
+                <Card key={expense.category} className="p-3 rounded-2xl border-0 shadow-soft">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                        <IconComponent className="w-4 h-4 text-primary" />
+                      <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                        <IconComponent className="w-5 h-5 text-primary" />
                       </div>
-                      <span className="font-medium">{expense.category}</span>
+                      <span className="font-semibold text-sm">{expense.category}</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold">₹{expense.amount.toLocaleString()}</div>
-                      <div className="text-xs text-muted-foreground">of ₹{expense.budget.toLocaleString()}</div>
+                      <div className="font-bold text-sm text-primary">₹{expense.amount.toLocaleString()}</div>
+                      <div className="text-[10px] text-muted-foreground">of ₹{expense.budget.toLocaleString()}</div>
                     </div>
                   </div>
                   <Progress value={(expense.amount / expense.budget) * 100} className="h-2" />
@@ -365,10 +365,10 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
             })}
             
             {filteredExpenses.length === 0 && searchQuery && (
-              <Card className="p-6 text-center">
-                <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No expenses found for "{searchQuery}"</p>
-                <p className="text-xs text-muted-foreground mt-1">Try searching for "Food", "Transport", or "Shopping"</p>
+              <Card className="p-4 text-center rounded-2xl border-0 shadow-soft">
+                <Search className="w-6 h-6 mx-auto text-muted-foreground mb-2" />
+                <p className="text-xs text-muted-foreground">No expenses found for "{searchQuery}"</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Try searching for "Food", "Transport", or "Shopping"</p>
               </Card>
             )}
           </div>

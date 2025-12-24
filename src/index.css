@@ -50,6 +50,31 @@ All colors MUST be HSL.
 
     --radius: 1rem;
 
+    /* ===== TYPOGRAPHY SCALE ===== */
+    /* Page titles */
+    --text-page-title: 1.125rem; /* 18px - consistent across all pages */
+    /* Section headers */
+    --text-section: 0.875rem; /* 14px */
+    /* Card titles */
+    --text-card-title: 0.875rem; /* 14px */
+    /* Body text */
+    --text-body: 0.75rem; /* 12px */
+    /* Small text / metadata */
+    --text-small: 0.625rem; /* 10px */
+
+    /* ===== SPACING TOKENS ===== */
+    --spacing-card: 0.75rem; /* 12px - consistent card padding */
+    --spacing-section: 1rem; /* 16px - section gaps */
+    --spacing-header: 0.75rem; /* 12px - header padding */
+
+    /* ===== COMPONENT SIZES ===== */
+    --icon-container-sm: 2.25rem; /* 36px - 9 in tailwind */
+    --icon-container-md: 2.5rem; /* 40px - 10 in tailwind */
+    --icon-container-lg: 3rem; /* 48px - 12 in tailwind */
+    --button-height-sm: 2rem; /* 32px - h-8 */
+    --button-height-md: 2.25rem; /* 36px - h-9 */
+    --tab-height: 2.75rem; /* 44px - h-11 */
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
     --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
