@@ -28,7 +28,8 @@ import {
   Laugh,
   UtensilsCrossed,
   Palette,
-  Radio
+  Radio,
+  Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BookingDialog from "@/components/dialogs/BookingDialog";
@@ -183,6 +184,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       duration: "3 hours",
       rating: 4.5, 
       reviews: "12k",
+      price: "₹800",
       bookingUrl: "#",
       icon: Music,
       isLive: true,
@@ -196,6 +198,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       duration: "2 hours",
       rating: 4.3, 
       reviews: "8.5k",
+      price: "₹500",
       bookingUrl: "#",
       icon: Laugh,
       isLive: false,
@@ -209,6 +212,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       duration: "All Day",
       rating: 4.6, 
       reviews: "15k",
+      price: "₹1,200",
       bookingUrl: "#",
       icon: UtensilsCrossed,
       isLive: true,
@@ -222,6 +226,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       duration: "4 hours",
       rating: 4.4, 
       reviews: "20k",
+      price: "₹350",
       bookingUrl: "#",
       icon: Palette,
       isLive: false,
@@ -475,16 +480,20 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                         </div>
                       </div>
                     </div>
-                    <Button 
-                      size="sm"
-                      className="w-full h-8 text-xs bg-gradient-primary text-white border-0 hover:opacity-90"
-                      onClick={() => {
-                        setSelectedHotspot(spot);
-                        setBookingDialogOpen(true);
-                      }}
-                    >
-                      Book Now
-                    </Button>
+                    <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                      <div className="text-sm font-bold text-primary">{spot.price}</div>
+                      <Button 
+                        size="sm"
+                        className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
+                        onClick={() => {
+                          setSelectedHotspot(spot);
+                          setBookingDialogOpen(true);
+                        }}
+                      >
+                        <Zap className="w-3 h-3 mr-1" />
+                        Compare
+                      </Button>
+                    </div>
                   </Card>
                 );
               })}
