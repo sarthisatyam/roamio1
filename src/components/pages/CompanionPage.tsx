@@ -431,78 +431,59 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                         {companion.profileImage}
                       </div>
                       {companion.online && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full border-2 border-background animate-pulse shadow-sm" />
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-destructive rounded-full border-2 border-background animate-pulse shadow-sm" />
                       )}
                       {companion.verified && (
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success rounded-full border-2 border-background flex items-center justify-center">
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-success rounded-full border-2 border-background flex items-center justify-center">
                           <CheckCircle className="w-3 h-3 text-white" />
                         </div>
                       )}
                     </div>
                     
                     {/* Content */}
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 flex flex-col">
                       {/* Header Row */}
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-base text-foreground">{companion.name}</h3>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                            <span className="font-medium">{companion.age} years</span>
-                            <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              <span>{companion.location}</span>
-                            </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-base text-foreground">{companion.name}</h3>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                          <span className="font-medium">{companion.age} years</span>
+                          <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            <span>{companion.location}</span>
                           </div>
                         </div>
                         
-                        {/* Like Button */}
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => onToggleLike?.(companion.id)}
-                            className={cn(
-                              "w-9 h-9 rounded-full transition-all",
-                              likedCompanions.includes(companion.id) 
-                                ? "text-destructive bg-destructive/10" 
-                                : "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        {/* Shared Interests */}
+                        {companion.sharedInterests.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {companion.sharedInterests.slice(0, 3).map((interest) => (
+                              <Badge 
+                                key={interest} 
+                                variant="secondary" 
+                                className="text-[10px] py-1 px-2.5 rounded-full bg-primary/10 text-primary border-0 font-medium"
+                              >
+                                {interest}
+                              </Badge>
+                            ))}
+                            {companion.sharedInterests.length > 3 && (
+                              <Badge 
+                                variant="secondary" 
+                                className="text-[10px] py-1 px-2.5 rounded-full bg-muted text-muted-foreground border-0"
+                              >
+                                +{companion.sharedInterests.length - 3} more
+                              </Badge>
                             )}
-                          >
-                            <Heart className={cn("w-5 h-5", likedCompanions.includes(companion.id) && "fill-current")} />
-                          </Button>
-                        </div>
+                          </div>
+                        )}
                       </div>
                       
-                      {/* Shared Interests */}
-                      {companion.sharedInterests.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {companion.sharedInterests.slice(0, 3).map((interest) => (
-                            <Badge 
-                              key={interest} 
-                              variant="secondary" 
-                              className="text-[10px] py-1 px-2.5 rounded-full bg-primary/10 text-primary border-0 font-medium"
-                            >
-                              {interest}
-                            </Badge>
-                          ))}
-                          {companion.sharedInterests.length > 3 && (
-                            <Badge 
-                              variant="secondary" 
-                              className="text-[10px] py-1 px-2.5 rounded-full bg-muted text-muted-foreground border-0"
-                            >
-                              +{companion.sharedInterests.length - 3} more
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-                      
-                      {/* Action Button */}
-                      <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
                         <Button 
                           size="sm" 
                           className={cn(
-                            "text-xs h-9 rounded-xl px-4 w-full sm:w-auto",
+                            "text-xs h-9 rounded-xl px-4 flex-1",
                             connectedCompanions.includes(companion.id)
                               ? "bg-success/10 text-success border border-success/30 hover:bg-success/20"
                               : "bg-gradient-primary text-white border-0 shadow-sm"
@@ -526,6 +507,19 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                               Connect
                             </>
                           )}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon"
+                          onClick={() => onToggleLike?.(companion.id)}
+                          className={cn(
+                            "w-9 h-9 rounded-xl transition-all flex-shrink-0",
+                            likedCompanions.includes(companion.id) 
+                              ? "text-destructive bg-destructive/10 border-destructive/30" 
+                              : "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          )}
+                        >
+                          <Heart className={cn("w-4 h-4", likedCompanions.includes(companion.id) && "fill-current")} />
                         </Button>
                       </div>
                     </div>
