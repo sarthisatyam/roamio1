@@ -174,7 +174,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
   ];
 
   const [selectedStay, setSelectedStay] = useState<number | null>(null);
-  const [selectedTravelType, setSelectedTravelType] = useState<'flight' | 'train' | 'cab' | null>(null);
+  const [selectedTravelType, setSelectedTravelType] = useState<'all' | 'flight' | 'train' | 'cab' | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [bookingDialog, setBookingDialog] = useState<{ open: boolean; data: any; type: 'stay' | 'travel' }>({ 
     open: false, 
@@ -266,8 +266,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
-              placeholder="Delhi to Hyderabad"
-              value="Delhi to Hyderabad"
+              placeholder="Search destination..."
               className="pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
             />
           </div>
@@ -504,6 +503,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
             {/* Travel Type Selection */}
             <div className="flex gap-2 mb-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
               {[
+                { key: "all", label: "All", icon: Sparkles },
                 { key: "flight", label: "Flight", icon: Plane },
                 { key: "train", label: "Train", icon: Train },
                 { key: "cab", label: "Cab", icon: Car },
@@ -527,10 +527,102 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                   <Plane className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <h3 className="font-semibold text-base mb-1">Select Transport Type</h3>
-                <p className="text-xs text-muted-foreground">Choose between flight, train or cab</p>
+                <p className="text-xs text-muted-foreground">Choose between all, flight, train or cab</p>
               </div>
             )}
             
+            {/* All Options */}
+            {selectedTravelType === "all" && (
+              <div className="space-y-4">
+                {/* Flights Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Plane className="w-4 h-4 text-primary" />
+                    <h3 className="font-semibold text-sm">Flights</h3>
+                  </div>
+                  {flightOptions.slice(0, 2).map((flight) => (
+                    <Card key={flight.id} className="p-3 shadow-soft rounded-2xl border-0">
+                      <div className="flex gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Plane className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h4 className="font-semibold text-sm">{flight.name}</h4>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                <Clock className="w-3 h-3" />
+                                <span>{flight.departure} → {flight.arrival}</span>
+                              </div>
+                            </div>
+                            <div className="text-base font-bold text-primary">{flight.price}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+                
+                {/* Trains Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Train className="w-4 h-4 text-primary" />
+                    <h3 className="font-semibold text-sm">Trains</h3>
+                  </div>
+                  {trainOptions.slice(0, 2).map((train) => (
+                    <Card key={train.id} className="p-3 shadow-soft rounded-2xl border-0">
+                      <div className="flex gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Train className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h4 className="font-semibold text-sm">{train.name}</h4>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                <Clock className="w-3 h-3" />
+                                <span>{train.departure} → {train.arrival}</span>
+                              </div>
+                            </div>
+                            <div className="text-base font-bold text-primary">{train.price}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+                
+                {/* Cabs Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Car className="w-4 h-4 text-primary" />
+                    <h3 className="font-semibold text-sm">Cabs</h3>
+                  </div>
+                  {cabOptions.map((cab) => (
+                    <Card key={cab.id} className="p-3 shadow-soft rounded-2xl border-0">
+                      <div className="flex gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Car className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <h4 className="font-semibold text-sm">{cab.name}</h4>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                <Clock className="w-3 h-3" />
+                                <span>{cab.duration}</span>
+                              </div>
+                            </div>
+                            <div className="text-base font-bold text-primary">{cab.price}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Flight Options */}
             {selectedTravelType === "flight" && (
               <div className="space-y-3">
