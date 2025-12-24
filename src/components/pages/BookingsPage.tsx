@@ -571,7 +571,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                   variant={selectedTravelType === key ? "default" : "outline"} 
                   size="sm" 
                   onClick={() => setSelectedTravelType(selectedTravelType === key ? null : key as any)}
-                  className="whitespace-nowrap text-xs h-9 rounded-xl px-4 flex items-center gap-1.5"
+                  className="whitespace-nowrap text-xs h-9 rounded-xl px-3 flex items-center gap-1.5"
                 >
                   <Icon className="w-4 h-4" />
                   {label}
