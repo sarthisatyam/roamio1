@@ -480,6 +480,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                         </div>
                       </div>
                     </div>
+                    
                     <div className="flex items-center justify-between pt-2 border-t border-border/50">
                       <div className="text-sm font-bold text-primary">{spot.price}</div>
                       <Button 
