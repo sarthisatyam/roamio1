@@ -629,14 +629,17 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                             ))}
                           </div>
                           
-                          <Button 
-                            size="sm" 
-                            onClick={() => setSelectedOption(selectedOption === flight.id ? null : flight.id)}
-                            className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
-                          >
-                            <Zap className="w-3 h-3 mr-1" />
-                            Compare Prices
-                          </Button>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="text-sm font-bold text-primary">{flight.price}</div>
+                            <Button 
+                              size="sm" 
+                              onClick={() => setSelectedOption(selectedOption === flight.id ? null : flight.id)}
+                              className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                            >
+                              <Zap className="w-3 h-3 mr-1" />
+                              Compare
+                            </Button>
+                          </div>
                         </div>
                       </div>
                       
@@ -740,14 +743,17 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                             ))}
                           </div>
                           
-                          <Button 
-                            size="sm" 
-                            onClick={() => setSelectedOption(selectedOption === train.id + 100 ? null : train.id + 100)}
-                            className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
-                          >
-                            <Zap className="w-3 h-3 mr-1" />
-                            Compare Prices
-                          </Button>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="text-sm font-bold text-primary">{train.price}</div>
+                            <Button 
+                              size="sm" 
+                              onClick={() => setSelectedOption(selectedOption === train.id + 100 ? null : train.id + 100)}
+                              className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                            >
+                              <Zap className="w-3 h-3 mr-1" />
+                              Compare
+                            </Button>
+                          </div>
                         </div>
                       </div>
                       
@@ -847,14 +853,17 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                             ))}
                           </div>
                           
-                          <Button 
-                            size="sm" 
-                            onClick={() => setSelectedOption(selectedOption === cab.id + 200 ? null : cab.id + 200)}
-                            className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
-                          >
-                            <Zap className="w-3 h-3 mr-1" />
-                            Compare Prices
-                          </Button>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="text-sm font-bold text-primary">{cab.price}</div>
+                            <Button 
+                              size="sm" 
+                              onClick={() => setSelectedOption(selectedOption === cab.id + 200 ? null : cab.id + 200)}
+                              className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                            >
+                              <Zap className="w-3 h-3 mr-1" />
+                              Compare
+                            </Button>
+                          </div>
                         </div>
                       </div>
                       
@@ -961,14 +970,17 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                           ))}
                         </div>
                         
-                        <Button 
-                          size="sm" 
-                          onClick={() => setSelectedOption(selectedOption === flight.id ? null : flight.id)}
-                          className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
-                        >
-                          <Zap className="w-3 h-3 mr-1" />
-                          Compare Prices
-                        </Button>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="text-sm font-bold text-primary">{flight.price}</div>
+                          <Button 
+                            size="sm" 
+                            onClick={() => setSelectedOption(selectedOption === flight.id ? null : flight.id)}
+                            className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Compare
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     
@@ -1077,14 +1089,17 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                           ))}
                         </div>
                         
-                        <Button 
-                          size="sm" 
-                          onClick={() => setSelectedOption(selectedOption === train.id + 100 ? null : train.id + 100)}
-                          className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
-                        >
-                          <Zap className="w-3 h-3 mr-1" />
-                          Compare Prices
-                        </Button>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="text-sm font-bold text-primary">{train.price}</div>
+                          <Button 
+                            size="sm" 
+                            onClick={() => setSelectedOption(selectedOption === train.id + 100 ? null : train.id + 100)}
+                            className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Compare
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     
@@ -1193,14 +1208,17 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                           ))}
                         </div>
                         
-                        <Button 
-                          size="sm" 
-                          onClick={() => setSelectedOption(selectedOption === cab.id + 200 ? null : cab.id + 200)}
-                          className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
-                        >
-                          <Zap className="w-3 h-3 mr-1" />
-                          Compare Prices
-                        </Button>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="text-sm font-bold text-primary">{cab.price}</div>
+                          <Button 
+                            size="sm" 
+                            onClick={() => setSelectedOption(selectedOption === cab.id + 200 ? null : cab.id + 200)}
+                            className="flex-1 text-xs h-8 rounded-xl bg-gradient-primary text-white"
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Compare
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     
