@@ -451,7 +451,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                               <span className="truncate">{stay.location}</span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 text-[10px] bg-warning/10 px-2 py-1 rounded-lg">
+                          <div className="flex items-center gap-1 text-[10px] bg-warning/10 px-2 py-1 rounded-lg flex-shrink-0">
                             <Star className="w-3 h-3 fill-warning text-warning" />
                             <span className="font-semibold">{stay.rating}</span>
                           </div>
@@ -467,19 +467,19 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                             </Badge>
                           ))}
                         </div>
-                        
-                        <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                          <div className="text-sm font-bold text-primary">{stay.price}</div>
-                          <Button 
-                            size="sm" 
-                            onClick={() => setSelectedStay(selectedStay === stay.id ? null : stay.id)}
-                            className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
-                          >
-                            <Zap className="w-3 h-3 mr-1" />
-                            Compare
-                          </Button>
-                        </div>
                       </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+                      <div className="text-sm font-bold text-primary">{stay.price}</div>
+                      <Button 
+                        size="sm" 
+                        onClick={() => setSelectedStay(selectedStay === stay.id ? null : stay.id)}
+                        className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
+                      >
+                        <Zap className="w-3 h-3 mr-1" />
+                        Compare
+                      </Button>
                     </div>
                     
                     {selectedStay === stay.id && comparison && (

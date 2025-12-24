@@ -385,6 +385,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => setActiveSection('My Interests')}
             className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30 border-0"
           >
             <Edit className="w-4 h-4" />
