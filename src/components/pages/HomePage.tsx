@@ -437,7 +437,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                     key={index} 
                     className="p-3 shadow-soft hover:shadow-medium transition-all rounded-2xl border-0"
                   >
-                    <div className="flex items-start gap-3 mb-2.5">
+                    <div className="flex items-start gap-3">
                       <div className={cn(
                         "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
                         spot.isLive ? "bg-warning/10" : "bg-primary/10"
@@ -478,22 +478,22 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                             {spot.distance}
                           </span>
                         </div>
+                        
+                        <div className="flex items-center justify-between pt-2 mt-2 border-t border-border/50">
+                          <div className="text-sm font-bold text-primary">{spot.price}</div>
+                          <Button 
+                            size="sm"
+                            className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
+                            onClick={() => {
+                              setSelectedHotspot(spot);
+                              setBookingDialogOpen(true);
+                            }}
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Compare
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                      <div className="text-sm font-bold text-primary">{spot.price}</div>
-                      <Button 
-                        size="sm"
-                        className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
-                        onClick={() => {
-                          setSelectedHotspot(spot);
-                          setBookingDialogOpen(true);
-                        }}
-                      >
-                        <Zap className="w-3 h-3 mr-1" />
-                        Compare
-                      </Button>
                     </div>
                   </Card>
                 );
