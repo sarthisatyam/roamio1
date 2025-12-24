@@ -18,7 +18,10 @@ import {
   Calendar,
   MapPin,
   Send,
-  MessageSquare
+  MessageSquare,
+  Heart,
+  Star,
+  Bookmark
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -294,39 +297,22 @@ export const SupportDialog: React.FC<SupportDialogProps> = ({ open, onOpenChange
 };
 
 // My Bookings Dialog
+interface Booking {
+  id: number;
+  type: string;
+  name: string;
+  date: string;
+  status: string;
+  price: string;
+}
+
 interface BookingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  bookings?: Booking[];
 }
 
-export const MyBookingsDialog: React.FC<BookingsDialogProps> = ({ open, onOpenChange }) => {
-  const bookings = [
-    {
-      id: 1,
-      type: "Stay",
-      name: "Hyderabad Backpackers Hub",
-      date: "Mar 23-25, 2024",
-      status: "upcoming",
-      price: "₹1,600"
-    },
-    {
-      id: 2,
-      type: "Flight",
-      name: "IndiGo 6E-2134 (DEL → HYD)",
-      date: "Mar 23, 2024",
-      status: "upcoming",
-      price: "₹4,200"
-    },
-    {
-      id: 3,
-      type: "Event",
-      name: "Live Music Night at Hard Rock Cafe",
-      date: "Mar 22, 2024",
-      status: "completed",
-      price: "₹800"
-    }
-  ];
-
+export const MyBookingsDialog: React.FC<BookingsDialogProps> = ({ open, onOpenChange, bookings = [] }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
@@ -338,37 +324,230 @@ export const MyBookingsDialog: React.FC<BookingsDialogProps> = ({ open, onOpenCh
         </DialogHeader>
 
         <div className="space-y-3">
-          {bookings.map((booking) => (
-            <Card key={booking.id} className="p-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <Badge variant={booking.status === "upcoming" ? "default" : "secondary"} className="text-xs mb-2">
-                    {booking.type}
-                  </Badge>
-                  <p className="font-medium text-sm">{booking.name}</p>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                    <Calendar className="w-3 h-3" />
-                    {booking.date}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-sm">{booking.price}</p>
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs mt-1 ${booking.status === "upcoming" ? "text-success border-success" : ""}`}
-                  >
-                    {booking.status}
-                  </Badge>
-                </div>
-              </div>
-            </Card>
-          ))}
-
-          {bookings.length === 0 && (
+          {bookings.length === 0 ? (
             <div className="text-center py-8">
               <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">No bookings yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Your travel bookings will appear here</p>
             </div>
+          ) : (
+            bookings.map((booking) => (
+              <Card key={booking.id} className="p-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <Badge variant={booking.status === "upcoming" ? "default" : "secondary"} className="text-xs mb-2">
+                      {booking.type}
+                    </Badge>
+                    <p className="font-medium text-sm">{booking.name}</p>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                      <Calendar className="w-3 h-3" />
+                      {booking.date}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-sm">{booking.price}</p>
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs mt-1 ${booking.status === "upcoming" ? "text-success border-success" : ""}`}
+                    >
+                      {booking.status}
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// My Co-Companion Dialog
+interface Companion {
+  id: number;
+  name: string;
+  profileImage: string;
+  age: number;
+  location: string;
+  bio: string;
+  interests: string[];
+  gender: string;
+  status: string;
+}
+
+interface CoCompanionDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  companions?: Companion[];
+}
+
+export const MyCoCompanionDialog: React.FC<CoCompanionDialogProps> = ({ open, onOpenChange, companions = [] }) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Heart className="w-5 h-5 text-primary" />
+            My Co-Companion
+          </DialogTitle>
+          <DialogDescription>Your saved travel companions</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {companions.length === 0 ? (
+            <div className="text-center py-8">
+              <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">No companions added yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Like companions to add them here</p>
+            </div>
+          ) : (
+            companions.map((companion) => (
+              <Card key={companion.id} className="p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 text-2xl flex items-center justify-center bg-muted rounded-full">
+                    {companion.profileImage}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">{companion.name}</h4>
+                    <p className="text-sm text-muted-foreground">{companion.age} years • {companion.location}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className={`w-2 h-2 rounded-full ${companion.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    <span className="text-xs text-muted-foreground capitalize">{companion.status}</span>
+                  </div>
+                </div>
+                <p className="text-sm mb-2">{companion.bio}</p>
+                <div className="flex flex-wrap gap-1">
+                  {companion.interests.map((interest) => (
+                    <Badge key={interest} variant="secondary" className="text-xs">
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// My Interests Dialog
+interface MyInterestsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  interests?: string[];
+  gender?: string;
+  age?: number;
+  about?: string;
+}
+
+export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({ 
+  open, 
+  onOpenChange, 
+  interests = [], 
+  gender = "Not specified",
+  age,
+  about = "No description yet"
+}) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Star className="w-5 h-5 text-accent" />
+            My Interests
+          </DialogTitle>
+          <DialogDescription>Your travel preferences and profile</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4 p-3 bg-muted/30 rounded-xl">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Gender</label>
+              <p className="text-sm font-medium">{gender}</p>
+            </div>
+            {age && (
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Age</label>
+                <p className="text-sm font-medium">{age} years</p>
+              </div>
+            )}
+          </div>
+          
+          <div>
+            <label className="text-sm font-medium text-muted-foreground mb-2 block">Interests</label>
+            {interests.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No interests added yet</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {interests.map((interest) => (
+                  <Badge key={interest} variant="secondary" className="text-sm py-1 px-3">
+                    {interest}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-muted-foreground mb-2 block">About</label>
+            <p className="text-sm p-3 bg-muted/30 rounded-xl">{about}</p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Travel List Dialog
+interface Place {
+  id: number;
+  name: string;
+  image: string;
+}
+
+interface TravelListDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  places?: Place[];
+}
+
+export const TravelListDialog: React.FC<TravelListDialogProps> = ({ open, onOpenChange, places = [] }) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Bookmark className="w-5 h-5 text-success" />
+            Travel List
+          </DialogTitle>
+          <DialogDescription>Your saved destinations</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {places.length === 0 ? (
+            <div className="text-center py-8">
+              <Bookmark className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">No destinations saved yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Bookmark places to add them here</p>
+            </div>
+          ) : (
+            places.map((place) => (
+              <Card key={place.id} className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 text-2xl flex items-center justify-center bg-muted rounded-full">
+                    {place.image}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{place.name}</h4>
+                    <p className="text-sm text-muted-foreground">Saved destination</p>
+                  </div>
+                </div>
+              </Card>
+            ))
           )}
         </div>
       </DialogContent>
