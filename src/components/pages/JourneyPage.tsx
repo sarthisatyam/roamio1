@@ -7,32 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Calendar,
-  DollarSign,
   MapPin,
   Clock,
   Plus,
   Edit,
-  Trash2,
-  Globe,
-  Bookmark,
   CheckCircle,
-  Languages,
-  Volume2,
-  BookOpen,
-  TrendingUp,
-  PieChart,
   Camera,
   Map as MapIcon,
-  List,
   User,
-  Search,
   Home,
   UtensilsCrossed,
   Car,
   Ticket,
-  ShoppingBag,
-  Mic,
-  MicOff
+  ShoppingBag
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,14 +28,8 @@ interface JourneyPageProps {
 }
 
 const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
-  const [activeTab, setActiveTab] = useState("guide");
+  const [activeTab, setActiveTab] = useState("planner");
   const [selectedTrip, setSelectedTrip] = useState(null);
-  const [languageSearchTerm, setLanguageSearchTerm] = useState("");
-  const [translatorText, setTranslatorText] = useState("");
-  const [translatedText, setTranslatedText] = useState("");
-  const [activeLanguageSection, setActiveLanguageSection] = useState("phrases");
-  const [isListening, setIsListening] = useState(false);
-  const [isTranslatorListening, setIsTranslatorListening] = useState(false);
 
   const allActivities = [
     // Past activities (completed)
@@ -127,75 +108,6 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
   const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
   const totalBudget = expenses.reduce((sum, exp) => sum + exp.budget, 0);
 
-  const languageGuides = [
-    { phrase: "Hello", translation: "नमस्ते (Namaste)", pronunciation: "na-mas-te" },
-    { phrase: "Thank you", translation: "धन्यवाद (Dhanyawad)", pronunciation: "dhan-ya-wad" },
-    { phrase: "Excuse me", translation: "माफ़ करें (Maaf kariye)", pronunciation: "maaf ka-ri-ye" },
-    { phrase: "How much?", translation: "कितना? (Kitna?)", pronunciation: "kit-na" },
-    { phrase: "Where is?", translation: "कहाँ है? (Kahan hai?)", pronunciation: "ka-han hai" },
-    { phrase: "Help me", translation: "मेरी मदद करें (Meri madad kariye)", pronunciation: "me-ri ma-dad ka-ri-ye" },
-    { phrase: "I don't understand", translation: "मैं समझा नहीं (Main samjha nahi)", pronunciation: "main sam-jha na-hi" },
-    { phrase: "Do you speak English?", translation: "क्या आप अंग्रेजी बोलते हैं? (Kya aap angrezi bolte hain?)", pronunciation: "kya aap ang-re-zi bol-te hain" }
-  ];
-
-  const handleTranslate = () => {
-    if (translatorText.trim()) {
-      // Simple mock translation - in real app would use translation API
-      setTranslatedText(`${translatorText} → हिंदी में अनुवाद`);
-    }
-  };
-
-  const startListening = (type: 'search' | 'translator') => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-
-      if (type === 'search') {
-        setIsListening(true);
-      } else {
-        setIsTranslatorListening(true);
-      }
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        if (type === 'search') {
-          setLanguageSearchTerm(transcript);
-        } else {
-          setTranslatorText(transcript);
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        if (type === 'search') {
-          setIsListening(false);
-        } else {
-          setIsTranslatorListening(false);
-        }
-      };
-
-      recognition.onend = () => {
-        if (type === 'search') {
-          setIsListening(false);
-        } else {
-          setIsTranslatorListening(false);
-        }
-      };
-
-      recognition.start();
-    } else {
-      alert('Speech recognition not supported in this browser');
-    }
-  };
-
-  const filteredLanguageGuides = languageGuides.filter(guide => 
-    guide.phrase.toLowerCase().includes(languageSearchTerm.toLowerCase()) ||
-    guide.translation.toLowerCase().includes(languageSearchTerm.toLowerCase())
-  );
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -222,8 +134,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
       <div className="flex-1 overflow-y-auto">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col h-full">
-          <TabsList className="grid w-full grid-cols-3 mx-6 mt-4">
-          <TabsTrigger value="guide">Guide</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mx-6 mt-4">
           <TabsTrigger value="planner">Planner</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
         </TabsList>
@@ -388,196 +299,6 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
           </div>
         </TabsContent>
 
-          {/* Past Trips Tab - Removed */}
-
-          {/* Language Guide Tab */}
-          <TabsContent value="guide" className="flex-1 overflow-y-auto p-6 pt-4">
-            {/* Language Section */}
-            <Card className="p-4 mb-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Languages className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold">Language Assistant</h3>
-              </div>
-              
-              {/* Search Bar */}
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search Hindi phrases..."
-                    value={languageSearchTerm}
-                    onChange={(e) => setLanguageSearchTerm(e.target.value)}
-                    className="pl-10 pr-12"
-                  />
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => startListening('search')}
-                    className="absolute right-1 top-1/2 transform -translate-y-1/2 w-8 h-8 p-0"
-                  >
-                    {isListening ? (
-                      <MicOff className="w-4 h-4 text-destructive" />
-                    ) : (
-                      <Mic className="w-4 h-4 text-muted-foreground hover:text-primary" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Language subsections */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <Card 
-                  className={cn(
-                    "p-3 cursor-pointer hover:shadow-soft transition-all",
-                    activeLanguageSection === "translator" && "ring-2 ring-primary"
-                  )}
-                  onClick={() => setActiveLanguageSection("translator")}
-                >
-                  <div className="text-center">
-                    <Volume2 className="w-6 h-6 mx-auto mb-2 text-primary" />
-                    <p className="text-sm font-medium">Translator</p>
-                    <p className="text-xs text-muted-foreground">Voice & text</p>
-                  </div>
-                </Card>
-                <Card 
-                  className={cn(
-                    "p-3 cursor-pointer hover:shadow-soft transition-all",
-                    activeLanguageSection === "learn" && "ring-2 ring-primary"
-                  )}
-                  onClick={() => setActiveLanguageSection("learn")}
-                >
-                  <div className="text-center">
-                    <BookOpen className="w-6 h-6 mx-auto mb-2 text-primary" />
-                    <p className="text-sm font-medium">Learn</p>
-                    <p className="text-xs text-muted-foreground">Basic lessons</p>
-                  </div>
-                </Card>
-              </div>
-
-              {/* Translator Section */}
-              {activeLanguageSection === "translator" && (
-                <div className="space-y-4 mb-6">
-                  <h4 className="text-sm font-medium text-muted-foreground">Text Translator</h4>
-                  <div className="space-y-3">
-                    <div className="relative">
-                      <Input 
-                        placeholder="Enter text to translate to Hindi..."
-                        value={translatorText}
-                        onChange={(e) => setTranslatorText(e.target.value)}
-                        className="pr-12"
-                      />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => startListening('translator')}
-                        className="absolute right-1 top-1/2 transform -translate-y-1/2 w-8 h-8 p-0"
-                      >
-                        {isTranslatorListening ? (
-                          <MicOff className="w-4 h-4 text-destructive" />
-                        ) : (
-                          <Mic className="w-4 h-4 text-muted-foreground hover:text-primary" />
-                        )}
-                      </Button>
-                    </div>
-                    <Button onClick={handleTranslate} className="w-full">
-                      <Volume2 className="w-4 h-4 mr-2" />
-                      Translate
-                    </Button>
-                    {translatedText && (
-                      <div className="p-3 bg-muted rounded-lg">
-                        <p className="text-sm">{translatedText}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Learn Section */}
-              {activeLanguageSection === "learn" && (
-                <div className="space-y-4 mb-6">
-                  <h4 className="text-sm font-medium text-muted-foreground">Hindi Lessons</h4>
-                  <div className="grid grid-cols-1 gap-3">
-                    <Card className="p-3 cursor-pointer hover:bg-muted/50">
-                      <h5 className="font-medium text-sm mb-1">Basic Greetings</h5>
-                      <p className="text-xs text-muted-foreground">Learn common Hindi greetings</p>
-                    </Card>
-                    <Card className="p-3 cursor-pointer hover:bg-muted/50">
-                      <h5 className="font-medium text-sm mb-1">Numbers 1-10</h5>
-                      <p className="text-xs text-muted-foreground">Essential counting in Hindi</p>
-                    </Card>
-                    <Card className="p-3 cursor-pointer hover:bg-muted/50">
-                      <h5 className="font-medium text-sm mb-1">Travel Phrases</h5>
-                      <p className="text-xs text-muted-foreground">Useful phrases for getting around</p>
-                    </Card>
-                  </div>
-                </div>
-              )}
-
-              {/* Essential Hindi Phrases - Always visible when no specific section */}
-              {activeLanguageSection === "phrases" && (
-                <div className="space-y-3">
-                   <h4 className="text-sm font-medium text-muted-foreground mb-3">Essential Phrases</h4>
-                   {filteredLanguageGuides.map((guide, index) => (
-                     <div key={index} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                       <div className="flex items-center justify-between">
-                         <div className="grid grid-cols-3 gap-4 flex-1">
-                           <div>
-                             <p className="font-medium text-sm">{guide.phrase}</p>
-                           </div>
-                           <div>
-                             <p className="font-medium text-sm text-primary">{guide.translation}</p>
-                           </div>
-                           <div>
-                             <p className="text-xs text-muted-foreground">{guide.pronunciation}</p>
-                           </div>
-                         </div>
-                         <Volume2 className="w-4 h-4 text-primary cursor-pointer hover:text-primary/80 transition-colors ml-4 flex-shrink-0" />
-                       </div>
-                     </div>
-                   ))}
-                </div>
-              )}
-            </Card>
-
-            {/* Solo Travel Tips for Delhi */}
-            <Card className="p-4">
-              <h3 className="font-semibold mb-4">Solo Travel Tips for Delhi</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>Use Delhi Metro for efficient and safe travel - buy a tourist card for unlimited rides</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>Uber/Ola are reliable ride options - avoid auto-rickshaws near tourist spots (overpriced)</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>Try street food at Chandni Chowk but stick to busy stalls with high turnover</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>Carry water bottle and stay hydrated - Delhi can get very hot and dusty</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>Visit Red Fort and India Gate early morning to avoid crowds and heat</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>Keep emergency contacts: Police - 100, Tourist Helpline - 1363</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>Bargain at markets like Karol Bagh and Sarojini Nagar - start at 30% of asking price</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                  <p>Book accommodations in safe areas like Connaught Place, Paharganj, or Karol Bagh</p>
-                </div>
-              </div>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>
