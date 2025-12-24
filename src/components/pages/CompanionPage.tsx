@@ -452,6 +452,15 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                             <MapPin className="w-3 h-3" />
                             <span>{companion.location}</span>
                           </div>
+                          {companion.online && (
+                            <>
+                              <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                              <div className="flex items-center gap-1 text-destructive">
+                                <div className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
+                                <span className="font-medium">Live</span>
+                              </div>
+                            </>
+                          )}
                         </div>
                         
                         {/* Shared Interests */}
