@@ -26,12 +26,7 @@ import {
   X,
   Plus,
   Trash2,
-  Languages,
-  Volume2,
-  BookOpen,
-  Search,
-  Mic,
-  MicOff
+  Languages
 } from "lucide-react";
 import { 
   EmergencyDialog, 
@@ -40,6 +35,7 @@ import {
   SupportDialog, 
   MyBookingsDialog 
 } from "@/components/dialogs/AccountSectionDialogs";
+import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
 
 interface AccountPageProps {
   userData: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
@@ -53,13 +49,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const accountType = "Free";
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [showGuide, setShowGuide] = useState(false);
-  const [languageSearchTerm, setLanguageSearchTerm] = useState("");
-  const [translatorText, setTranslatorText] = useState("");
-  const [translatedText, setTranslatedText] = useState("");
-  const [activeLanguageSection, setActiveLanguageSection] = useState("phrases");
-  const [isListening, setIsListening] = useState(false);
-  const [isTranslatorListening, setIsTranslatorListening] = useState(false);
   
   // Dialog states
   const [emergencyDialogOpen, setEmergencyDialogOpen] = useState(false);
@@ -67,6 +56,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [supportDialogOpen, setSupportDialogOpen] = useState(false);
   const [bookingsDialogOpen, setBookingsDialogOpen] = useState(false);
+  const [travelGuideDialogOpen, setTravelGuideDialogOpen] = useState(false);
 
   // Mock companion data for displaying liked companions with detailed info
   const companions = [
@@ -126,72 +116,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
 
   const likedCompanionProfiles = companions.filter(c => likedCompanions.includes(c.id));
 
-  // Language Guide Data
-  const languageGuides = [
-    { phrase: "Hello", translation: "नमस्ते (Namaste)", pronunciation: "na-mas-te" },
-    { phrase: "Thank you", translation: "धन्यवाद (Dhanyawad)", pronunciation: "dhan-ya-wad" },
-    { phrase: "Excuse me", translation: "माफ़ करें (Maaf kariye)", pronunciation: "maaf ka-ri-ye" },
-    { phrase: "How much?", translation: "कितना? (Kitna?)", pronunciation: "kit-na" },
-    { phrase: "Where is?", translation: "कहाँ है? (Kahan hai?)", pronunciation: "ka-han hai" },
-    { phrase: "Help me", translation: "मेरी मदद करें (Meri madad kariye)", pronunciation: "me-ri ma-dad ka-ri-ye" },
-    { phrase: "I don't understand", translation: "मैं समझा नहीं (Main samjha nahi)", pronunciation: "main sam-jha na-hi" },
-    { phrase: "Do you speak English?", translation: "क्या आप अंग्रेजी बोलते हैं? (Kya aap angrezi bolte hain?)", pronunciation: "kya aap ang-re-zi bol-te hain" }
-  ];
 
-  const handleTranslate = () => {
-    if (translatorText.trim()) {
-      setTranslatedText(`${translatorText} → हिंदी में अनुवाद`);
-    }
-  };
-
-  const startListening = (type: 'search' | 'translator') => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-
-      if (type === 'search') {
-        setIsListening(true);
-      } else {
-        setIsTranslatorListening(true);
-      }
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        if (type === 'search') {
-          setLanguageSearchTerm(transcript);
-        } else {
-          setTranslatorText(transcript);
-        }
-      };
-
-      recognition.onerror = () => {
-        if (type === 'search') {
-          setIsListening(false);
-        } else {
-          setIsTranslatorListening(false);
-        }
-      };
-
-      recognition.onend = () => {
-        if (type === 'search') {
-          setIsListening(false);
-        } else {
-          setIsTranslatorListening(false);
-        }
-      };
-
-      recognition.start();
-    }
-  };
-
-  const filteredLanguageGuides = languageGuides.filter(guide => 
-    guide.phrase.toLowerCase().includes(languageSearchTerm.toLowerCase()) ||
-    guide.translation.toLowerCase().includes(languageSearchTerm.toLowerCase())
-  );
 
 
   const handleSectionClick = (sectionTitle: string) => {
@@ -385,7 +310,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       description: "Language assistant and travel tips",
       color: "text-warning",
       bgColor: "bg-warning/10",
-      action: () => setShowGuide(true)
+      action: () => setTravelGuideDialogOpen(true)
     },
     {
       icon: Shield,
@@ -531,153 +456,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         {/* Detailed Section */}
         {renderDetailedSection()}
 
-        {/* Travel Guide Section */}
-        {showGuide && (
-          <Card className="mb-6 shadow-soft">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Languages className="w-5 h-5 text-primary" />
-                Travel Guide
-              </CardTitle>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setShowGuide(false)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {/* Search Bar */}
-              <div className="mb-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search Hindi phrases..."
-                    value={languageSearchTerm}
-                    onChange={(e) => setLanguageSearchTerm(e.target.value)}
-                    className="pl-10 pr-12"
-                  />
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => startListening('search')}
-                    className="absolute right-1 top-1/2 transform -translate-y-1/2 w-8 h-8 p-0"
-                  >
-                    {isListening ? (
-                      <MicOff className="w-4 h-4 text-destructive" />
-                    ) : (
-                      <Mic className="w-4 h-4 text-muted-foreground hover:text-primary" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Language subsections */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <Card 
-                  className={`p-3 cursor-pointer hover:shadow-soft transition-all ${activeLanguageSection === "translator" ? "ring-2 ring-primary" : ""}`}
-                  onClick={() => setActiveLanguageSection("translator")}
-                >
-                  <div className="text-center">
-                    <Volume2 className="w-6 h-6 mx-auto mb-2 text-primary" />
-                    <p className="text-sm font-medium">Translator</p>
-                    <p className="text-xs text-muted-foreground">Voice & text</p>
-                  </div>
-                </Card>
-                <Card 
-                  className={`p-3 cursor-pointer hover:shadow-soft transition-all ${activeLanguageSection === "learn" ? "ring-2 ring-primary" : ""}`}
-                  onClick={() => setActiveLanguageSection("learn")}
-                >
-                  <div className="text-center">
-                    <BookOpen className="w-6 h-6 mx-auto mb-2 text-primary" />
-                    <p className="text-sm font-medium">Learn</p>
-                    <p className="text-xs text-muted-foreground">Basic lessons</p>
-                  </div>
-                </Card>
-              </div>
-
-              {/* Translator Section */}
-              {activeLanguageSection === "translator" && (
-                <div className="space-y-3 mb-4">
-                  <h4 className="text-sm font-medium text-muted-foreground">Text Translator</h4>
-                  <div className="relative">
-                    <Input 
-                      placeholder="Enter text to translate to Hindi..."
-                      value={translatorText}
-                      onChange={(e) => setTranslatorText(e.target.value)}
-                      className="pr-12"
-                    />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => startListening('translator')}
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 w-8 h-8 p-0"
-                    >
-                      {isTranslatorListening ? (
-                        <MicOff className="w-4 h-4 text-destructive" />
-                      ) : (
-                        <Mic className="w-4 h-4 text-muted-foreground hover:text-primary" />
-                      )}
-                    </Button>
-                  </div>
-                  <Button onClick={handleTranslate} className="w-full">
-                    <Volume2 className="w-4 h-4 mr-2" />
-                    Translate
-                  </Button>
-                  {translatedText && (
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-sm">{translatedText}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Learn Section */}
-              {activeLanguageSection === "learn" && (
-                <div className="space-y-3 mb-4">
-                  <h4 className="text-sm font-medium text-muted-foreground">Hindi Lessons</h4>
-                  <Card className="p-3 cursor-pointer hover:bg-muted/50">
-                    <h5 className="font-medium text-sm mb-1">Basic Greetings</h5>
-                    <p className="text-xs text-muted-foreground">Learn common Hindi greetings</p>
-                  </Card>
-                  <Card className="p-3 cursor-pointer hover:bg-muted/50">
-                    <h5 className="font-medium text-sm mb-1">Numbers 1-10</h5>
-                    <p className="text-xs text-muted-foreground">Essential counting in Hindi</p>
-                  </Card>
-                  <Card className="p-3 cursor-pointer hover:bg-muted/50">
-                    <h5 className="font-medium text-sm mb-1">Travel Phrases</h5>
-                    <p className="text-xs text-muted-foreground">Useful phrases for getting around</p>
-                  </Card>
-                </div>
-              )}
 
 
-              {/* Solo Travel Tips */}
-              <div className="mt-4 pt-4 border-t">
-                <h4 className="font-semibold mb-3">Solo Travel Tips for Delhi</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex gap-2">
-                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                    <p>Use Delhi Metro for efficient and safe travel</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                    <p>Uber/Ola are reliable ride options</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                    <p>Try street food at Chandni Chowk</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
-                    <p>Emergency: Police - 100, Tourist Helpline - 1363</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
         <div className="space-y-3 mb-6">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -754,6 +534,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <ParentalControlDialog open={parentalDialogOpen} onOpenChange={setParentalDialogOpen} />
       <VerifyDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen} />
       <SupportDialog open={supportDialogOpen} onOpenChange={setSupportDialogOpen} />
+      <TravelGuideDialog open={travelGuideDialogOpen} onOpenChange={setTravelGuideDialogOpen} />
     </div>
   );
 };
