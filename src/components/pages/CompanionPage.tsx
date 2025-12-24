@@ -229,14 +229,14 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="bg-gradient-hero p-3 pb-5">
+      <div className="bg-gradient-hero px-4 py-3 pb-5">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Users className="w-5 h-5" />
+              <Users className="w-4 h-4" />
               Companions
             </h1>
-            <p className="text-white/80 text-xs">Connect with verified travelers</p>
+            <p className="text-white/80 text-[10px]">Connect with verified travelers</p>
           </div>
           <Button
             variant="ghost"
@@ -250,12 +250,12 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
         
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
             placeholder="Search by interests or cities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
+            className="pl-10 text-xs bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
           />
         </div>
       </div>
@@ -264,13 +264,13 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       <div className="flex-1 overflow-y-auto">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl">
-            <TabsTrigger value="discover" className="text-xs rounded-lg flex items-center gap-1">
-              <Compass className="w-3.5 h-3.5" />
+          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl bg-muted">
+            <TabsTrigger value="discover" className="text-xs rounded-lg flex items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Compass className="w-4 h-4" />
               Discover
             </TabsTrigger>
-            <TabsTrigger value="groups" className="text-xs rounded-lg flex items-center gap-1">
-              <Users className="w-3.5 h-3.5" />
+            <TabsTrigger value="groups" className="text-xs rounded-lg flex items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Users className="w-4 h-4" />
               Groups
             </TabsTrigger>
           </TabsList>
@@ -418,20 +418,20 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
               {filteredCompanions.map((companion) => (
                 <Card 
                   key={companion.id} 
-                  className="p-4 shadow-soft rounded-2xl border-0 cursor-pointer hover:shadow-medium transition-all hover:scale-[1.01] bg-card"
+                  className="p-3 shadow-soft rounded-2xl border-0 cursor-pointer hover:shadow-medium transition-all bg-card"
                   onClick={() => {
                     setSelectedCompanion(companion);
                     setConnectDialogOpen(true);
                   }}
                 >
-                  <div className="flex gap-4">
+                  <div className="flex gap-3">
                     {/* Profile Image */}
                     <div className="relative flex-shrink-0">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-3xl shadow-sm">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl">
                         {companion.profileImage}
                       </div>
                       {companion.online && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full border-2 border-background animate-pulse shadow-sm" />
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-background" />
                       )}
                     </div>
                     
@@ -440,12 +440,12 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                       {/* Header Row */}
                       <div className="flex-1">
                         <div className="flex items-center gap-1.5">
-                          <h3 className="font-bold text-base text-foreground">{companion.name}</h3>
+                          <h3 className="font-semibold text-sm text-foreground">{companion.name}</h3>
                           {companion.verified && (
-                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
+                            <CheckCircle className="w-3.5 h-3.5 text-success flex-shrink-0" />
                           )}
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
                           <span className="font-medium">{companion.age} years</span>
                           <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
                           <div className="flex items-center gap-1">
@@ -456,12 +456,12 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                         
                         {/* Shared Interests */}
                         {companion.sharedInterests.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mt-2">
+                          <div className="flex flex-wrap gap-1 mt-2">
                             {companion.sharedInterests.slice(0, 3).map((interest) => (
                               <Badge 
                                 key={interest} 
                                 variant="secondary" 
-                                className="text-[10px] py-1 px-2.5 rounded-full bg-primary/10 text-primary border-0 font-medium"
+                                className="text-[10px] py-0.5 px-2 rounded-lg bg-primary/10 text-primary border-0"
                               >
                                 {interest}
                               </Badge>
@@ -469,9 +469,9 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                             {companion.sharedInterests.length > 3 && (
                               <Badge 
                                 variant="secondary" 
-                                className="text-[10px] py-1 px-2.5 rounded-full bg-muted text-muted-foreground border-0"
+                                className="text-[10px] py-0.5 px-2 rounded-lg bg-muted text-muted-foreground border-0"
                               >
-                                +{companion.sharedInterests.length - 3} more
+                                +{companion.sharedInterests.length - 3}
                               </Badge>
                             )}
                           </div>
