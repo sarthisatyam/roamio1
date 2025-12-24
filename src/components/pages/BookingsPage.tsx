@@ -174,7 +174,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
   ];
 
   const [selectedStay, setSelectedStay] = useState<number | null>(null);
-  const [selectedTravelType, setSelectedTravelType] = useState<'all' | 'flight' | 'train' | 'cab' | null>(null);
+  const [selectedTravelType, setSelectedTravelType] = useState<'all' | 'flight' | 'train' | 'cab' | null>('all');
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [bookingDialog, setBookingDialog] = useState<{ open: boolean; data: any; type: 'stay' | 'travel' }>({ 
     open: false, 
