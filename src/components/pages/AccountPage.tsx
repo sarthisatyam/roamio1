@@ -371,37 +371,37 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="bg-gradient-hero p-6 pb-8">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-gradient-hero px-4 py-3 pb-5">
+        <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={onNavigateBack}
-            className="w-10 h-10 rounded-full bg-white/20 text-white hover:bg-white/30 border-0"
+            className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30 border-0"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
           </Button>
-          <h1 className="text-2xl font-bold text-white text-center flex-1">Account</h1>
+          <h1 className="text-lg font-bold text-white text-center flex-1">Account</h1>
           <Button
             variant="ghost"
             size="sm"
-            className="w-10 h-10 rounded-full bg-white/20 text-white hover:bg-white/30 border-0"
+            className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30 border-0"
           >
-            <Edit className="w-5 h-5" />
+            <Edit className="w-4 h-4" />
           </Button>
         </div>
 
         {/* Profile Section */}
-        <div className="flex items-center gap-4">
-          <Avatar className="w-16 h-16">
-            <AvatarFallback className="bg-white/20 text-white text-xl font-bold">
+        <div className="flex items-center gap-3">
+          <Avatar className="w-14 h-14">
+            <AvatarFallback className="bg-white/20 text-white text-lg font-bold">
               {userData?.name?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h2 className="text-xl font-bold text-white">{userData?.name || 'User'}</h2>
-            <p className="text-white/80 text-sm">{userData?.emailOrPhone || 'No contact info'}</p>
-            <div className="flex items-center gap-2 mt-2">
+            <h2 className="text-base font-bold text-white">{userData?.name || 'User'}</h2>
+            <p className="text-white/80 text-xs">{userData?.emailOrPhone || 'No contact info'}</p>
+            <div className="flex items-center gap-2 mt-1.5">
               {getAccountTypeIcon()}
               {getAccountTypeBadge()}
             </div>
@@ -410,31 +410,31 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto px-4 py-4">
         {/* User Info Card */}
-        <Card className="mb-6 shadow-soft">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <User className="w-5 h-5 text-primary" />
+        <Card className="mb-4 shadow-soft rounded-2xl border-0">
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <User className="w-4 h-4 text-primary" />
               Personal Information
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-3 pt-0 space-y-3">
             <div className="flex items-center gap-3">
               {userData?.emailOrPhone?.includes('@') ? (
                 <Mail className="w-4 h-4 text-muted-foreground" />
               ) : (
                 <Phone className="w-4 h-4 text-muted-foreground" />
               )}
-              <span className="text-sm">{userData?.emailOrPhone || 'Not provided'}</span>
+              <span className="text-xs">{userData?.emailOrPhone || 'Not provided'}</span>
             </div>
             <div className="flex items-center gap-3">
               <Globe className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm">{userData?.language || 'Not specified'}</span>
+              <span className="text-xs">{userData?.language || 'Not specified'}</span>
             </div>
             <div className="flex items-center gap-3">
               <MapPin className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm">
+              <span className="text-xs">
                 {userData?.locationEnabled ? 'Location enabled' : 'Location disabled'}
               </span>
             </div>
@@ -443,7 +443,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
                 <Heart className="w-4 h-4 text-muted-foreground mt-0.5" />
                 <div className="flex flex-wrap gap-1">
                   {userData.preferences.map((pref) => (
-                    <Badge key={pref} variant="secondary" className="text-xs">
+                    <Badge key={pref} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">
                       {pref}
                     </Badge>
                   ))}
@@ -458,13 +458,13 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
 
 
 
-        <div className="space-y-3 mb-6">
+        <div className="space-y-3 mb-4">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (
               <Card 
                 key={item.title} 
-                className="p-4 shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
+                className="p-3 shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0"
                 onClick={() => {
                   if (item.action) {
                     item.action();
@@ -473,36 +473,36 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
                   }
                 }}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.bgColor}`}>
                     <Icon className={`w-5 h-5 ${item.color}`} />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-sm">{item.title}</h3>
-                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                    <p className="text-[10px] text-muted-foreground">{item.description}</p>
                     {item.companions && item.companions.length > 0 && (
-                      <div className="flex gap-1 mt-2">
+                      <div className="flex gap-1 mt-1.5">
                         {item.companions.slice(0, 3).map((companion) => (
-                          <div key={companion.id} className="w-6 h-6 text-sm flex items-center justify-center bg-muted rounded-full">
+                          <div key={companion.id} className="w-5 h-5 text-xs flex items-center justify-center bg-muted rounded-full">
                             {companion.profileImage}
                           </div>
                         ))}
                         {item.companions.length > 3 && (
-                          <div className="w-6 h-6 text-xs flex items-center justify-center bg-muted rounded-full text-muted-foreground">
+                          <div className="w-5 h-5 text-[10px] flex items-center justify-center bg-muted rounded-full text-muted-foreground">
                             +{item.companions.length - 3}
                           </div>
                         )}
                       </div>
                     )}
                     {item.places && item.places.length > 0 && (
-                      <div className="flex gap-1 mt-2">
+                      <div className="flex gap-1 mt-1.5">
                         {item.places.slice(0, 3).map((place) => (
-                          <div key={place.id} className="w-6 h-6 text-sm flex items-center justify-center bg-muted rounded-full">
+                          <div key={place.id} className="w-5 h-5 text-xs flex items-center justify-center bg-muted rounded-full">
                             {place.image}
                           </div>
                         ))}
                         {item.places.length > 3 && (
-                          <div className="w-6 h-6 text-xs flex items-center justify-center bg-muted rounded-full text-muted-foreground">
+                          <div className="w-5 h-5 text-[10px] flex items-center justify-center bg-muted rounded-full text-muted-foreground">
                             +{item.places.length - 3}
                           </div>
                         )}
@@ -516,13 +516,13 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         </div>
 
         {/* Logout */}
-        <Card className="p-4 shadow-soft border-destructive/20">
+        <Card className="p-3 shadow-soft border-destructive/20 rounded-2xl">
           <Button 
             variant="ghost" 
             onClick={onLogout}
-            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 h-9 text-sm"
           >
-            <LogOut className="w-5 h-5 mr-3" />
+            <LogOut className="w-4 h-4 mr-2" />
             Logout
           </Button>
         </Card>
