@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Calendar,
@@ -17,7 +18,8 @@ import {
   UtensilsCrossed,
   Car,
   Ticket,
-  ShoppingBag
+  ShoppingBag,
+  Search
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -36,6 +38,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
   const [activityDialogMode, setActivityDialogMode] = useState<"add" | "edit">("add");
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [addedExternalCount, setAddedExternalCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [activities, setActivities] = useState<Activity[]>([
     { id: 1, title: "Morning Walk at Lodhi Gardens", time: "07:00 AM", location: "Lodhi Road, Delhi", type: "Exercise", duration: "1 hour", status: "completed", date: "Yesterday" },
@@ -77,6 +80,18 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
   const completedCount = activities.filter(a => a.status === "completed").length;
   const progressPercent = Math.round((completedCount / activities.length) * 100);
 
+  // Filter activities based on search
+  const filteredActivities = activities.filter(activity =>
+    activity.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    activity.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    activity.type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Filter expenses based on search
+  const filteredExpenses = expenses.filter(expense =>
+    expense.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const handleSaveActivity = (activityData: Omit<Activity, "id"> & { id?: number }) => {
     if (activityData.id) {
       setActivities(prev => prev.map(a => a.id === activityData.id ? { ...activityData, id: a.id } as Activity : a));
@@ -98,22 +113,35 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
-      <div className="bg-gradient-hero p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-gradient-hero p-3 pb-5">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h1 className="text-2xl font-bold text-white mb-1">Your Journey</h1>
-            <p className="text-white/80 text-sm">Track, plan, and remember your adventures</p>
+            <h1 className="text-lg font-bold text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Your Journey
+            </h1>
+            <p className="text-white/80 text-xs">Track, plan, and remember</p>
           </div>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={onNavigateToAccount}
-            className="w-10 h-10 rounded-full bg-secondary/90 text-foreground hover:bg-secondary border-secondary"
+            className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30"
           >
-            <User className="w-5 h-5" />
+            <User className="w-4 h-4" />
           </Button>
         </div>
         
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search activities, expenses..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
+          />
+        </div>
       </div>
 
       {/* Content */}
@@ -164,7 +192,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
             </div>
 
             <div className="space-y-3">
-              {activities.map((activity, index) => {
+              {filteredActivities.map((activity, index) => {
                 const isCompleted = activity.status === "completed";
                 const isFuture = activity.date === "Mar 25";
                 
@@ -307,7 +335,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
 
           {/* Expense Categories */}
           <div className="space-y-3">
-            {expenses.map((expense) => {
+            {filteredExpenses.map((expense) => {
               const IconComponent = expense.icon;
               return (
                 <Card key={expense.category} className="p-4">
