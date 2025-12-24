@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,14 +27,16 @@ import ExpenseDialog from "@/components/dialogs/ExpenseDialog";
 
 interface JourneyPageProps {
   onNavigateToAccount?: () => void;
+  externalActivities?: { title: string; location: string; type: string }[];
 }
 
-const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
+const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, externalActivities = [] }) => {
   const [activeTab, setActiveTab] = useState("planner");
   const [activityDialogOpen, setActivityDialogOpen] = useState(false);
   const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
   const [activityDialogMode, setActivityDialogMode] = useState<"add" | "edit">("add");
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [addedExternalCount, setAddedExternalCount] = useState(0);
 
   const [activities, setActivities] = useState<Activity[]>([
     { id: 1, title: "Morning Walk at Lodhi Gardens", time: "07:00 AM", location: "Lodhi Road, Delhi", type: "Exercise", duration: "1 hour", status: "completed", date: "Yesterday" },
@@ -44,6 +46,24 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
     { id: 5, title: "Sunset at India Gate", time: "06:00 PM", location: "Rajpath, New Delhi", type: "Scenic", duration: "1.5 hours", status: "planned", date: "Today" },
     { id: 6, title: "Visit Akshardham Temple", time: "10:00 AM", location: "Akshardham, Delhi", type: "Religious", duration: "3 hours", status: "planned", date: "Mar 25" }
   ]);
+
+  // Add external activities when they change
+  useEffect(() => {
+    if (externalActivities.length > addedExternalCount) {
+      const newActivities = externalActivities.slice(addedExternalCount).map((ext, idx) => ({
+        id: Date.now() + idx,
+        title: ext.title,
+        time: "TBD",
+        location: ext.location,
+        type: ext.type,
+        duration: "TBD",
+        status: "planned" as const,
+        date: "Planned"
+      }));
+      setActivities(prev => [...prev, ...newActivities]);
+      setAddedExternalCount(externalActivities.length);
+    }
+  }, [externalActivities, addedExternalCount]);
 
   const [expenses, setExpenses] = useState([
     { category: "Accommodation", amount: 3500, budget: 5000, icon: Home },
@@ -101,10 +121,16 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
       <div className="flex-1 overflow-y-auto">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col h-full">
-          <TabsList className="grid w-full grid-cols-2 mx-6 mt-4">
-          <TabsTrigger value="planner">Planner</TabsTrigger>
-          <TabsTrigger value="expenses">Expenses</TabsTrigger>
-        </TabsList>
+          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl">
+            <TabsTrigger value="planner" className="text-xs rounded-lg flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" />
+              Planner
+            </TabsTrigger>
+            <TabsTrigger value="expenses" className="text-xs rounded-lg flex items-center gap-1">
+              <ShoppingBag className="w-3.5 h-3.5" />
+              Expenses
+            </TabsTrigger>
+          </TabsList>
 
           {/* Activity Planner Tab */}
           <TabsContent value="planner" className="flex-1 overflow-y-auto p-6 pt-4">

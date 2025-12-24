@@ -24,23 +24,32 @@ import {
   Building2,
   Utensils,
   Calendar,
-  Clock
+  Clock,
+  Music,
+  Laugh,
+  UtensilsCrossed,
+  Palette,
+  Radio
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BookingDialog from "@/components/dialogs/BookingDialog";
+import DestinationDialog from "@/components/dialogs/DestinationDialog";
 
 interface HomePageProps {
   userData?: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
   onNavigateToAccount?: () => void;
   bookmarkedPlaces?: { id: number; name: string; image: string }[];
   onToggleBookmark?: (place: { id: number; name: string; image: string }) => void;
+  onAddToPlanner?: (activity: { title: string; location: string; type: string }) => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, bookmarkedPlaces = [], onToggleBookmark }) => {
+const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, bookmarkedPlaces = [], onToggleBookmark, onAddToPlanner }) => {
   const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState<any>(null);
+  const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
 
   const destinations = [
     {
@@ -50,7 +59,33 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       rating: 4.8,
       price: "₹1,500/day",
       safety: 92,
-      tags: ["Solo-friendly", "Beach vibes", "Safe transport"]
+      tags: ["Solo-friendly", "Beach vibes", "Safe transport"],
+      itinerary: [
+        {
+          day: 1,
+          title: "Beach & Chill",
+          activities: [
+            { time: "8:00 AM", activity: "Sunrise at Palolem Beach", type: "Scenic" },
+            { time: "10:00 AM", activity: "Breakfast at Beach Shack", type: "Food" },
+            { time: "2:00 PM", activity: "Water Sports at Baga Beach", type: "Adventure" },
+            { time: "6:00 PM", activity: "Sunset at Vagator Beach", type: "Scenic" }
+          ]
+        },
+        {
+          day: 2,
+          title: "Heritage & Culture",
+          activities: [
+            { time: "9:00 AM", activity: "Old Goa Churches Tour", type: "Heritage" },
+            { time: "1:00 PM", activity: "Goan Thali Lunch", type: "Food" },
+            { time: "4:00 PM", activity: "Fontainhas Latin Quarter Walk", type: "Heritage" }
+          ]
+        }
+      ],
+      eateries: [
+        { name: "Gunpowder", type: "Goan Cuisine", rating: 4.6, priceRange: "₹₹", specialty: "Prawn Balchao" },
+        { name: "Thalassa", type: "Greek-Goan", rating: 4.7, priceRange: "₹₹₹", specialty: "Seafood Platter" },
+        { name: "Ritz Classic", type: "Local", rating: 4.5, priceRange: "₹", specialty: "Fish Curry Rice" }
+      ]
     },
     {
       id: 2,
@@ -59,7 +94,33 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       rating: 4.9,
       price: "₹1,200/day",
       safety: 95,
-      tags: ["Women-safe", "Adventure hub", "Mountain retreat"]
+      tags: ["Women-safe", "Adventure hub", "Mountain retreat"],
+      itinerary: [
+        {
+          day: 1,
+          title: "Mountain Exploration",
+          activities: [
+            { time: "7:00 AM", activity: "Sunrise Trek to Jogini Falls", type: "Adventure" },
+            { time: "11:00 AM", activity: "Visit Hadimba Temple", type: "Heritage" },
+            { time: "3:00 PM", activity: "Mall Road Shopping", type: "Shopping" },
+            { time: "6:00 PM", activity: "Cafe Hopping in Old Manali", type: "Food" }
+          ]
+        },
+        {
+          day: 2,
+          title: "Solang Valley Day",
+          activities: [
+            { time: "8:00 AM", activity: "Paragliding at Solang Valley", type: "Adventure" },
+            { time: "12:00 PM", activity: "Atal Tunnel Visit", type: "Scenic" },
+            { time: "4:00 PM", activity: "Hot Springs at Vashisht", type: "Wellness" }
+          ]
+        }
+      ],
+      eateries: [
+        { name: "Drifters' Cafe", type: "Continental", rating: 4.5, priceRange: "₹₹", specialty: "Wood-fired Pizza" },
+        { name: "Johnson's Cafe", type: "Multi-cuisine", rating: 4.4, priceRange: "₹₹", specialty: "Trout Fish" },
+        { name: "Lazy Dog", type: "Cafe", rating: 4.6, priceRange: "₹", specialty: "Pancakes & Coffee" }
+      ]
     },
     {
       id: 3,
@@ -68,7 +129,33 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       rating: 4.7,
       price: "₹2,000/day",
       safety: 94,
-      tags: ["Heritage city", "Solo traveler friendly", "Palace stays"]
+      tags: ["Heritage city", "Solo traveler friendly", "Palace stays"],
+      itinerary: [
+        {
+          day: 1,
+          title: "Royal Heritage",
+          activities: [
+            { time: "9:00 AM", activity: "City Palace Tour", type: "Heritage" },
+            { time: "1:00 PM", activity: "Lunch at Ambrai Ghat", type: "Food" },
+            { time: "4:00 PM", activity: "Boat Ride on Lake Pichola", type: "Scenic" },
+            { time: "7:00 PM", activity: "Sunset at Sajjangarh", type: "Scenic" }
+          ]
+        },
+        {
+          day: 2,
+          title: "Art & Culture",
+          activities: [
+            { time: "10:00 AM", activity: "Bagore Ki Haveli & Folk Dance", type: "Cultural" },
+            { time: "2:00 PM", activity: "Hathi Pol Bazaar Shopping", type: "Shopping" },
+            { time: "5:00 PM", activity: "High Tea at Taj Lake Palace", type: "Food" }
+          ]
+        }
+      ],
+      eateries: [
+        { name: "Ambrai", type: "Rajasthani", rating: 4.7, priceRange: "₹₹₹", specialty: "Lake View Dining" },
+        { name: "Savage Garden", type: "Fusion", rating: 4.5, priceRange: "₹₹", specialty: "Rooftop Ambiance" },
+        { name: "Natraj Dining Hall", type: "Thali", rating: 4.4, priceRange: "₹", specialty: "Unlimited Rajasthani Thali" }
+      ]
     }
   ];
 
@@ -95,7 +182,9 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       duration: "3 hours",
       rating: 4.5, 
       reviews: "12k",
-      bookingUrl: "#"
+      bookingUrl: "#",
+      icon: Music,
+      isLive: true
     },
     { 
       name: "Stand-up Comedy Show", 
@@ -105,7 +194,9 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       duration: "2 hours",
       rating: 4.3, 
       reviews: "8.5k",
-      bookingUrl: "#"
+      bookingUrl: "#",
+      icon: Laugh,
+      isLive: false
     },
     { 
       name: "Food Festival at Kingdom of Dreams", 
@@ -115,7 +206,9 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       duration: "All Day",
       rating: 4.6, 
       reviews: "15k",
-      bookingUrl: "#"
+      bookingUrl: "#",
+      icon: UtensilsCrossed,
+      isLive: true
     },
     { 
       name: "Art Exhibition - Modern India", 
@@ -125,7 +218,9 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       duration: "4 hours",
       rating: 4.4, 
       reviews: "20k",
-      bookingUrl: "#"
+      bookingUrl: "#",
+      icon: Palette,
+      isLive: false
     }
   ];
 
@@ -236,7 +331,14 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           
           <div className="space-y-4">
             {filteredDestinations.map((dest) => (
-              <Card key={dest.id} className="p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer">
+              <Card 
+                key={dest.id} 
+                className="p-4 shadow-soft hover:shadow-medium transition-all cursor-pointer"
+                onClick={() => {
+                  setSelectedDestination(dest);
+                  setDestinationDialogOpen(true);
+                }}
+              >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="text-3xl">{dest.image}</div>
@@ -290,49 +392,77 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           </div>
           
           <div className="space-y-3">
-            {filteredHotspots.map((spot, index) => (
-              <Card key={index} className="p-4 shadow-soft hover:shadow-medium transition-all">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-medium mb-2 text-sm sm:text-base">{spot.name}</h3>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground mb-2">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {spot.date}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {spot.duration}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {spot.distance}
-                      </span>
-                      <span>{spot.type}</span>
-                    </div>
-                  </div>
-                  <div className="text-right ml-3">
-                    <div className="flex items-center gap-1 text-sm font-medium">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      {spot.rating}
-                    </div>
-                    <div className="text-xs text-muted-foreground">{spot.reviews}</div>
-                  </div>
-                </div>
-                <Button 
-                  size="sm" 
-                  className="w-full bg-gradient-primary text-white border-0 hover:opacity-90"
-                  onClick={() => {
-                    setSelectedHotspot(spot);
-                    setBookingDialogOpen(true);
-                  }}
+            {filteredHotspots.map((spot, index) => {
+              const IconComponent = spot.icon;
+              return (
+                <Card 
+                  key={index} 
+                  className={cn(
+                    "p-4 shadow-soft hover:shadow-medium transition-all",
+                    spot.isLive && "border-l-4 border-l-success"
+                  )}
                 >
-                  Book Now
-                </Button>
-              </Card>
-            ))}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex gap-3 flex-1">
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                        spot.isLive ? "bg-success/10" : "bg-primary/10"
+                      )}>
+                        <IconComponent className={cn(
+                          "w-5 h-5",
+                          spot.isLive ? "text-success" : "text-primary"
+                        )} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium text-sm sm:text-base truncate">{spot.name}</h3>
+                          {spot.isLive && (
+                            <Badge className="bg-success text-success-foreground text-[10px] px-1.5 py-0 flex items-center gap-1">
+                              <Radio className="w-2.5 h-2.5" />
+                              Live
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs sm:text-sm text-muted-foreground mb-2">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {spot.date}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {spot.duration}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {spot.distance}
+                          </span>
+                          <span>{spot.type}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right ml-3">
+                      <div className="flex items-center gap-1 text-sm font-medium">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        {spot.rating}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{spot.reviews}</div>
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    className="w-full bg-gradient-primary text-white border-0 hover:opacity-90"
+                    onClick={() => {
+                      setSelectedHotspot(spot);
+                      setBookingDialogOpen(true);
+                    }}
+                  >
+                    Book Now
+                  </Button>
+                </Card>
+              );
+            })}
           </div>
         </section>
       </div>
@@ -354,6 +484,13 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           }}
         />
       )}
+      {/* Destination Dialog */}
+      <DestinationDialog
+        open={destinationDialogOpen}
+        onOpenChange={setDestinationDialogOpen}
+        destination={selectedDestination}
+        onAddToPlanner={onAddToPlanner}
+      />
     </div>
   );
 };
