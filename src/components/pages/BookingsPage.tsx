@@ -540,25 +540,102 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     <Plane className="w-4 h-4 text-primary" />
                     <h3 className="font-semibold text-sm">Flights</h3>
                   </div>
-                  {flightOptions.slice(0, 2).map((flight) => (
-                    <Card key={flight.id} className="p-3 shadow-soft rounded-2xl border-0">
+                  {flightOptions.map((flight) => (
+                    <Card key={`all-flight-${flight.id}`} className="p-3 shadow-soft rounded-2xl border-0">
                       <div className="flex gap-3">
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <Plane className="w-5 h-5 text-primary" />
                         </div>
+                        
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start justify-between gap-2 mb-1">
                             <div>
                               <h4 className="font-semibold text-sm">{flight.name}</h4>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                                 <Clock className="w-3 h-3" />
                                 <span>{flight.departure} → {flight.arrival}</span>
+                                <Badge variant="outline" className="text-[10px] py-0 px-1.5">{flight.duration}</Badge>
                               </div>
                             </div>
-                            <div className="text-base font-bold text-primary">{flight.price}</div>
+                            <div className="text-right">
+                              <div className="text-base font-bold text-primary">{flight.price}</div>
+                              <Badge variant="secondary" className="text-[10px]">{flight.type}</Badge>
+                            </div>
                           </div>
+                          
+                          <div className="flex flex-wrap gap-1 my-2">
+                            {flight.features.slice(0, 2).map((feature) => (
+                              <Badge key={feature} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
+                                {feature}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          <Button 
+                            size="sm" 
+                            onClick={() => setSelectedOption(selectedOption === flight.id ? null : flight.id)}
+                            className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Compare Prices
+                          </Button>
                         </div>
                       </div>
+                      
+                      {selectedOption === flight.id && (
+                        <div className="mt-3 p-3 bg-muted/50 rounded-xl">
+                          <div className="flex items-center gap-2 mb-3">
+                            <TrendingDown className="w-4 h-4 text-success" />
+                            <h5 className="font-semibold text-sm">Platform Comparison</h5>
+                          </div>
+                          
+                          <div className="space-y-2 mb-3">
+                            {[
+                              { name: "goibibo", price: "₹4,150", savings: "₹50", best: true },
+                              { name: "ixigo", price: "₹4,180", savings: "₹20", best: false },
+                              { name: "makemytrip", price: "₹4,200", savings: "₹0", best: false },
+                              { name: "cleartrip", price: "₹4,300", savings: "₹0", best: false },
+                            ].map((platform) => (
+                              <div 
+                                key={platform.name} 
+                                className={cn(
+                                  "flex items-center justify-between p-2.5 rounded-xl transition-all",
+                                  platform.best ? "bg-success/10 border border-success/30" : "bg-background"
+                                )}
+                              >
+                                <div className="flex items-center gap-2">
+                                  {platformIcons[platform.name]}
+                                  <span className="font-medium text-sm capitalize">{platform.name}</span>
+                                  {platform.best && (
+                                    <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
+                                      <Award className="w-2.5 h-2.5 mr-0.5" />
+                                      Best
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-bold text-primary text-sm">{platform.price}</div>
+                                  {platform.savings !== "₹0" && (
+                                    <div className="text-[10px] text-success">Save {platform.savings}</div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <Button 
+                            className="w-full bg-gradient-primary text-white h-10 rounded-xl text-sm"
+                            onClick={() => setBookingDialog({ 
+                              open: true, 
+                              data: { flight, platform: 'Goibibo', price: 4150 }, 
+                              type: 'travel' 
+                            })}
+                          >
+                            Book via Goibibo • ₹4,150
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </div>
+                      )}
                     </Card>
                   ))}
                 </div>
@@ -569,25 +646,98 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     <Train className="w-4 h-4 text-primary" />
                     <h3 className="font-semibold text-sm">Trains</h3>
                   </div>
-                  {trainOptions.slice(0, 2).map((train) => (
-                    <Card key={train.id} className="p-3 shadow-soft rounded-2xl border-0">
+                  {trainOptions.map((train) => (
+                    <Card key={`all-train-${train.id}`} className="p-3 shadow-soft rounded-2xl border-0">
                       <div className="flex gap-3">
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <Train className="w-5 h-5 text-primary" />
                         </div>
+                        
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start justify-between gap-2 mb-1">
                             <div>
                               <h4 className="font-semibold text-sm">{train.name}</h4>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                                 <Clock className="w-3 h-3" />
                                 <span>{train.departure} → {train.arrival}</span>
+                                <Badge variant="outline" className="text-[10px] py-0 px-1.5">{train.duration}</Badge>
                               </div>
                             </div>
-                            <div className="text-base font-bold text-primary">{train.price}</div>
+                            <div className="text-right">
+                              <div className="text-base font-bold text-primary">{train.price}</div>
+                              <Badge variant="secondary" className="text-[10px]">{train.type}</Badge>
+                            </div>
                           </div>
+                          
+                          <div className="flex flex-wrap gap-1 my-2">
+                            {train.features.slice(0, 2).map((feature) => (
+                              <Badge key={feature} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
+                                {feature}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          <Button 
+                            size="sm" 
+                            onClick={() => setSelectedOption(selectedOption === train.id + 100 ? null : train.id + 100)}
+                            className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Compare Prices
+                          </Button>
                         </div>
                       </div>
+                      
+                      {selectedOption === train.id + 100 && (
+                        <div className="mt-3 p-3 bg-muted/50 rounded-xl">
+                          <div className="flex items-center gap-2 mb-3">
+                            <TrendingDown className="w-4 h-4 text-success" />
+                            <h5 className="font-semibold text-sm">Platform Comparison</h5>
+                          </div>
+                          
+                          <div className="space-y-2 mb-3">
+                            {[
+                              { name: "irctc", price: train.price, savings: "₹0", best: true },
+                              { name: "ixigo", price: `₹${parseInt(train.price.replace(/[₹,]/g, '')) + 50}`, savings: "₹0", best: false },
+                              { name: "makemytrip", price: `₹${parseInt(train.price.replace(/[₹,]/g, '')) + 80}`, savings: "₹0", best: false },
+                            ].map((platform) => (
+                              <div 
+                                key={platform.name} 
+                                className={cn(
+                                  "flex items-center justify-between p-2.5 rounded-xl transition-all",
+                                  platform.best ? "bg-success/10 border border-success/30" : "bg-background"
+                                )}
+                              >
+                                <div className="flex items-center gap-2">
+                                  {platformIcons[platform.name]}
+                                  <span className="font-medium text-sm capitalize">{platform.name}</span>
+                                  {platform.best && (
+                                    <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
+                                      <Award className="w-2.5 h-2.5 mr-0.5" />
+                                      Best
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-bold text-primary text-sm">{platform.price}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <Button 
+                            className="w-full bg-gradient-primary text-white h-10 rounded-xl text-sm"
+                            onClick={() => setBookingDialog({ 
+                              open: true, 
+                              data: { train, platform: 'IRCTC', price: train.price }, 
+                              type: 'travel' 
+                            })}
+                          >
+                            Book via IRCTC • {train.price}
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </div>
+                      )}
                     </Card>
                   ))}
                 </div>
@@ -599,24 +749,100 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
                     <h3 className="font-semibold text-sm">Cabs</h3>
                   </div>
                   {cabOptions.map((cab) => (
-                    <Card key={cab.id} className="p-3 shadow-soft rounded-2xl border-0">
+                    <Card key={`all-cab-${cab.id}`} className="p-3 shadow-soft rounded-2xl border-0">
                       <div className="flex gap-3">
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <Car className="w-5 h-5 text-primary" />
                         </div>
+                        
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start justify-between gap-2 mb-1">
                             <div>
                               <h4 className="font-semibold text-sm">{cab.name}</h4>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                                 <Clock className="w-3 h-3" />
                                 <span>{cab.duration}</span>
+                                <Badge variant="outline" className="text-[10px] py-0 px-1.5">{cab.type}</Badge>
                               </div>
                             </div>
-                            <div className="text-base font-bold text-primary">{cab.price}</div>
+                            <div className="text-right">
+                              <div className="text-base font-bold text-primary">{cab.price}</div>
+                              <Badge variant="secondary" className="text-[10px]">{cab.service}</Badge>
+                            </div>
                           </div>
+                          
+                          <div className="flex flex-wrap gap-1 my-2">
+                            {cab.features.slice(0, 2).map((feature) => (
+                              <Badge key={feature} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
+                                {feature}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          <Button 
+                            size="sm" 
+                            onClick={() => setSelectedOption(selectedOption === cab.id + 200 ? null : cab.id + 200)}
+                            className="w-full text-xs h-8 rounded-xl bg-gradient-primary text-white mt-1"
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            Compare Prices
+                          </Button>
                         </div>
                       </div>
+                      
+                      {selectedOption === cab.id + 200 && (
+                        <div className="mt-3 p-3 bg-muted/50 rounded-xl">
+                          <div className="flex items-center gap-2 mb-3">
+                            <TrendingDown className="w-4 h-4 text-success" />
+                            <h5 className="font-semibold text-sm">Platform Comparison</h5>
+                          </div>
+                          
+                          <div className="space-y-2 mb-3">
+                            {[
+                              { name: "ola", price: cab.price, savings: "₹500", best: true },
+                              { name: "uber", price: `₹${parseInt(cab.price.replace(/[₹,]/g, '')) + 300}`, savings: "₹200", best: false },
+                              { name: "rapido", price: `₹${parseInt(cab.price.replace(/[₹,]/g, '')) + 500}`, savings: "₹0", best: false },
+                            ].map((platform) => (
+                              <div 
+                                key={platform.name} 
+                                className={cn(
+                                  "flex items-center justify-between p-2.5 rounded-xl transition-all",
+                                  platform.best ? "bg-success/10 border border-success/30" : "bg-background"
+                                )}
+                              >
+                                <div className="flex items-center gap-2">
+                                  {platformIcons[platform.name]}
+                                  <span className="font-medium text-sm capitalize">{platform.name}</span>
+                                  {platform.best && (
+                                    <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
+                                      <Award className="w-2.5 h-2.5 mr-0.5" />
+                                      Best
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-bold text-primary text-sm">{platform.price}</div>
+                                  {platform.savings !== "₹0" && (
+                                    <div className="text-[10px] text-success">Save {platform.savings}</div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <Button 
+                            className="w-full bg-gradient-primary text-white h-10 rounded-xl text-sm"
+                            onClick={() => setBookingDialog({ 
+                              open: true, 
+                              data: { cab, platform: 'Ola', price: cab.price }, 
+                              type: 'travel' 
+                            })}
+                          >
+                            Book via Ola • {cab.price}
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </div>
+                      )}
                     </Card>
                   ))}
                 </div>
