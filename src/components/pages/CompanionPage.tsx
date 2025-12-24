@@ -76,7 +76,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       gender: "female",
       profileImage: "👩‍💻",
       online: true,
-      mutualInterests: 3
+      sharedInterests: ["Photography", "Coworking", "Chai Spots"]
     },
     {
       id: 2,
@@ -90,7 +90,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       gender: "female",
       profileImage: "👩‍🎨",
       online: false,
-      mutualInterests: 2
+      sharedInterests: ["Heritage", "Local Markets"]
     },
     {
       id: 3,
@@ -104,7 +104,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       gender: "male",
       profileImage: "👨‍🦱",
       online: true,
-      mutualInterests: 1
+      sharedInterests: ["Photography"]
     },
     {
       id: 4,
@@ -118,7 +118,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       gender: "female", 
       profileImage: "👩‍🍳",
       online: true,
-      mutualInterests: 2
+      sharedInterests: ["Local Markets", "Street Food"]
     }
   ];
 
@@ -444,13 +444,16 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                         <MapPin className="w-3 h-3" />
                         <span>{companion.location}</span>
-                        {companion.mutualInterests > 0 && (
-                          <>
-                            <span>•</span>
-                            <span className="text-primary font-medium">{companion.mutualInterests} mutual</span>
-                          </>
-                        )}
                       </div>
+                      {companion.sharedInterests.length > 0 && (
+                        <div className="flex items-center gap-1 mt-1 text-xs text-primary">
+                          <Heart className="w-3 h-3" />
+                          <span className="font-medium truncate">
+                            {companion.sharedInterests.slice(0, 2).join(", ")}
+                            {companion.sharedInterests.length > 2 && ` +${companion.sharedInterests.length - 2}`}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="flex gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
