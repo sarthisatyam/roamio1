@@ -444,6 +444,12 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                         <MapPin className="w-3 h-3" />
                         <span>{companion.location}</span>
+                        {companion.mutualInterests > 0 && (
+                          <>
+                            <span>•</span>
+                            <span className="text-primary font-medium">{companion.mutualInterests} mutual</span>
+                          </>
+                        )}
                       </div>
                     </div>
                     
