@@ -270,7 +270,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
         </div>
         
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input 
             placeholder="Search destinations, activities..."
             value={searchQuery}
