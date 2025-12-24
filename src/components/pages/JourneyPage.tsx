@@ -169,73 +169,112 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                 const isFuture = activity.date === "Mar 25";
                 
                 return (
-                  <Card key={activity.id} className={cn(
-                    "p-4 shadow-soft transition-all",
-                    isCompleted && "opacity-60 bg-muted/30"
-                  )}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm",
-                          isCompleted 
-                            ? "bg-success/20 text-success" 
-                            : isFuture 
-                              ? "bg-muted text-muted-foreground"
-                              : "bg-primary/10 text-primary"
-                        )}>
-                          {isCompleted ? (
-                            <CheckCircle className="w-4 h-4" />
-                          ) : (
-                            index - 1 // Adjust for completed items
+                  <Card 
+                    key={activity.id} 
+                    className={cn(
+                      "p-4 shadow-soft rounded-2xl border-0 transition-all hover:shadow-medium",
+                      isCompleted && "opacity-70"
+                    )}
+                  >
+                    <div className="flex gap-4">
+                      {/* Status Icon */}
+                      <div className={cn(
+                        "w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm",
+                        isCompleted 
+                          ? "bg-success/20" 
+                          : isFuture 
+                            ? "bg-muted"
+                            : "bg-gradient-to-br from-primary/20 to-primary/5"
+                      )}>
+                        {isCompleted ? (
+                          <CheckCircle className="w-6 h-6 text-success" />
+                        ) : (
+                          <span className={cn(
+                            "font-bold text-lg",
+                            isFuture ? "text-muted-foreground" : "text-primary"
+                          )}>
+                            {index + 1}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className={cn(
+                                "font-bold text-base",
+                                isCompleted && "line-through text-muted-foreground"
+                              )}>
+                                {activity.title}
+                              </h4>
+                              <Badge 
+                                variant="secondary" 
+                                className={cn(
+                                  "text-[10px] py-0.5 px-2 rounded-full",
+                                  isCompleted 
+                                    ? "bg-success/10 text-success" 
+                                    : isFuture 
+                                      ? "bg-muted text-muted-foreground"
+                                      : "bg-primary/10 text-primary"
+                                )}
+                              >
+                                {activity.date}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5" />
+                                <span>{activity.time}</span>
+                              </div>
+                              <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-3.5 h-3.5" />
+                                <span className="truncate">{activity.location}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Actions */}
+                          {!isCompleted && (
+                            <div className="flex gap-1.5 flex-shrink-0">
+                              <Button 
+                                variant="outline" 
+                                size="icon"
+                                className="w-8 h-8 rounded-xl"
+                                onClick={() => { setActivityDialogMode("edit"); setSelectedActivity(activity); setActivityDialogOpen(true); }}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="icon"
+                                className="w-8 h-8 rounded-xl text-success hover:bg-success/10 hover:text-success"
+                                onClick={() => handleCompleteActivity(activity.id)}
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </Button>
+                            </div>
                           )}
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className={cn(
-                              "font-medium",
-                              isCompleted && "line-through"
-                            )}>
-                              {activity.title}
-                            </h4>
-                            <Badge variant="outline" className="text-xs">
-                              {activity.date}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{activity.time}</span>
-                            <span>•</span>
-                            <MapPin className="w-3 h-3" />
-                            <span>{activity.location}</span>
-                          </div>
-                          <div className="flex gap-2 mt-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {activity.type}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {activity.duration}
-                            </Badge>
-                          </div>
+                        
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          <Badge 
+                            variant="secondary" 
+                            className="text-[10px] py-1 px-2.5 rounded-full bg-secondary/80 font-medium"
+                          >
+                            {activity.type}
+                          </Badge>
+                          <Badge 
+                            variant="outline" 
+                            className="text-[10px] py-1 px-2.5 rounded-full"
+                          >
+                            {activity.duration}
+                          </Badge>
                         </div>
                       </div>
-                      {!isCompleted && (
-                        <div className="flex gap-1">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => { setActivityDialogMode("edit"); setSelectedActivity(activity); setActivityDialogOpen(true); }}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleCompleteActivity(activity.id)}
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      )}
                     </div>
                   </Card>
                 );
