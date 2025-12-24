@@ -28,6 +28,8 @@ import {
   Mountain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import ConnectDialog from "@/components/dialogs/ConnectDialog";
 
 interface CompanionPageProps {
   onNavigateToAccount?: () => void;
@@ -41,6 +43,11 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
   onToggleLike 
 }) => {
   const [activeTab, setActiveTab] = useState("discover");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [connectDialogOpen, setConnectDialogOpen] = useState(false);
+  const [selectedCompanion, setSelectedCompanion] = useState<any>(null);
+  const [connectedCompanions, setConnectedCompanions] = useState<number[]>([]);
+  const [joinedGroups, setJoinedGroups] = useState<number[]>([1, 3]); // Pre-joined groups
   const [filters, setFilters] = useState({
     gender: 'all',
     status: 'all',
@@ -116,8 +123,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       category: "Coworking",
       icon: Briefcase,
       description: "Community for remote workers exploring Delhi NCR",
-      lastActivity: "2 hours ago",
-      joined: true
+      lastActivity: "2 hours ago"
     },
     {
       id: 2,
@@ -126,8 +132,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       category: "Safety",
       icon: Shield,
       description: "Safe space for women traveling solo across India",
-      lastActivity: "1 hour ago", 
-      joined: false
+      lastActivity: "1 hour ago"
     },
     {
       id: 3,
@@ -136,12 +141,22 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
       category: "Food",
       icon: Coffee,
       description: "Discover the best Indian street food experiences together",
-      lastActivity: "30 minutes ago",
-      joined: true
+      lastActivity: "30 minutes ago"
     }
   ];
 
+  // Filter companions based on search and filters
   const filteredCompanions = companions.filter(companion => {
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = 
+        companion.name.toLowerCase().includes(query) ||
+        companion.bio.toLowerCase().includes(query) ||
+        companion.interests.some(i => i.toLowerCase().includes(query));
+      if (!matchesSearch) return false;
+    }
+    
     if (filters.gender !== 'all' && companion.gender !== filters.gender) {
       return false;
     }
@@ -164,6 +179,20 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
     }
     return true;
   });
+
+  const handleConnect = (companionId: number, message: string) => {
+    setConnectedCompanions(prev => [...prev, companionId]);
+  };
+
+  const handleJoinGroup = (groupId: number) => {
+    if (joinedGroups.includes(groupId)) {
+      setJoinedGroups(prev => prev.filter(id => id !== groupId));
+      toast.success("Left the group");
+    } else {
+      setJoinedGroups(prev => [...prev, groupId]);
+      toast.success("Joined the group successfully!");
+    }
+  };
 
   const interestIcons: Record<string, React.ReactNode> = {
     "Coworking": <Briefcase className="w-3 h-3" />,
@@ -205,6 +234,8 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
             placeholder="Search by interests or cities..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 text-sm bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
           />
         </div>
@@ -422,9 +453,33 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                       </div>
                       
                       <div className="flex gap-2">
-                        <Button size="sm" className="flex-1 bg-gradient-primary text-white border-0 text-xs h-9 rounded-xl">
-                          <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
-                          Connect
+                        <Button 
+                          size="sm" 
+                          className={cn(
+                            "flex-1 text-xs h-9 rounded-xl",
+                            connectedCompanions.includes(companion.id)
+                              ? "bg-success/10 text-success border border-success/30"
+                              : "bg-gradient-primary text-white border-0"
+                          )}
+                          onClick={() => {
+                            if (!connectedCompanions.includes(companion.id)) {
+                              setSelectedCompanion(companion);
+                              setConnectDialogOpen(true);
+                            }
+                          }}
+                          disabled={connectedCompanions.includes(companion.id)}
+                        >
+                          {connectedCompanions.includes(companion.id) ? (
+                            <>
+                              <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
+                              Connected
+                            </>
+                          ) : (
+                            <>
+                              <MessageCircle className="w-3.5 h-3.5 mr-1.5" />
+                              Connect
+                            </>
+                          )}
                         </Button>
                         <Button 
                           variant="outline" 
@@ -484,13 +539,14 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                           </div>
                           <Button 
                             size="sm" 
-                            variant={group.joined ? "outline" : "default"}
+                            variant={joinedGroups.includes(group.id) ? "outline" : "default"}
                             className={cn(
                               "text-xs h-8 rounded-xl px-4",
-                              !group.joined && "bg-gradient-primary text-white border-0"
+                              !joinedGroups.includes(group.id) && "bg-gradient-primary text-white border-0"
                             )}
+                            onClick={() => handleJoinGroup(group.id)}
                           >
-                            {group.joined ? (
+                            {joinedGroups.includes(group.id) ? (
                               <>
                                 <CheckCircle className="w-3.5 h-3.5 mr-1.5" />
                                 Joined
@@ -513,6 +569,14 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
 
         </Tabs>
       </div>
+
+      {/* Connect Dialog */}
+      <ConnectDialog
+        open={connectDialogOpen}
+        onOpenChange={setConnectDialogOpen}
+        companion={selectedCompanion}
+        onConnect={handleConnect}
+      />
     </div>
   );
 };

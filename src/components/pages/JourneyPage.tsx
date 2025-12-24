@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Calendar,
@@ -22,6 +21,9 @@ import {
   ShoppingBag
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import ActivityDialog, { Activity } from "@/components/dialogs/ActivityDialog";
+import ExpenseDialog from "@/components/dialogs/ExpenseDialog";
 
 interface JourneyPageProps {
   onNavigateToAccount?: () => void;
@@ -29,84 +31,49 @@ interface JourneyPageProps {
 
 const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
   const [activeTab, setActiveTab] = useState("planner");
-  const [selectedTrip, setSelectedTrip] = useState(null);
+  const [activityDialogOpen, setActivityDialogOpen] = useState(false);
+  const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
+  const [activityDialogMode, setActivityDialogMode] = useState<"add" | "edit">("add");
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
 
-  const allActivities = [
-    // Past activities (completed)
-    {
-      id: 1,
-      title: "Morning Walk at Lodhi Gardens",
-      time: "07:00 AM",
-      location: "Lodhi Road, Delhi",
-      type: "Exercise",
-      duration: "1 hour",
-      status: "completed",
-      date: "Yesterday"
-    },
-    {
-      id: 2,
-      title: "Shopping at Connaught Place",
-      time: "11:00 AM", 
-      location: "CP, New Delhi",
-      type: "Shopping",
-      duration: "2 hours",
-      status: "completed",
-      date: "Yesterday"
-    },
-    // Today's activities
-    {
-      id: 3,
-      title: "Visit Red Fort",
-      time: "09:00 AM",
-      location: "Chandni Chowk, Delhi",
-      type: "Heritage",
-      duration: "2 hours",
-      status: "planned",
-      date: "Today"
-    },
-    {
-      id: 4,
-      title: "Street Food at Paranthe Wali Gali",
-      time: "12:30 PM", 
-      location: "Old Delhi",
-      type: "Food",
-      duration: "1 hour",
-      status: "planned",
-      date: "Today"
-    },
-    {
-      id: 5,
-      title: "Sunset at India Gate",
-      time: "06:00 PM",
-      location: "Rajpath, New Delhi",
-      type: "Scenic",
-      duration: "1.5 hours",
-      status: "planned",
-      date: "Today"
-    },
-    // Future activity
-    {
-      id: 6,
-      title: "Visit Akshardham Temple",
-      time: "10:00 AM",
-      location: "Akshardham, Delhi",
-      type: "Religious",
-      duration: "3 hours",
-      status: "planned",
-      date: "Mar 25"
-    }
-  ];
+  const [activities, setActivities] = useState<Activity[]>([
+    { id: 1, title: "Morning Walk at Lodhi Gardens", time: "07:00 AM", location: "Lodhi Road, Delhi", type: "Exercise", duration: "1 hour", status: "completed", date: "Yesterday" },
+    { id: 2, title: "Shopping at Connaught Place", time: "11:00 AM", location: "CP, New Delhi", type: "Shopping", duration: "2 hours", status: "completed", date: "Yesterday" },
+    { id: 3, title: "Visit Red Fort", time: "09:00 AM", location: "Chandni Chowk, Delhi", type: "Heritage", duration: "2 hours", status: "planned", date: "Today" },
+    { id: 4, title: "Street Food at Paranthe Wali Gali", time: "12:30 PM", location: "Old Delhi", type: "Food", duration: "1 hour", status: "planned", date: "Today" },
+    { id: 5, title: "Sunset at India Gate", time: "06:00 PM", location: "Rajpath, New Delhi", type: "Scenic", duration: "1.5 hours", status: "planned", date: "Today" },
+    { id: 6, title: "Visit Akshardham Temple", time: "10:00 AM", location: "Akshardham, Delhi", type: "Religious", duration: "3 hours", status: "planned", date: "Mar 25" }
+  ]);
 
-  const expenses = [
+  const [expenses, setExpenses] = useState([
     { category: "Accommodation", amount: 3500, budget: 5000, icon: Home },
     { category: "Food & Drinks", amount: 2400, budget: 4000, icon: UtensilsCrossed },
     { category: "Transportation", amount: 1200, budget: 2500, icon: Car },
     { category: "Activities", amount: 1800, budget: 3000, icon: Ticket },
     { category: "Shopping", amount: 800, budget: 1500, icon: ShoppingBag }
-  ];
+  ]);
 
   const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
   const totalBudget = expenses.reduce((sum, exp) => sum + exp.budget, 0);
+  const completedCount = activities.filter(a => a.status === "completed").length;
+  const progressPercent = Math.round((completedCount / activities.length) * 100);
+
+  const handleSaveActivity = (activityData: Omit<Activity, "id"> & { id?: number }) => {
+    if (activityData.id) {
+      setActivities(prev => prev.map(a => a.id === activityData.id ? { ...activityData, id: a.id } as Activity : a));
+    } else {
+      setActivities(prev => [...prev, { ...activityData, id: Date.now() } as Activity]);
+    }
+  };
+
+  const handleCompleteActivity = (id: number) => {
+    setActivities(prev => prev.map(a => a.id === id ? { ...a, status: "completed" as const } : a));
+    toast.success("Activity marked as complete!");
+  };
+
+  const handleAddExpense = (expense: { category: string; amount: number }) => {
+    setExpenses(prev => prev.map(e => e.category === expense.category ? { ...e, amount: e.amount + expense.amount } : e));
+  };
 
 
   return (
@@ -154,22 +121,25 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
               </Badge>
             </div>
             
-            <Progress value={60} className="mb-3" />
-            <p className="text-sm text-muted-foreground">60% of activities completed</p>
+            <Progress value={progressPercent} className="mb-3" />
+            <p className="text-sm text-muted-foreground">{progressPercent}% of activities completed</p>
           </Card>
 
-          {/* Today's Activities */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Activities Timeline</h2>
-              <Button size="sm" className="bg-gradient-primary text-white border-0">
+              <Button 
+                size="sm" 
+                className="bg-gradient-primary text-white border-0"
+                onClick={() => { setActivityDialogMode("add"); setSelectedActivity(null); setActivityDialogOpen(true); }}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Activity
               </Button>
             </div>
 
             <div className="space-y-3">
-              {allActivities.map((activity, index) => {
+              {activities.map((activity, index) => {
                 const isCompleted = activity.status === "completed";
                 const isFuture = activity.date === "Mar 25";
                 
@@ -225,10 +195,18 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
                       </div>
                       {!isCompleted && (
                         <div className="flex gap-1">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => { setActivityDialogMode("edit"); setSelectedActivity(activity); setActivityDialogOpen(true); }}
+                          >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleCompleteActivity(activity.id)}
+                          >
                             <CheckCircle className="w-4 h-4" />
                           </Button>
                         </div>
@@ -259,7 +237,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
           <Card className="p-4 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Trip Budget</h3>
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="outline" onClick={() => setExpenseDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Expense
               </Button>
@@ -301,6 +279,21 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount }) => {
 
         </Tabs>
       </div>
+
+      <ActivityDialog
+        open={activityDialogOpen}
+        onOpenChange={setActivityDialogOpen}
+        activity={selectedActivity}
+        onSave={handleSaveActivity}
+        mode={activityDialogMode}
+      />
+
+      <ExpenseDialog
+        open={expenseDialogOpen}
+        onOpenChange={setExpenseDialogOpen}
+        onSave={handleAddExpense}
+        existingCategories={expenses.map(e => e.category)}
+      />
     </div>
   );
 };
