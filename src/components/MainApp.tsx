@@ -19,6 +19,37 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [likedCompanions, setLikedCompanions] = useState<number[]>([]);
   const [bookmarkedPlaces, setBookmarkedPlaces] = useState<{ id: number; name: string; image: string }[]>([]);
   const [plannerActivities, setPlannerActivities] = useState<{ title: string; location: string; type: string }[]>([]);
+  
+  // Location state with localStorage persistence
+  const [locationEnabled, setLocationEnabled] = useState(() => {
+    const saved = localStorage.getItem('locationEnabled');
+    return saved !== null ? JSON.parse(saved) : (userData?.locationEnabled ?? false);
+  });
+
+  const handleLocationToggle = async (enabled: boolean) => {
+    if (enabled) {
+      // Request browser geolocation permission
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            setLocationEnabled(true);
+            localStorage.setItem('locationEnabled', 'true');
+          },
+          () => {
+            // Permission denied or error
+            setLocationEnabled(false);
+            localStorage.setItem('locationEnabled', 'false');
+          }
+        );
+      }
+    } else {
+      setLocationEnabled(false);
+      localStorage.setItem('locationEnabled', 'false');
+    }
+  };
+
+  // Merge userData with local locationEnabled state
+  const mergedUserData = userData ? { ...userData, locationEnabled } : null;
 
   const handleToggleLike = (companionId: number) => {
     setLikedCompanions(prev => 
@@ -62,15 +93,15 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   };
 
   if (showAccount) {
-    return <AccountPage userData={userData} onNavigateBack={handleNavigateBack} onLogout={handleLogout} likedCompanions={likedCompanions} bookmarkedPlaces={bookmarkedPlaces} />;
+    return <AccountPage userData={mergedUserData} onNavigateBack={handleNavigateBack} onLogout={handleLogout} likedCompanions={likedCompanions} bookmarkedPlaces={bookmarkedPlaces} onLocationToggle={handleLocationToggle} />;
   }
 
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === 0 && <HomePage userData={userData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} />}
-        {activeTab === 1 && <BookingsPage userData={userData} onNavigateToAccount={handleNavigateToAccount} />}
+        {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} />}
+        {activeTab === 1 && <BookingsPage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} />}
         {activeTab === 2 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} likedCompanions={likedCompanions} onToggleLike={handleToggleLike} />}
         {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>

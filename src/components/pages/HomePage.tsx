@@ -43,9 +43,10 @@ interface HomePageProps {
   bookmarkedPlaces?: { id: number; name: string; image: string }[];
   onToggleBookmark?: (place: { id: number; name: string; image: string }) => void;
   onAddToPlanner?: (activity: { title: string; location: string; type: string }) => void;
+  onLocationToggle?: (enabled: boolean) => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, bookmarkedPlaces = [], onToggleBookmark, onAddToPlanner }) => {
+const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, bookmarkedPlaces = [], onToggleBookmark, onAddToPlanner, onLocationToggle }) => {
   const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
@@ -274,7 +275,14 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
             <h1 className="text-lg font-bold text-white mb-0.5 truncate">
               Good morning{userData?.name ? `, ${userData.name}` : ''}! 👋
             </h1>
-            <p className="text-white/80 text-xs flex items-center gap-1">
+            <p 
+              className={`text-white/80 text-xs flex items-center gap-1 ${!userData?.locationEnabled ? 'cursor-pointer hover:text-white transition-colors' : ''}`}
+              onClick={() => {
+                if (!userData?.locationEnabled && onLocationToggle) {
+                  onLocationToggle(true);
+                }
+              }}
+            >
               <MapPin className="w-3 h-3 flex-shrink-0" />
               {userData?.locationEnabled ? "Delhi" : "Enable location"}
             </p>
