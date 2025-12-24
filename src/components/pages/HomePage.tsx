@@ -374,11 +374,10 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                         </Badge>
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="font-bold text-sm text-primary">{dest.price}</p>
+                    <div className="flex flex-col items-end flex-shrink-0">
                       <Bookmark 
                         className={cn(
-                          "w-4 h-4 ml-auto mt-1 cursor-pointer transition-colors",
+                          "w-4 h-4 cursor-pointer transition-colors",
                           bookmarkedPlaces.find(p => p.id === dest.id)
                             ? "text-primary fill-current"
                             : "text-muted-foreground hover:text-primary"
@@ -388,6 +387,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                           onToggleBookmark?.({ id: dest.id, name: dest.name, image: dest.image });
                         }}
                       />
+                      <p className="font-bold text-sm text-primary mt-1">{dest.price}</p>
                     </div>
                   </div>
                   
