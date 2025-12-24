@@ -431,12 +431,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                         {companion.profileImage}
                       </div>
                       {companion.online && (
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-destructive rounded-full border-2 border-background animate-pulse shadow-sm" />
-                      )}
-                      {companion.verified && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-success rounded-full border-2 border-background flex items-center justify-center">
-                          <CheckCircle className="w-3 h-3 text-white" />
-                        </div>
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full border-2 border-background animate-pulse shadow-sm" />
                       )}
                     </div>
                     
@@ -444,7 +439,12 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                     <div className="flex-1 min-w-0 flex flex-col">
                       {/* Header Row */}
                       <div className="flex-1">
-                        <h3 className="font-bold text-base text-foreground">{companion.name}</h3>
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="font-bold text-base text-foreground">{companion.name}</h3>
+                          {companion.verified && (
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
+                          )}
+                        </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                           <span className="font-medium">{companion.age} years</span>
                           <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
@@ -452,15 +452,6 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                             <MapPin className="w-3 h-3" />
                             <span>{companion.location}</span>
                           </div>
-                          {companion.online && (
-                            <>
-                              <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-                              <div className="flex items-center gap-1 text-destructive">
-                                <div className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
-                                <span className="font-medium">Live</span>
-                              </div>
-                            </>
-                          )}
                         </div>
                         
                         {/* Shared Interests */}
