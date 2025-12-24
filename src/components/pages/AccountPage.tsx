@@ -33,6 +33,13 @@ import {
   Mic,
   MicOff
 } from "lucide-react";
+import { 
+  EmergencyDialog, 
+  ParentalControlDialog, 
+  VerifyDialog, 
+  SupportDialog, 
+  MyBookingsDialog 
+} from "@/components/dialogs/AccountSectionDialogs";
 
 interface AccountPageProps {
   userData: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
@@ -43,7 +50,7 @@ interface AccountPageProps {
 }
 
 const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [] }) => {
-  const accountType = "Free"; // This could be dynamic based on user subscription
+  const accountType = "Free";
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
@@ -53,6 +60,13 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [activeLanguageSection, setActiveLanguageSection] = useState("phrases");
   const [isListening, setIsListening] = useState(false);
   const [isTranslatorListening, setIsTranslatorListening] = useState(false);
+  
+  // Dialog states
+  const [emergencyDialogOpen, setEmergencyDialogOpen] = useState(false);
+  const [parentalDialogOpen, setParentalDialogOpen] = useState(false);
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [supportDialogOpen, setSupportDialogOpen] = useState(false);
+  const [bookingsDialogOpen, setBookingsDialogOpen] = useState(false);
 
   // Mock companion data for displaying liked companions with detailed info
   const companions = [
@@ -339,7 +353,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       title: "My Bookings",
       description: "View and manage your travel bookings",
       color: "text-primary",
-      bgColor: "bg-primary/10"
+      bgColor: "bg-primary/10",
+      action: () => setBookingsDialogOpen(true)
     },
     {
       icon: Users,
@@ -377,28 +392,32 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       title: "Emergency Details",
       description: "Emergency contacts and safety information",
       color: "text-destructive",
-      bgColor: "bg-destructive/10"
+      bgColor: "bg-destructive/10",
+      action: () => setEmergencyDialogOpen(true)
     },
     {
       icon: Settings,
       title: "Parental Control",
       description: "Manage safety settings and restrictions",
       color: "text-warning",
-      bgColor: "bg-warning/10"
+      bgColor: "bg-warning/10",
+      action: () => setParentalDialogOpen(true)
     },
     {
       icon: CheckCircle,
       title: "Verify Yourself",
       description: "Complete your profile verification",
       color: "text-primary",
-      bgColor: "bg-primary/10"
+      bgColor: "bg-primary/10",
+      action: () => setVerifyDialogOpen(true)
     },
     {
       icon: Headphones,
       title: "Customer Support",
       description: "Get help and support",
       color: "text-success",
-      bgColor: "bg-success/10"
+      bgColor: "bg-success/10",
+      action: () => setSupportDialogOpen(true)
     }
   ];
 
@@ -746,6 +765,13 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
           </Button>
         </Card>
       </div>
+
+      {/* Dialogs */}
+      <MyBookingsDialog open={bookingsDialogOpen} onOpenChange={setBookingsDialogOpen} />
+      <EmergencyDialog open={emergencyDialogOpen} onOpenChange={setEmergencyDialogOpen} />
+      <ParentalControlDialog open={parentalDialogOpen} onOpenChange={setParentalDialogOpen} />
+      <VerifyDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen} />
+      <SupportDialog open={supportDialogOpen} onOpenChange={setSupportDialogOpen} />
     </div>
   );
 };

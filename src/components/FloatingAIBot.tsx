@@ -25,6 +25,28 @@ const FloatingAIBot: React.FC = () => {
     "Transportation tips"
   ];
 
+  const getAIResponse = (userMessage: string): string => {
+    const msg = userMessage.toLowerCase();
+    
+    if (msg.includes("hostel") || msg.includes("stay") || msg.includes("hotel")) {
+      return "For safe hostels in Delhi, I recommend Hyderabad Backpackers Hub in Banjara Hills (₹800/night) or Gachibowli Tech Stays (₹1,200/night). Both have 24/7 security, verified reviews, and are solo-traveler friendly. Would you like me to show you booking options?";
+    }
+    if (msg.includes("emergency") || msg.includes("help") || msg.includes("sos")) {
+      return "For emergencies in India:\n• Police: 100\n• Tourist Helpline: 1363\n• Women's Helpline: 181\n• Ambulance: 102\n\nYou can also set up SOS alerts in your Account → Emergency Details. Stay safe!";
+    }
+    if (msg.includes("transport") || msg.includes("cab") || msg.includes("metro") || msg.includes("travel")) {
+      return "Delhi has excellent transport options:\n• Metro: Fastest & safest (₹20-60)\n• Uber/Ola: Reliable, share trip with contacts\n• Auto: Negotiate or use meter\n\nFor intercity travel, check the Bookings tab for flights, trains, and cabs!";
+    }
+    if (msg.includes("food") || msg.includes("eat") || msg.includes("restaurant")) {
+      return "Must-try Delhi food spots:\n• Paranthe Wali Gali (Old Delhi) - Famous paranthas\n• Chandni Chowk - Street food heaven\n• Khan Market - Cafes & restaurants\n\nAlways check hygiene ratings and carry water. Want me to add a food tour to your journey?";
+    }
+    if (msg.includes("safe") || msg.includes("custom") || msg.includes("culture")) {
+      return "Delhi travel tips:\n• Dress modestly at religious sites\n• Keep valuables secure\n• Use women-only metro coaches\n• Avoid isolated areas at night\n• Share live location with trusted contacts\n\nCheck the Travel Guide in your Account for more tips!";
+    }
+    
+    return "I can help you with safe hostels, emergency contacts, transportation, food recommendations, and local customs. What would you like to know about?";
+  };
+
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
 
@@ -36,18 +58,19 @@ const FloatingAIBot: React.FC = () => {
     };
 
     setMessages(prev => [...prev, newMessage]);
+    const userInput = inputMessage;
     setInputMessage("");
 
-    // Simulate AI response
+    // Generate contextual AI response
     setTimeout(() => {
       const botResponse = {
         id: messages.length + 2,
-        text: "I understand you're looking for help with that. Let me provide you with the best recommendations based on your location and preferences.",
+        text: getAIResponse(userInput),
         isBot: true,
         time: "now"
       };
       setMessages(prev => [...prev, botResponse]);
-    }, 1000);
+    }, 800);
   };
 
   const handleQuickAction = (action: string) => {
