@@ -28,6 +28,7 @@ import {
   Trash2,
   Languages
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { 
   EmergencyDialog, 
   ParentalControlDialog, 
@@ -43,9 +44,10 @@ interface AccountPageProps {
   onLogout: () => void;
   likedCompanions?: number[];
   bookmarkedPlaces?: { id: number; name: string; image: string }[];
+  onLocationToggle?: (enabled: boolean) => void;
 }
 
-const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [] }) => {
+const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [], onLocationToggle }) => {
   const accountType = "Free";
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -433,11 +435,17 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
               <Globe className="w-4 h-4 text-muted-foreground" />
               <span className="text-xs">{userData?.language || 'Not specified'}</span>
             </div>
-            <div className="flex items-center gap-3">
-              <MapPin className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs">
-                {userData?.locationEnabled ? 'Location enabled' : 'Location disabled'}
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <MapPin className="w-4 h-4 text-muted-foreground" />
+                <span className="text-xs">
+                  {userData?.locationEnabled ? 'Location enabled' : 'Location disabled'}
+                </span>
+              </div>
+              <Switch 
+                checked={userData?.locationEnabled ?? false}
+                onCheckedChange={(checked) => onLocationToggle?.(checked)}
+              />
             </div>
             {userData?.preferences && userData.preferences.length > 0 && (
               <div className="flex items-start gap-3">
