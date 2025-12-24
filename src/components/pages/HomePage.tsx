@@ -276,7 +276,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
             </h1>
             <p className="text-white/80 text-xs flex items-center gap-1">
               <MapPin className="w-3 h-3 flex-shrink-0" />
-              Delhi
+              {userData?.locationEnabled ? "Delhi" : "Enable location"}
             </p>
           </div>
           <Button
