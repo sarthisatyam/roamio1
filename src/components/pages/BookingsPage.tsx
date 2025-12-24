@@ -38,14 +38,17 @@ import { useAISearch } from "@/hooks/useAISearch";
 import AISearchResults from "@/components/AISearchResults";
 
 interface BookingsPageProps {
+  userData?: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
   onNavigateToAccount?: () => void;
 }
 
-const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
+const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccount }) => {
   const [activeTab, setActiveTab] = useState("stay");
   const [checkInDate, setCheckInDate] = useState<Date>();
   const [checkOutDate, setCheckOutDate] = useState<Date>();
   const [departureDate, setDepartureDate] = useState<Date>();
+  const [origin, setOrigin] = useState(userData?.locationEnabled ? "Delhi" : "");
+  const [destination, setDestination] = useState("Hyderabad");
   const [stayFilters, setStayFilters] = useState({
     type: "all",
     priceRange: "all",
@@ -290,7 +293,13 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ onNavigateToAccount }) => {
               <Sparkles className="w-4 h-4" />
               Book Journey
             </h1>
-            <p className="text-white/80 text-[10px]">Safe stays & transport</p>
+            <p className="text-white/80 text-[10px] flex items-center gap-1">
+              {activeTab === "stay" ? (
+                <>Stays in {destination}</>
+              ) : (
+                <>{origin || "Select origin"} → {destination}</>
+              )}
+            </p>
           </div>
           <Button
             variant="ghost"

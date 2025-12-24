@@ -70,7 +70,7 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {activeTab === 0 && <HomePage userData={userData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} />}
-        {activeTab === 1 && <BookingsPage onNavigateToAccount={handleNavigateToAccount} />}
+        {activeTab === 1 && <BookingsPage userData={userData} onNavigateToAccount={handleNavigateToAccount} />}
         {activeTab === 2 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} likedCompanions={likedCompanions} onToggleLike={handleToggleLike} />}
         {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
