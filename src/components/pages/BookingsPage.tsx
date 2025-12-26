@@ -397,40 +397,44 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {/* Tabs */}
+        {/* Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl bg-muted">
-            <TabsTrigger value="stay" className="text-xs rounded-lg flex items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-              <Bed className="w-4 h-4" />
-              Stay
-            </TabsTrigger>
-            <TabsTrigger value="transport" className="text-xs rounded-lg flex items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
-              <Plane className="w-4 h-4" />
-              Travel
-            </TabsTrigger>
-          </TabsList>
 
           {/* Stay Tab */}
           <TabsContent value="stay" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
-            {/* Stay Filters */}
-            <div className="flex gap-2 mb-3 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-              {[
-                { key: "all", label: "All", icon: Home },
-                { key: "hostel", label: "Hostels", icon: Bed },
-                { key: "hotel", label: "Hotels", icon: Building2 },
-                { key: "coliving", label: "Co-living", icon: Building2 },
-              ].map(({ key, label, icon: Icon }) => (
-                <Button 
-                  key={key}
-                  variant={stayFilters.type === key ? "default" : "outline"} 
-                  size="sm" 
-                  onClick={() => setStayFilters({...stayFilters, type: key})}
-                  className="whitespace-nowrap text-xs h-9 rounded-xl px-3 flex items-center gap-1.5"
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {label}
-                </Button>
-              ))}
+            {/* Stay Filter */}
+            <div className="flex items-center gap-2 mb-3">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-xs h-9 rounded-xl px-3 flex items-center gap-1.5">
+                    <Home className="w-3.5 h-3.5" />
+                    {stayFilters.type === "all" ? "All Types" : 
+                     stayFilters.type === "hostel" ? "Hostels" :
+                     stayFilters.type === "hotel" ? "Hotels" : "Co-living"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-40 p-1" align="start">
+                  <div className="space-y-0.5">
+                    {[
+                      { key: "all", label: "All Types", icon: Home },
+                      { key: "hostel", label: "Hostels", icon: Bed },
+                      { key: "hotel", label: "Hotels", icon: Building2 },
+                      { key: "coliving", label: "Co-living", icon: Building2 },
+                    ].map(({ key, label, icon: Icon }) => (
+                      <Button 
+                        key={key}
+                        variant={stayFilters.type === key ? "secondary" : "ghost"} 
+                        size="sm" 
+                        onClick={() => setStayFilters({...stayFilters, type: key})}
+                        className="w-full justify-start text-xs h-8 rounded-lg px-2 flex items-center gap-1.5"
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             
             <div className="space-y-3">
