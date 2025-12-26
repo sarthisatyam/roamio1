@@ -38,7 +38,7 @@ import { useAISearch, AIDestination } from "@/hooks/useAISearch";
 import AISearchResults from "@/components/AISearchResults";
 
 interface HomePageProps {
-  userData?: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
+  userData?: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean; currentCity?: string | null } | null;
   onNavigateToAccount?: () => void;
   bookmarkedPlaces?: { id: number; name: string; image: string }[];
   onToggleBookmark?: (place: { id: number; name: string; image: string }) => void;
@@ -284,7 +284,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
               }}
             >
               <MapPin className="w-3 h-3 flex-shrink-0" />
-              {userData?.locationEnabled ? "Delhi" : "Enable location"}
+              {userData?.locationEnabled ? (userData?.currentCity || "Fetching...") : "Enable location"}
             </p>
           </div>
           <Button
