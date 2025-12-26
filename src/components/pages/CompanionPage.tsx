@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { 
   Users, 
@@ -280,15 +279,24 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
             <div className="px-4 py-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
-                  <Badge variant="outline" className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg">
+                  <Badge 
+                    variant={filters.gender !== 'all' ? "default" : "secondary"} 
+                    className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                  >
                     <Users className="w-3 h-3" />
                     {filters.gender === 'all' ? 'All' : filters.gender === 'female' ? 'Female' : 'Male'}
                   </Badge>
-                  <Badge variant="outline" className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg">
+                  <Badge 
+                    variant={filters.radius[0] !== 5 ? "default" : "secondary"} 
+                    className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                  >
                     <MapPin className="w-3 h-3" />
                     {filters.radius[0]}km
                   </Badge>
-                  <Badge variant="outline" className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg">
+                  <Badge 
+                    variant={filters.status !== 'all' ? "default" : "secondary"} 
+                    className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                  >
                     <Clock className="w-3 h-3" />
                     {filters.status === 'all' ? 'All' : 'Online'}
                   </Badge>
@@ -296,22 +304,22 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                 
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg px-3 flex-shrink-0">
+                    <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg px-3 flex-shrink-0 border-dashed">
                       <Filter className="w-3.5 h-3.5 mr-1.5" />
-                      Filter
+                      Filters
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-72 p-4 rounded-xl" align="end">
+                  <PopoverContent className="w-64 p-4 rounded-xl bg-popover" align="end">
                     <div className="space-y-4">
                       <h4 className="font-semibold text-sm flex items-center gap-2">
                         <Filter className="w-4 h-4 text-primary" />
-                        Filters
+                        Filter Companions
                       </h4>
                       
                       {/* Gender Filter */}
                       <div>
-                        <label className="text-xs font-medium mb-2 block">Gender</label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <label className="text-xs font-medium mb-2 block text-muted-foreground">Gender</label>
+                        <div className="grid grid-cols-3 gap-1.5">
                           {['all', 'female', 'male'].map((gender) => (
                             <Button
                               key={gender}
@@ -329,12 +337,10 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                         </div>
                       </div>
                       
-                      <Separator />
-                      
                       {/* Status Filter */}
                       <div>
-                        <label className="text-xs font-medium mb-2 block">Status</label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <label className="text-xs font-medium mb-2 block text-muted-foreground">Status</label>
+                        <div className="grid grid-cols-2 gap-1.5">
                           {['all', 'online'].map((status) => (
                             <Button
                               key={status}
@@ -353,11 +359,9 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                         </div>
                       </div>
                       
-                      <Separator />
-                      
                       {/* Radius Filter */}
                       <div>
-                        <label className="text-xs font-medium mb-2 block flex items-center gap-1.5">
+                        <label className="text-xs font-medium mb-2 block text-muted-foreground flex items-center gap-1.5">
                           <MapPin className="w-3 h-3 text-primary" />
                           Radius: {filters.radius[0]}km
                         </label>
@@ -371,11 +375,9 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                         />
                       </div>
                       
-                      <Separator />
-                      
                       {/* Age Range Filter */}
                       <div>
-                        <label className="text-xs font-medium mb-2 block">
+                        <label className="text-xs font-medium mb-2 block text-muted-foreground">
                           Age: {filters.ageRange[0]}-{filters.ageRange[1]}
                         </label>
                         <Slider
@@ -387,8 +389,6 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
                           className="w-full"
                         />
                       </div>
-                      
-                      <Separator />
                       
                       {/* Reset Filters */}
                       <Button
