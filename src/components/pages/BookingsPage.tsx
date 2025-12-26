@@ -402,131 +402,89 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
 
           <TabsContent value="stay" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
             {/* Stay Filter Bar */}
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
-                <Badge 
-                  variant={stayFilters.type === "all" ? "default" : "secondary"} 
-                  className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => setStayFilters({...stayFilters, type: "all"})}
-                >
-                  <Home className="w-3 h-3" />
-                  {stayFilters.type === "all" ? "All Types" : 
-                   stayFilters.type === "hostel" ? "Hostels" :
-                   stayFilters.type === "hotel" ? "Hotels" : "Co-living"}
-                </Badge>
-                <Badge 
-                  variant={stayFilters.priceRange !== "all" ? "default" : "secondary"} 
-                  className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                >
-                  <TrendingDown className="w-3 h-3" />
-                  {stayFilters.priceRange === "all" ? "Any Price" : stayFilters.priceRange}
-                </Badge>
-                <Badge 
-                  variant={stayFilters.rating !== "all" ? "default" : "secondary"} 
-                  className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                >
-                  <Star className="w-3 h-3" />
-                  {stayFilters.rating === "all" ? "Any Rating" : `${stayFilters.rating}+`}
-                </Badge>
-              </div>
-              
+            <div className="flex items-center gap-2 mb-3">
+              {/* Type Filter */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg px-3 flex-shrink-0 border-dashed">
-                    <Zap className="w-3.5 h-3.5 mr-1.5" />
-                    Filters
+                  <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg px-3 flex items-center gap-1.5">
+                    <Home className="w-3.5 h-3.5" />
+                    Type
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-64 p-4 rounded-xl bg-popover" align="end">
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-primary" />
-                      Filter Stays
-                    </h4>
-                    
-                    {/* Type Filter */}
-                    <div>
-                      <label className="text-xs font-medium mb-2 block text-muted-foreground">Accommodation Type</label>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {[
-                          { key: "all", label: "All", icon: Home },
-                          { key: "hostel", label: "Hostels", icon: Bed },
-                          { key: "hotel", label: "Hotels", icon: Building2 },
-                          { key: "coliving", label: "Co-living", icon: Building2 },
-                        ].map(({ key, label, icon: Icon }) => (
-                          <Button 
-                            key={key}
-                            variant={stayFilters.type === key ? "default" : "outline"} 
-                            size="sm" 
-                            onClick={() => setStayFilters({...stayFilters, type: key})}
-                            className={cn(
-                              "text-xs h-8 rounded-lg px-2 flex items-center gap-1.5 justify-start",
-                              stayFilters.type === key && "bg-gradient-primary text-white border-0"
-                            )}
-                          >
-                            <Icon className="w-3.5 h-3.5" />
-                            {label}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Price Filter */}
-                    <div>
-                      <label className="text-xs font-medium mb-2 block text-muted-foreground">Price Range</label>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {[
-                          { key: "all", label: "Any" },
-                          { key: "budget", label: "Budget" },
-                          { key: "mid", label: "Mid-range" },
-                          { key: "premium", label: "Premium" },
-                        ].map(({ key, label }) => (
-                          <Button 
-                            key={key}
-                            variant={stayFilters.priceRange === key ? "default" : "outline"} 
-                            size="sm" 
-                            onClick={() => setStayFilters({...stayFilters, priceRange: key})}
-                            className={cn(
-                              "text-xs h-8 rounded-lg px-2",
-                              stayFilters.priceRange === key && "bg-gradient-primary text-white border-0"
-                            )}
-                          >
-                            {label}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Rating Filter */}
-                    <div>
-                      <label className="text-xs font-medium mb-2 block text-muted-foreground">Minimum Rating</label>
-                      <div className="grid grid-cols-4 gap-1.5">
-                        {["all", "4.5", "4.0", "3.5"].map((rating) => (
-                          <Button 
-                            key={rating}
-                            variant={stayFilters.rating === rating ? "default" : "outline"} 
-                            size="sm" 
-                            onClick={() => setStayFilters({...stayFilters, rating})}
-                            className={cn(
-                              "text-xs h-8 rounded-lg px-2",
-                              stayFilters.rating === rating && "bg-gradient-primary text-white border-0"
-                            )}
-                          >
-                            {rating === "all" ? "Any" : `${rating}+`}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Reset */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setStayFilters({ type: "all", priceRange: "all", rating: "all" })}
-                      className="w-full text-xs h-9 rounded-lg"
-                    >
-                      Reset All Filters
-                    </Button>
+                <PopoverContent className="w-40 p-1 bg-popover" align="start">
+                  <div className="space-y-0.5">
+                    {[
+                      { key: "all", label: "All", icon: Home },
+                      { key: "hostel", label: "Hostels", icon: Bed },
+                      { key: "hotel", label: "Hotels", icon: Building2 },
+                      { key: "coliving", label: "Co-living", icon: Building2 },
+                    ].map(({ key, label, icon: Icon }) => (
+                      <Button 
+                        key={key}
+                        variant={stayFilters.type === key ? "secondary" : "ghost"} 
+                        size="sm" 
+                        onClick={() => setStayFilters({...stayFilters, type: key})}
+                        className="w-full justify-start text-xs h-8 rounded-lg px-2 flex items-center gap-1.5"
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
+              {/* Price Filter */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg px-3 flex items-center gap-1.5">
+                    <TrendingDown className="w-3.5 h-3.5" />
+                    Price
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-36 p-1 bg-popover" align="start">
+                  <div className="space-y-0.5">
+                    {[
+                      { key: "all", label: "Any" },
+                      { key: "budget", label: "Budget" },
+                      { key: "mid", label: "Mid-range" },
+                      { key: "premium", label: "Premium" },
+                    ].map(({ key, label }) => (
+                      <Button 
+                        key={key}
+                        variant={stayFilters.priceRange === key ? "secondary" : "ghost"} 
+                        size="sm" 
+                        onClick={() => setStayFilters({...stayFilters, priceRange: key})}
+                        className="w-full justify-start text-xs h-8 rounded-lg px-2"
+                      >
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
+              {/* Rating Filter */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg px-3 flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5" />
+                    Rating
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-28 p-1 bg-popover" align="start">
+                  <div className="space-y-0.5">
+                    {["all", "4.5", "4.0", "3.5"].map((rating) => (
+                      <Button 
+                        key={rating}
+                        variant={stayFilters.rating === rating ? "secondary" : "ghost"} 
+                        size="sm" 
+                        onClick={() => setStayFilters({...stayFilters, rating})}
+                        className="w-full justify-start text-xs h-8 rounded-lg px-2"
+                      >
+                        {rating === "all" ? "Any" : `${rating}+`}
+                      </Button>
+                    ))}
                   </div>
                 </PopoverContent>
               </Popover>
