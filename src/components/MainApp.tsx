@@ -25,31 +25,53 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
     const saved = localStorage.getItem('locationEnabled');
     return saved !== null ? JSON.parse(saved) : (userData?.locationEnabled ?? false);
   });
+  
+  const [currentCity, setCurrentCity] = useState<string | null>(() => {
+    return localStorage.getItem('currentCity');
+  });
 
   const handleLocationToggle = async (enabled: boolean) => {
     if (enabled) {
       // Request browser geolocation permission
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          () => {
+          async (position) => {
             setLocationEnabled(true);
             localStorage.setItem('locationEnabled', 'true');
+            
+            // Reverse geocode to get city name
+            try {
+              const { latitude, longitude } = position.coords;
+              const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+              );
+              const data = await response.json();
+              const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state || 'Unknown';
+              setCurrentCity(city);
+              localStorage.setItem('currentCity', city);
+            } catch {
+              setCurrentCity('Unknown');
+            }
           },
           () => {
             // Permission denied or error
             setLocationEnabled(false);
             localStorage.setItem('locationEnabled', 'false');
+            setCurrentCity(null);
+            localStorage.removeItem('currentCity');
           }
         );
       }
     } else {
       setLocationEnabled(false);
       localStorage.setItem('locationEnabled', 'false');
+      setCurrentCity(null);
+      localStorage.removeItem('currentCity');
     }
   };
 
-  // Merge userData with local locationEnabled state
-  const mergedUserData = userData ? { ...userData, locationEnabled } : null;
+  // Merge userData with local locationEnabled state and currentCity
+  const mergedUserData = userData ? { ...userData, locationEnabled, currentCity } : null;
 
   const handleToggleLike = (companionId: number) => {
     setLikedCompanions(prev => 

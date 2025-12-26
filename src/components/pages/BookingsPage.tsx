@@ -38,7 +38,7 @@ import { useAISearch } from "@/hooks/useAISearch";
 import AISearchResults from "@/components/AISearchResults";
 
 interface BookingsPageProps {
-  userData?: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
+  userData?: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean; currentCity?: string | null } | null;
   onNavigateToAccount?: () => void;
 }
 
@@ -47,8 +47,8 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   const [checkInDate, setCheckInDate] = useState<Date>();
   const [checkOutDate, setCheckOutDate] = useState<Date>();
   const [departureDate, setDepartureDate] = useState<Date>();
-  const [origin, setOrigin] = useState(userData?.locationEnabled ? "Delhi" : "");
-  const [destination, setDestination] = useState("Hyderabad");
+  const [origin, setOrigin] = useState(userData?.locationEnabled && userData?.currentCity ? userData.currentCity : "");
+  const [destination, setDestination] = useState("");
   const [stayFilters, setStayFilters] = useState({
     type: "all",
     priceRange: "all",
