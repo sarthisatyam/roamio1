@@ -46,7 +46,7 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
                 `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
               );
               const data = await response.json();
-              const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state || 'Unknown';
+              const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state_district || data.address?.county || data.address?.state || 'Unknown';
               setCurrentCity(city);
               localStorage.setItem('currentCity', city);
             } catch {
