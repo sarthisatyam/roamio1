@@ -102,9 +102,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount }) =>
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
-          console.log("Location fetched successfully"); //
         },
-
         (error) => {
           console.log("Location not available:", error);
         },
