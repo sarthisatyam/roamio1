@@ -505,7 +505,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
       <ExpenseDialog
         open={expenseDialogOpen}
         onOpenChange={setExpenseDialogOpen}
-        onSave={handleAddExpense}
+        onSave={handleSaveExpense}
         existingCategories={expenses.map((e) => e.category)}
       />
     </div>
