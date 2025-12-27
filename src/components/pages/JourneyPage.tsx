@@ -922,14 +922,14 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                                   </Button>
                                 </>
                               )}
-                              <Button
+                              {/* <Button
                                 variant="outline"
                                 size="icon"
                                 className="w-8 h-8 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
                                 onClick={() => handleDeleteActivity(activity.id)}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
+                              </Button> */}
                             </div>
                           </div>
 
