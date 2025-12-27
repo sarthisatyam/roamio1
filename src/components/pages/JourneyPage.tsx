@@ -898,7 +898,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                             <div className="flex gap-1.5 flex-shrink-0">
                               {!isCompleted && (
                                 <>
-                                  <Button
+                                  {/* <Button
                                     variant="outline"
                                     size="icon"
                                     className="w-8 h-8 rounded-xl"
@@ -911,12 +911,15 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                                     }}
                                   >
                                     <Edit className="w-3.5 h-3.5" />
-                                  </Button>
+                                  </Button> */}
                                   <Button
                                     variant="outline"
                                     size="icon"
                                     className="w-8 h-8 rounded-xl text-success hover:bg-success/10 hover:text-success"
-                                    onClick={() => handleCompleteActivity(activity.id)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCompleteActivity(activity.id);
+                                    }}
                                   >
                                     <CheckCircle className="w-3.5 h-3.5" />
                                   </Button>
