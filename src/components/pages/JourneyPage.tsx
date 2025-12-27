@@ -401,18 +401,30 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
             <Card className="p-3 mb-4 rounded-2xl border-0 shadow-soft">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-sm">Trip Budget</h3>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setEditingExpense(null);
-                    setExpenseDialogOpen(true);
-                  }}
-                  className="h-8 text-xs rounded-xl px-3"
-                >
-                  <Plus className="w-3.5 h-3.5 mr-1" />
-                  Add Expense
-                </Button>
+
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditingExpense(null);
+                      setExpenseDialogOpen(true);
+                    }}
+                    className="h-8 text-xs rounded-xl px-3"
+                  >
+                    <Plus className="w-3.5 h-3.5 mr-1" />
+                    Add
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={handleResetExpenses}
+                    className="h-8 text-xs rounded-xl px-3"
+                  >
+                    Reset
+                  </Button>
+                </div>
               </div>
 
               <div className="text-center mb-3">
