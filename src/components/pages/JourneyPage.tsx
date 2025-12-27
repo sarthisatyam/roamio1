@@ -208,6 +208,18 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
     setExpenseDialogOpen(true);
   };
 
+  const handleResetExpenses = () => {
+    setExpenses((prev) =>
+      prev.map((expense) => ({
+        ...expense,
+        amount: 0,
+        budget: 0,
+      })),
+    );
+
+    toast.success("All expenses have been reset.");
+  };
+
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
