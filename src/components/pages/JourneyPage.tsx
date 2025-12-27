@@ -431,6 +431,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                 return (
                   <Card
                     key={expense.category}
+                    onClick={() => handleEditExpense(expense)}
                     className="p-3 rounded-2xl border-0 shadow-soft flex justify-between items-center"
                   >
                     <div className="flex items-center gap-3">
@@ -445,14 +446,14 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                       </div>
                     </div>
 
-                    <Button
+                    {/* <Button
                       variant="outline"
                       size="icon"
                       className="w-8 h-8 rounded-xl"
                       onClick={() => handleEditExpense(expense)}
                     >
                       <Edit className="w-4 h-4" />
-                    </Button>
+                    </Button> */}
                   </Card>
                 );
               })}
