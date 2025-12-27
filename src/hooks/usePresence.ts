@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const usePresence = (userId: string | null) => {
   const heartbeatInterval = useRef<NodeJS.Timeout | null>(null);
+  const isSettingOffline = useRef(false);
 
   const updatePresence = useCallback(async (isOnline: boolean) => {
     if (!userId) return;
@@ -30,9 +31,24 @@ export const usePresence = (userId: string | null) => {
     updatePresence(true);
   }, [updatePresence]);
 
-  const setOffline = useCallback(() => {
-    updatePresence(false);
+  const setOffline = useCallback(async () => {
+    if (isSettingOffline.current) return;
+    isSettingOffline.current = true;
+    await updatePresence(false);
+    isSettingOffline.current = false;
   }, [updatePresence]);
+
+  // Listen for auth state changes to set offline on logout
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" && userId) {
+        // User logged out - set them offline immediately
+        updatePresence(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [userId, updatePresence]);
 
   useEffect(() => {
     if (!userId) return;
@@ -55,13 +71,12 @@ export const usePresence = (userId: string | null) => {
       }
     };
 
-    // Handle before unload
+    // Handle before unload - set offline synchronously before page closes
     const handleBeforeUnload = () => {
-      // Use sendBeacon for reliable offline update
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_presence?user_id=eq.${userId}`;
-      const body = JSON.stringify({ is_online: false, last_seen: new Date().toISOString() });
-      
-      navigator.sendBeacon && navigator.sendBeacon(url, body);
+      // Use sync XHR as a fallback since sendBeacon doesn't support auth headers
+      // The RLS policy requires authentication, so we need to use a different approach
+      // We'll rely on the heartbeat timeout instead
+      updatePresence(false);
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);

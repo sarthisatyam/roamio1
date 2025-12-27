@@ -49,9 +49,10 @@ import GroupChatDialog from "@/components/dialogs/GroupChatDialog";
 
 interface CompanionPageProps {
   onNavigateToAccount?: () => void;
+  userCity?: string | null;
 }
 
-const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount }) => {
+const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, userCity }) => {
   const [activeTab, setActiveTab] = useState("discover");
   const [searchQuery, setSearchQuery] = useState("");
   const [connectDialogOpen, setConnectDialogOpen] = useState(false);
@@ -94,7 +95,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount }) =>
       setCurrentUserId(session?.user?.id || null);
     });
 
-    // Get user location
+    // Get user location via geolocation
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -104,7 +105,40 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount }) =>
           });
         },
         (error) => {
-          console.log("Location not available:", error);
+          console.log("Geolocation not available:", error);
+          // Fallback: try to geocode from userCity if available
+          if (userCity) {
+            // Use a simple geocoding approach for major Indian cities
+            const cityCoords: Record<string, { lat: number; lng: number }> = {
+              "Delhi": { lat: 28.6139, lng: 77.2090 },
+              "New Delhi": { lat: 28.6139, lng: 77.2090 },
+              "Mumbai": { lat: 19.0760, lng: 72.8777 },
+              "Bangalore": { lat: 12.9716, lng: 77.5946 },
+              "Bengaluru": { lat: 12.9716, lng: 77.5946 },
+              "Chennai": { lat: 13.0827, lng: 80.2707 },
+              "Kolkata": { lat: 22.5726, lng: 88.3639 },
+              "Hyderabad": { lat: 17.3850, lng: 78.4867 },
+              "Pune": { lat: 18.5204, lng: 73.8567 },
+              "Jaipur": { lat: 26.9124, lng: 75.7873 },
+              "Ahmedabad": { lat: 23.0225, lng: 72.5714 },
+              "Goa": { lat: 15.2993, lng: 74.1240 },
+              "Manali": { lat: 32.2396, lng: 77.1887 },
+              "Udaipur": { lat: 24.5854, lng: 73.7125 },
+              "Varanasi": { lat: 25.3176, lng: 82.9739 },
+              "Rishikesh": { lat: 30.0869, lng: 78.2676 },
+              "Shimla": { lat: 31.1048, lng: 77.1734 },
+              "Agra": { lat: 27.1767, lng: 78.0081 },
+              "Lucknow": { lat: 26.8467, lng: 80.9462 },
+              "Kochi": { lat: 9.9312, lng: 76.2673 },
+              "Thiruvananthapuram": { lat: 8.5241, lng: 76.9366 },
+            };
+            
+            const normalizedCity = userCity.trim();
+            const coords = cityCoords[normalizedCity];
+            if (coords) {
+              setUserLocation(coords);
+            }
+          }
         },
       );
     }
