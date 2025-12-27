@@ -94,6 +94,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({
             lng: position.coords.longitude
           });
         },
+        console.log("Location fetched successfully"); //
         (error) => {
           console.log("Location not available:", error);
         }
