@@ -132,6 +132,8 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
     { category: "Shopping", amount: 800, budget: 1500, icon: ShoppingBag },
   ]);
 
+  const [editingExpense, setEditingExpense] = useState<any>(null);
+
   const totalSpent = expenses.reduce((sum, exp) => sum + exp.amount, 0);
   const totalBudget = expenses.reduce((sum, exp) => sum + exp.budget, 0);
   const completedCount = activities.filter((a) => a.status === "completed").length;
