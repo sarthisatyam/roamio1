@@ -179,10 +179,30 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
     toast.info("Activity deleted.");
   };
 
-  const handleAddExpense = (expense: { category: string; amount: number }) => {
-    setExpenses((prev) =>
-      prev.map((e) => (e.category === expense.category ? { ...e, amount: e.amount + expense.amount } : e)),
-    );
+  // const handleAddExpense = (expense: { category: string; amount: number }) => {
+  //   setExpenses((prev) =>
+  //     prev.map((e) => (e.category === expense.category ? { ...e, amount: e.amount + expense.amount } : e)),
+  //   );
+  // };
+
+  // Expense management
+  const handleSaveExpense = (expense: { category: string; amount: number; budget: number }) => {
+    setExpenses((prev) => {
+      const existing = prev.find((e) => e.category === expense.category);
+      if (existing) {
+        return prev.map((e) =>
+          e.category === expense.category ? { ...e, amount: expense.amount, budget: expense.budget } : e,
+        );
+      } else {
+        return [...prev, { ...expense, icon: ShoppingBag }];
+      }
+    });
+    toast.success("Expense saved successfully!");
+  };
+
+  const handleEditExpense = (expense: any) => {
+    setEditingExpense(expense);
+    setExpenseDialogOpen(true);
   };
 
   return (
