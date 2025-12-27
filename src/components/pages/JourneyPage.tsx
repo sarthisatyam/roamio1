@@ -401,19 +401,25 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
           </TabsContent>
 
           {/* EXPENSES TAB */}
-          <TabsContent value="expenses" className="px-4 pt-3 pb-20">
+          <TabsContent value="expenses" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
+            {/* Budget Overview */}
             <Card className="p-3 mb-4 rounded-2xl border-0 shadow-soft">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-sm">Trip Budget</h3>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setExpenseDialogOpen(true)}
+                  onClick={() => {
+                    setEditingExpense(null);
+                    setExpenseDialogOpen(true);
+                  }}
                   className="h-8 text-xs rounded-xl px-3"
                 >
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Add Expense
+                  <Plus className="w-3.5 h-3.5 mr-1" />
+                  Add Expense
                 </Button>
               </div>
+
               <div className="text-center mb-3">
                 <div className="text-2xl font-bold text-primary mb-0.5">₹{totalSpent.toLocaleString()}</div>
                 <div className="text-[10px] text-muted-foreground">
@@ -423,26 +429,39 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
               </div>
             </Card>
 
-            {filteredExpenses.map((expense) => {
-              const IconComponent = expense.icon;
-              return (
-                <Card key={expense.category} className="p-3 rounded-2xl border-0 shadow-soft mb-3">
-                  <div className="flex items-center justify-between mb-2">
+            {/* Expense List */}
+            <div className="space-y-3">
+              {expenses.map((expense) => {
+                const IconComponent = expense.icon;
+                return (
+                  <Card
+                    key={expense.category}
+                    className="p-3 rounded-2xl border-0 shadow-soft flex justify-between items-center"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
                         <IconComponent className="w-5 h-5 text-primary" />
                       </div>
-                      <span className="font-semibold text-sm">{expense.category}</span>
+                      <div>
+                        <div className="font-semibold text-sm">{expense.category}</div>
+                        <div className="text-[10px] text-muted-foreground">
+                          ₹{expense.amount} / ₹{expense.budget}
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-sm text-primary">₹{expense.amount.toLocaleString()}</div>
-                      <div className="text-[10px] text-muted-foreground">of ₹{expense.budget.toLocaleString()}</div>
-                    </div>
-                  </div>
-                  <Progress value={(expense.amount / expense.budget) * 100} className="h-2" />
-                </Card>
-              );
-            })}
+
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-8 h-8 rounded-xl"
+                      onClick={() => handleEditExpense(expense)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </Card>
+                );
+              })}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
