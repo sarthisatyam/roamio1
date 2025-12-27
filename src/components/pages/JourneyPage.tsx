@@ -519,6 +519,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
         onOpenChange={setActivityDialogOpen}
         activity={selectedActivity}
         onSave={handleSaveActivity}
+        onDelete={handleDeleteActivity} // ← new prop
         mode={activityDialogMode}
       />
 
