@@ -907,7 +907,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                                       // setSelectedActivity(activity);
                                       // setActivityDialogOpen(true);
                                       e.stopPropagation();
-                                      handleCompleteActivity(activity.id);
+                                      //handleCompleteActivity(activity.id);
                                     }}
                                   >
                                     <Edit className="w-3.5 h-3.5" />
