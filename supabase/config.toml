@@ -2,3 +2,6 @@ project_id = "tdfyccorqobrkymoiuit"
 
 [functions.search-generator]
 verify_jwt = false
+
+[functions.hotels-search]
+verify_jwt = false
