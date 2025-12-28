@@ -37,6 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAISearch } from "@/hooks/useAISearch";
 import AISearchResults from "@/components/AISearchResults";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BookingsPageProps {
   userData?: {
@@ -218,7 +219,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   });
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch hotels from Travelpayouts API when search query changes
+  // Fetch hotels from Travelpayouts API via edge function when search query changes
   useEffect(() => {
     const fetchHotels = async () => {
       if (!searchQuery || searchQuery.length < 2) {
@@ -231,15 +232,14 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
       setHotelError(null);
 
       try {
-        const response = await fetch(
-          `https://engine.hotellook.com/api/v2/cache.json?location=${encodeURIComponent(searchQuery)}&currency=inr&limit=10&token=d3c81d4b9`,
-        );
+        const { data, error } = await supabase.functions.invoke('hotels-search', {
+          body: { location: searchQuery, currency: 'inr', limit: 10 }
+        });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch hotels");
+        if (error) {
+          throw new Error(error.message || "Failed to fetch hotels");
         }
 
-        const data = await response.json();
         setHotelResults(data || []);
       } catch (error) {
         console.error("Error fetching hotels:", error);
