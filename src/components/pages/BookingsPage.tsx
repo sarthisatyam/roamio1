@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,7 @@ import {
   Sparkles,
   Award,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAISearch } from "@/hooks/useAISearch";
@@ -49,6 +50,22 @@ interface BookingsPageProps {
   onNavigateToAccount?: () => void;
 }
 
+interface HotelResult {
+  hotelId: number;
+  hotelName: string;
+  location: {
+    name: string;
+    country: string;
+    geo?: {
+      lat: number;
+      lon: number;
+    };
+  };
+  stars: number;
+  priceFrom: number;
+  pricePercentile?: Record<string, number>;
+}
+
 const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccount }) => {
   const [activeTab, setActiveTab] = useState("stay");
   const [checkInDate, setCheckInDate] = useState<Date>();
@@ -62,7 +79,13 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
     rating: "all",
   });
 
-  const stayOptions = [
+  // Hotel API state
+  const [hotelResults, setHotelResults] = useState<HotelResult[]>([]);
+  const [isLoadingHotels, setIsLoadingHotels] = useState(false);
+  const [hotelError, setHotelError] = useState<string | null>(null);
+
+  // Static fallback options (used when no search query)
+  const staticStayOptions = [
     {
       id: 1,
       name: "Hyderabad Backpackers Hub",
@@ -195,13 +218,68 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   });
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter stays based on search
-  const filteredStayOptions = stayOptions.filter(
-    (stay) =>
-      stay.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      stay.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      stay.amenities.some((a) => a.toLowerCase().includes(searchQuery.toLowerCase())),
-  );
+  // Fetch hotels from Travelpayouts API when search query changes
+  useEffect(() => {
+    const fetchHotels = async () => {
+      if (!searchQuery || searchQuery.length < 2) {
+        setHotelResults([]);
+        setHotelError(null);
+        return;
+      }
+
+      setIsLoadingHotels(true);
+      setHotelError(null);
+
+      try {
+        const response = await fetch(
+          `https://engine.hotellook.com/api/v2/cache.json?location=${encodeURIComponent(searchQuery)}&currency=inr&limit=10&token=d3c81d4b9fb68c84be15dbfc609e2f6d`
+        );
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch hotels");
+        }
+
+        const data = await response.json();
+        setHotelResults(data || []);
+      } catch (error) {
+        console.error("Error fetching hotels:", error);
+        setHotelError("Failed to fetch hotels. Please try again.");
+        setHotelResults([]);
+      } finally {
+        setIsLoadingHotels(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchHotels, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  // Transform API results to match UI format
+  const stayOptions = searchQuery.length >= 2 
+    ? hotelResults.map((hotel) => ({
+        id: hotel.hotelId,
+        name: hotel.hotelName,
+        location: hotel.location?.name 
+          ? `${hotel.location.name}${hotel.location.country ? `, ${hotel.location.country}` : ""}`
+          : "Location available on booking",
+        price: `₹${hotel.priceFrom?.toLocaleString("en-IN") || "N/A"}/night`,
+        rating: hotel.stars || 0,
+        icon: hotel.stars >= 4 ? Building2 : hotel.stars >= 3 ? Home : Bed,
+        amenities: ["Hotel", `${hotel.stars || 0} Star${hotel.stars !== 1 ? "s" : ""}`],
+        verified: hotel.stars >= 4,
+        category: hotel.stars >= 4 ? "hotel" : hotel.stars >= 3 ? "coliving" : "hostel",
+      }))
+    : staticStayOptions;
+
+  // Filter stays based on search (for static options) or use API results directly
+  const filteredStayOptions = searchQuery.length >= 2 
+    ? stayOptions 
+    : stayOptions.filter(
+        (stay) =>
+          stay.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          stay.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          stay.amenities.some((a) => a.toLowerCase().includes(searchQuery.toLowerCase())),
+      );
 
   // Filter flights based on search
   const filteredFlightOptions = flightOptions.filter(
@@ -508,7 +586,33 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
             </div>
 
             <div className="space-y-3">
-              {filteredStayOptions.length > 0 ? (
+              {/* Loading State */}
+              {isLoadingHotels && (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary mb-3" />
+                  <p className="text-sm text-muted-foreground">Searching hotels in "{searchQuery}"...</p>
+                </div>
+              )}
+
+              {/* Error State */}
+              {hotelError && !isLoadingHotels && (
+                <Card className="p-6 text-center">
+                  <Search className="w-8 h-8 mx-auto text-destructive mb-2" />
+                  <p className="text-sm text-destructive">{hotelError}</p>
+                </Card>
+              )}
+
+              {/* No Results State */}
+              {!isLoadingHotels && !hotelError && searchQuery.length >= 2 && filteredStayOptions.length === 0 && (
+                <Card className="p-6 text-center">
+                  <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">No hotels found for "{searchQuery}"</p>
+                  <p className="text-xs text-muted-foreground mt-1">Try searching for a different destination</p>
+                </Card>
+              )}
+
+              {/* Results */}
+              {!isLoadingHotels && !hotelError && filteredStayOptions.length > 0 ? (
                 filteredStayOptions.map((stay) => {
                   const IconComponent = stay.icon;
                   const comparison = stayComparisons[stay.id as keyof typeof stayComparisons];
@@ -625,7 +729,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                     </Card>
                   );
                 })
-              ) : showAIStayResults ? (
+              ) : !isLoadingHotels && !hotelError && searchQuery.length < 2 && showAIStayResults ? (
                 <AISearchResults
                   results={aiResults}
                   isLoading={aiLoading}
@@ -635,11 +739,6 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                   showStays={true}
                   showTravel={true}
                 />
-              ) : searchQuery ? (
-                <Card className="p-6 text-center">
-                  <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">No stays found for "{searchQuery}"</p>
-                </Card>
               ) : null}
             </div>
           </TabsContent>
