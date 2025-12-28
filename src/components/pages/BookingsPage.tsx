@@ -232,9 +232,9 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
 
       try {
         const response = await fetch(
-          `https://engine.hotellook.com/api/v2/cache.json?location=${encodeURIComponent(searchQuery)}&currency=inr&limit=10&token=d3c81d4b9fb68c84be15dbfc609e2f6d`
+          `https://engine.hotellook.com/api/v2/cache.json?location=${encodeURIComponent(searchQuery)}&currency=inr&limit=10&token=d3c81d4b9`,
         );
-        
+
         if (!response.ok) {
           throw new Error("Failed to fetch hotels");
         }
@@ -255,31 +255,33 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   }, [searchQuery]);
 
   // Transform API results to match UI format
-  const stayOptions = searchQuery.length >= 2 
-    ? hotelResults.map((hotel) => ({
-        id: hotel.hotelId,
-        name: hotel.hotelName,
-        location: hotel.location?.name 
-          ? `${hotel.location.name}${hotel.location.country ? `, ${hotel.location.country}` : ""}`
-          : "Location available on booking",
-        price: `₹${hotel.priceFrom?.toLocaleString("en-IN") || "N/A"}/night`,
-        rating: hotel.stars || 0,
-        icon: hotel.stars >= 4 ? Building2 : hotel.stars >= 3 ? Home : Bed,
-        amenities: ["Hotel", `${hotel.stars || 0} Star${hotel.stars !== 1 ? "s" : ""}`],
-        verified: hotel.stars >= 4,
-        category: hotel.stars >= 4 ? "hotel" : hotel.stars >= 3 ? "coliving" : "hostel",
-      }))
-    : staticStayOptions;
+  const stayOptions =
+    searchQuery.length >= 2
+      ? hotelResults.map((hotel) => ({
+          id: hotel.hotelId,
+          name: hotel.hotelName,
+          location: hotel.location?.name
+            ? `${hotel.location.name}${hotel.location.country ? `, ${hotel.location.country}` : ""}`
+            : "Location available on booking",
+          price: `₹${hotel.priceFrom?.toLocaleString("en-IN") || "N/A"}/night`,
+          rating: hotel.stars || 0,
+          icon: hotel.stars >= 4 ? Building2 : hotel.stars >= 3 ? Home : Bed,
+          amenities: ["Hotel", `${hotel.stars || 0} Star${hotel.stars !== 1 ? "s" : ""}`],
+          verified: hotel.stars >= 4,
+          category: hotel.stars >= 4 ? "hotel" : hotel.stars >= 3 ? "coliving" : "hostel",
+        }))
+      : staticStayOptions;
 
   // Filter stays based on search (for static options) or use API results directly
-  const filteredStayOptions = searchQuery.length >= 2 
-    ? stayOptions 
-    : stayOptions.filter(
-        (stay) =>
-          stay.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          stay.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          stay.amenities.some((a) => a.toLowerCase().includes(searchQuery.toLowerCase())),
-      );
+  const filteredStayOptions =
+    searchQuery.length >= 2
+      ? stayOptions
+      : stayOptions.filter(
+          (stay) =>
+            stay.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            stay.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            stay.amenities.some((a) => a.toLowerCase().includes(searchQuery.toLowerCase())),
+        );
 
   // Filter flights based on search
   const filteredFlightOptions = flightOptions.filter(
