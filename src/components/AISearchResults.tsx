@@ -10,10 +10,7 @@ import {
   MapPin, 
   Bed, 
   Building2, 
-  Home,
-  Plane,
-  Train,
-  Clock
+  Home
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AISearchResults as AIResults, AIDestination, AIStay, AIFlight, AITrain } from '@/hooks/useAISearch';
@@ -209,73 +206,7 @@ export const AISearchResults: React.FC<AISearchResultsProps> = ({
         </section>
       )}
 
-      {/* Flights */}
-      {showTravel && hasFlights && (
-        <section>
-          <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-            <Plane className="w-4 h-4 text-primary" />
-            Flights
-          </h3>
-          <div className="space-y-2">
-            {results.flights.map((flight) => (
-              <Card key={flight.id} className="p-3 shadow-soft">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-semibold text-sm">{flight.name}</h4>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                      <span>{flight.departure}</span>
-                      <span>→</span>
-                      <span>{flight.arrival}</span>
-                      <Badge variant="outline" className="text-[10px]">
-                        <Clock className="w-2.5 h-2.5 mr-0.5" />
-                        {flight.duration}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-primary">{flight.price}</p>
-                    <Badge variant="secondary" className="text-[10px] mt-1">{flight.type}</Badge>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Trains */}
-      {showTravel && hasTrains && (
-        <section>
-          <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-            <Train className="w-4 h-4 text-primary" />
-            Trains
-          </h3>
-          <div className="space-y-2">
-            {results.trains.map((train) => (
-              <Card key={train.id} className="p-3 shadow-soft">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-semibold text-sm">{train.name}</h4>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                      <span>{train.departure}</span>
-                      <span>→</span>
-                      <span>{train.arrival}</span>
-                      <Badge variant="outline" className="text-[10px]">
-                        <Clock className="w-2.5 h-2.5 mr-0.5" />
-                        {train.duration}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-primary">{train.price}</p>
-                    <Badge variant="secondary" className="text-[10px] mt-1">{train.type}</Badge>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Flights and Trains sections removed as per user request */}
     </div>
   );
 };

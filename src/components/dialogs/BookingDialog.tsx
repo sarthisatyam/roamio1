@@ -10,8 +10,16 @@ interface BookingPlatform {
   price: string;
   savings?: string;
   url: string;
-  icon: string;
+  icon?: string;
+  logo?: string;
 }
+
+// Platform logos
+const PLATFORM_LOGOS: Record<string, string> = {
+  makemytrip: "https://imgak.mmtcdn.com/pwa_v3/pwa_header_assets/logo.png",
+  goibibo: "https://gos3.ibcdn.com/goibiboLogoVIP-1540542890.png",
+  agoda: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Agoda_transparent_logo.png"
+};
 
 interface BookingDialogProps {
   open: boolean;
@@ -98,8 +106,11 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
             <h4 className="font-semibold text-sm">Compare Prices</h4>
           </div>
 
-          {platforms.map((platform, index) => {
+        {platforms.slice(0, 3).map((platform, index) => {
             const isBest = index === bestPlatformIndex;
+            const platformKey = platform.name.toLowerCase().replace(/\s/g, '');
+            const logoUrl = platform.logo || PLATFORM_LOGOS[platformKey];
+            
             return (
               <div
                 key={platform.name}
@@ -109,7 +120,15 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">{platform.icon}</span>
+                  {logoUrl ? (
+                    <img 
+                      src={logoUrl} 
+                      alt={platform.name} 
+                      className="h-6 w-auto max-w-[80px] object-contain"
+                    />
+                  ) : (
+                    <span className="text-xl">{platform.icon}</span>
+                  )}
                   <div>
                     <p className="font-medium text-sm capitalize">{platform.name}</p>
                     {isBest && (
