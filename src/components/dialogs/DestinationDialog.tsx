@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,17 +12,47 @@ import { Separator } from "@/components/ui/separator";
 import { 
   Star, 
   Shield, 
-  MapPin, 
   Clock, 
   Utensils, 
   Calendar,
   Plus,
-  Camera,
-  Mountain,
-  Building2
+  CloudSun
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+
+// Cache for weather data
+const weatherCache: Record<string, { data: string; timestamp: number }> = {};
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+
+// Opening hours for popular attractions
+const attractionHours: Record<string, string> = {
+  "jagannath temple": "5:30 AM – 10 PM",
+  "lingaraj temple": "6 AM – 9 PM",
+  "puri beach": "Open 24 hours",
+  "konark sun temple": "6 AM – 8 PM",
+  "dhauli shanti stupa": "8 AM – 6 PM",
+  "nandankanan zoo": "8 AM – 5 PM",
+  "udayagiri caves": "9 AM – 5 PM",
+  "khandagiri caves": "9 AM – 5 PM",
+  "rajarani temple": "9 AM – 5 PM",
+  "mukteswara temple": "6 AM – 6 PM",
+  "chilika lake": "6 AM – 6 PM",
+  "ekamra kanan": "6 AM – 8 PM",
+  "state museum": "10 AM – 5 PM",
+  "tribal museum": "10 AM – 5 PM",
+  "patnagarh": "Open 24 hours",
+  "default": "9 AM – 6 PM"
+};
+
+const getAttractionHours = (activity: string): string => {
+  const lowerActivity = activity.toLowerCase();
+  for (const [key, hours] of Object.entries(attractionHours)) {
+    if (lowerActivity.includes(key)) {
+      return hours;
+    }
+  }
+  return attractionHours.default;
+};
 
 interface Itinerary {
   day: number;
@@ -63,6 +93,42 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({
   destination,
   onAddToPlanner
 }) => {
+  const [weather, setWeather] = useState<string | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+
+  useEffect(() => {
+    if (!destination || !open) return;
+
+    const fetchWeather = async () => {
+      const cityName = destination.name.toLowerCase().split(',')[0].trim();
+      
+      // Check cache first
+      const cached = weatherCache[cityName];
+      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        setWeather(cached.data);
+        return;
+      }
+
+      setWeatherLoading(true);
+      try {
+        const response = await fetch(`https://wttr.in/${encodeURIComponent(cityName)}?format=%C+%t`);
+        if (!response.ok) throw new Error('Weather fetch failed');
+        const data = await response.text();
+        
+        // Cache the result
+        weatherCache[cityName] = { data, timestamp: Date.now() };
+        setWeather(data);
+      } catch (error) {
+        console.error('Failed to fetch weather:', error);
+        setWeather(null);
+      } finally {
+        setWeatherLoading(false);
+      }
+    };
+
+    fetchWeather();
+  }, [destination, open]);
+
   if (!destination) return null;
 
   const handleAddToPlanner = (activity: { time: string; activity: string; type: string }, day: number) => {
@@ -100,6 +166,16 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({
                   <Shield className="w-3 h-3 mr-1" />
                   {destination.safety}% Safe
                 </Badge>
+                {weatherLoading ? (
+                  <span className="text-xs text-muted-foreground ml-2">Loading weather...</span>
+                ) : weather ? (
+                  <Badge variant="outline" className="text-xs bg-sky-500/10 text-sky-600 border-sky-300 ml-1">
+                    <CloudSun className="w-3 h-3 mr-1" />
+                    <span className="font-normal">{weather}</span>
+                  </Badge>
+                ) : (
+                  <span className="text-xs text-muted-foreground/70 ml-2">Weather unavailable</span>
+                )}
               </div>
             </div>
           </DialogTitle>
@@ -133,7 +209,9 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({
                         <div key={idx} className="flex items-center justify-between gap-2 py-1.5 border-b border-border/50 last:border-0">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">{activity.time}</span>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {getAttractionHours(activity.activity)}
+                            </span>
                             <span className="text-sm truncate">{activity.activity}</span>
                           </div>
                           <Button
