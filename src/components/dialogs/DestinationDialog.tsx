@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,10 +19,7 @@ import {
   CloudSun
 } from "lucide-react";
 import { toast } from "sonner";
-
-// Cache for weather data
-const weatherCache: Record<string, { data: string; timestamp: number }> = {};
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+import { useWeather } from "@/hooks/useWeather";
 
 // Opening hours for popular attractions
 const attractionHours: Record<string, string> = {
@@ -93,41 +90,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({
   destination,
   onAddToPlanner
 }) => {
-  const [weather, setWeather] = useState<string | null>(null);
-  const [weatherLoading, setWeatherLoading] = useState(false);
-
-  useEffect(() => {
-    if (!destination || !open) return;
-
-    const fetchWeather = async () => {
-      const cityName = destination.name.toLowerCase().split(',')[0].trim();
-      
-      // Check cache first
-      const cached = weatherCache[cityName];
-      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        setWeather(cached.data);
-        return;
-      }
-
-      setWeatherLoading(true);
-      try {
-        const response = await fetch(`https://wttr.in/${encodeURIComponent(cityName)}?format=%C+%t`);
-        if (!response.ok) throw new Error('Weather fetch failed');
-        const data = await response.text();
-        
-        // Cache the result
-        weatherCache[cityName] = { data, timestamp: Date.now() };
-        setWeather(data);
-      } catch (error) {
-        console.error('Failed to fetch weather:', error);
-        setWeather(null);
-      } finally {
-        setWeatherLoading(false);
-      }
-    };
-
-    fetchWeather();
-  }, [destination, open]);
+  const { weather, loading: weatherLoading } = useWeather(destination?.name || null, open);
 
   if (!destination) return null;
 

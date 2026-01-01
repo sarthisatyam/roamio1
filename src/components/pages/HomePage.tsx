@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,8 +29,10 @@ import {
   UtensilsCrossed,
   Palette,
   Radio,
-  Zap
+  Zap,
+  CloudSun
 } from "lucide-react";
+import { useMultipleWeather } from "@/hooks/useWeather";
 import { cn } from "@/lib/utils";
 import BookingDialog from "@/components/dialogs/BookingDialog";
 import DestinationDialog from "@/components/dialogs/DestinationDialog";
@@ -53,6 +55,15 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
   const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
+
+  // Extract city names for weather fetching
+  const destinationCities = useMemo(() => [
+    "Goa, India",
+    "Manali, Himachal Pradesh", 
+    "Udaipur, Rajasthan"
+  ], []);
+  
+  const { weatherMap, loading: weatherLoading } = useMultipleWeather(destinationCities);
 
   const destinations = [
     {
@@ -376,10 +387,20 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl flex-shrink-0">{dest.image}</div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm truncate">{dest.name}</h3>
-                        <Badge variant="outline" className="text-[10px] mt-1 py-0.5 px-2 rounded-lg bg-success/10 text-success border-success/30">
-                          <Shield className="w-2.5 h-2.5 mr-0.5" />
-                          {dest.safety}% Safe
-                        </Badge>
+                        <div className="flex items-center gap-1 mt-1 flex-wrap">
+                          <Badge variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg bg-success/10 text-success border-success/30">
+                            <Shield className="w-2.5 h-2.5 mr-0.5" />
+                            {dest.safety}% Safe
+                          </Badge>
+                          {weatherLoading ? (
+                            <span className="text-[10px] text-muted-foreground">...</span>
+                          ) : weatherMap[dest.name] ? (
+                            <Badge variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg bg-sky-500/10 text-sky-600 border-sky-300">
+                              <CloudSun className="w-2.5 h-2.5 mr-0.5" />
+                              <span className="font-normal">{weatherMap[dest.name]}</span>
+                            </Badge>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-col items-end flex-shrink-0">
