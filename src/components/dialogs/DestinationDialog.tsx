@@ -1,23 +1,10 @@
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Star, 
-  Shield, 
-  Clock, 
-  Utensils, 
-  Calendar,
-  Plus,
-  CloudSun
-} from "lucide-react";
+import { Star, Shield, Clock, Utensils, Calendar, Plus, CloudSun } from "lucide-react";
 import { toast } from "sonner";
 import { useWeather } from "@/hooks/useWeather";
 
@@ -37,8 +24,8 @@ const attractionHours: Record<string, string> = {
   "ekamra kanan": "6 AM – 8 PM",
   "state museum": "10 AM – 5 PM",
   "tribal museum": "10 AM – 5 PM",
-  "patnagarh": "Open 24 hours",
-  "default": "9 AM – 6 PM"
+  patnagarh: "Open 24 hours",
+  default: "9 AM – 6 PM",
 };
 
 const getAttractionHours = (activity: string): string => {
@@ -84,12 +71,7 @@ interface DestinationDialogProps {
   onAddToPlanner?: (activity: { title: string; location: string; type: string }) => void;
 }
 
-const DestinationDialog: React.FC<DestinationDialogProps> = ({
-  open,
-  onOpenChange,
-  destination,
-  onAddToPlanner
-}) => {
+const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChange, destination, onAddToPlanner }) => {
   const { weather, loading: weatherLoading } = useWeather(destination?.name || null, open);
 
   if (!destination) return null;
@@ -98,7 +80,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({
     onAddToPlanner?.({
       title: activity.activity,
       location: destination.name,
-      type: activity.type
+      type: activity.type,
     });
     toast.success(`"${activity.activity}" added to your planner!`);
   };
@@ -107,7 +89,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({
     onAddToPlanner?.({
       title: `Dine at ${eatery.name}`,
       location: destination.name,
-      type: "Food"
+      type: "Food",
     });
     toast.success(`"${eatery.name}" added to your planner!`);
   };
@@ -166,15 +148,20 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({
               <div className="space-y-4">
                 {destination.itinerary.map((day) => (
                   <Card key={day.day} className="p-3">
-                    <h4 className="font-medium text-sm mb-2 text-primary">Day {day.day}: {day.title}</h4>
+                    <h4 className="font-medium text-sm mb-2 text-primary">
+                      Day {day.day}: {day.title}
+                    </h4>
                     <div className="space-y-2">
                       {day.activities.map((activity, idx) => (
-                        <div key={idx} className="flex items-center justify-between gap-2 py-1.5 border-b border-border/50 last:border-0">
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between gap-2 py-1.5 border-b border-border/50 last:border-0"
+                        >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                            {/* <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
                               {getAttractionHours(activity.activity)}
-                            </span>
+                            </span> */}
                             <span className="text-sm truncate">{activity.activity}</span>
                           </div>
                           <Button
@@ -210,7 +197,9 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium text-sm">{eatery.name}</h4>
-                          <Badge variant="outline" className="text-[10px]">{eatery.type}</Badge>
+                          <Badge variant="outline" className="text-[10px]">
+                            {eatery.type}
+                          </Badge>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                           <div className="flex items-center gap-1">
