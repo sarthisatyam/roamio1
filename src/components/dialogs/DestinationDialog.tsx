@@ -9,34 +9,34 @@ import { toast } from "sonner";
 import { useWeather } from "@/hooks/useWeather";
 
 // Opening hours for popular attractions
-const attractionHours: Record<string, string> = {
-  "jagannath temple": "5:30 AM – 10 PM",
-  "lingaraj temple": "6 AM – 9 PM",
-  "puri beach": "Open 24 hours",
-  "konark sun temple": "6 AM – 8 PM",
-  "dhauli shanti stupa": "8 AM – 6 PM",
-  "nandankanan zoo": "8 AM – 5 PM",
-  "udayagiri caves": "9 AM – 5 PM",
-  "khandagiri caves": "9 AM – 5 PM",
-  "rajarani temple": "9 AM – 5 PM",
-  "mukteswara temple": "6 AM – 6 PM",
-  "chilika lake": "6 AM – 6 PM",
-  "ekamra kanan": "6 AM – 8 PM",
-  "state museum": "10 AM – 5 PM",
-  "tribal museum": "10 AM – 5 PM",
-  patnagarh: "Open 24 hours",
-  default: "9 AM – 6 PM",
-};
+// const attractionHours: Record<string, string> = {
+//   "jagannath temple": "5:30 AM – 10 PM",
+//   "lingaraj temple": "6 AM – 9 PM",
+//   "puri beach": "Open 24 hours",
+//   "konark sun temple": "6 AM – 8 PM",
+//   "dhauli shanti stupa": "8 AM – 6 PM",
+//   "nandankanan zoo": "8 AM – 5 PM",
+//   "udayagiri caves": "9 AM – 5 PM",
+//   "khandagiri caves": "9 AM – 5 PM",
+//   "rajarani temple": "9 AM – 5 PM",
+//   "mukteswara temple": "6 AM – 6 PM",
+//   "chilika lake": "6 AM – 6 PM",
+//   "ekamra kanan": "6 AM – 8 PM",
+//   "state museum": "10 AM – 5 PM",
+//   "tribal museum": "10 AM – 5 PM",
+//   patnagarh: "Open 24 hours",
+//   default: "9 AM – 6 PM",
+// };
 
-const getAttractionHours = (activity: string): string => {
-  const lowerActivity = activity.toLowerCase();
-  for (const [key, hours] of Object.entries(attractionHours)) {
-    if (lowerActivity.includes(key)) {
-      return hours;
-    }
-  }
-  return attractionHours.default;
-};
+// const getAttractionHours = (activity: string): string => {
+//   const lowerActivity = activity.toLowerCase();
+//   for (const [key, hours] of Object.entries(attractionHours)) {
+//     if (lowerActivity.includes(key)) {
+//       return hours;
+//     }
+//   }
+//   return attractionHours.default;
+// };
 
 interface Itinerary {
   day: number;
@@ -148,9 +148,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
               <div className="space-y-4">
                 {destination.itinerary.map((day) => (
                   <Card key={day.day} className="p-3">
-                    <h4 className="font-medium text-sm mb-2 text-primary">
-                      Day {day.day}: {day.title}
-                    </h4>
+                    <h4 className="font-medium text-sm mb-2 text-primary">Day: {day.title}</h4>
                     <div className="space-y-2">
                       {day.activities.map((activity, idx) => (
                         <div
@@ -161,7 +159,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
                             {/* <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
                               {getAttractionHours(activity.activity)}
-                            </span> */}
+                            </span>  Day {day.day}*/}
                             <span className="text-sm truncate">{activity.activity}</span>
                           </div>
                           <Button
