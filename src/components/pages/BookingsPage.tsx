@@ -219,10 +219,15 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   });
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch hotels from Travelpayouts API when search query changes
+  // Determine the effective location for hotel search
+  const effectiveLocation = searchQuery.length >= 2 
+    ? searchQuery 
+    : (userData?.locationEnabled && userData?.currentCity ? userData.currentCity : null);
+
+  // Fetch hotels from Travelpayouts API when search query or location changes
   useEffect(() => {
     const fetchHotels = async () => {
-      if (!searchQuery || searchQuery.length < 2) {
+      if (!effectiveLocation) {
         setHotelResults([]);
         setHotelError(null);
         return;
@@ -233,7 +238,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
 
       try {
         const { data, error } = await supabase.functions.invoke('hotels-search', {
-          body: { location: searchQuery, currency: 'inr', limit: 10 }
+          body: { location: effectiveLocation, currency: 'inr', limit: 10 }
         });
 
         if (error) {
@@ -252,11 +257,11 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
 
     const debounceTimer = setTimeout(fetchHotels, 500);
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
+  }, [effectiveLocation]);
 
   // Transform API results to match UI format
   const stayOptions =
-    searchQuery.length >= 2
+    effectiveLocation
       ? hotelResults.map((hotel) => ({
           id: hotel.hotelId,
           name: hotel.hotelName,
@@ -274,7 +279,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
 
   // Filter stays based on search (for static options) or use API results directly
   const filteredStayOptions =
-    searchQuery.length >= 2
+    effectiveLocation
       ? stayOptions
       : stayOptions.filter(
           (stay) =>
@@ -392,7 +397,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
             </h1>
             <p className="text-white/80 text-[10px] flex items-center gap-1">
               {activeTab === "stay" ? (
-                <>Stays in {destination}</>
+                <>Stays in {searchQuery || userData?.currentCity || "your area"}</>
               ) : (
                 <>
                   {origin || "Select origin"} → {destination}
@@ -593,7 +598,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
               {isLoadingHotels && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-primary mb-3" />
-                  <p className="text-sm text-muted-foreground">Searching hotels in "{searchQuery}"...</p>
+                  <p className="text-sm text-muted-foreground">Searching hotels in "{effectiveLocation}"...</p>
                 </div>
               )}
 
@@ -606,11 +611,20 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
               )}
 
               {/* No Results State */}
-              {!isLoadingHotels && !hotelError && searchQuery.length >= 2 && filteredStayOptions.length === 0 && (
+              {!isLoadingHotels && !hotelError && effectiveLocation && filteredStayOptions.length === 0 && (
                 <Card className="p-6 text-center">
                   <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">No hotels found for "{searchQuery}"</p>
+                  <p className="text-sm text-muted-foreground">No hotels found for "{effectiveLocation}"</p>
                   <p className="text-xs text-muted-foreground mt-1">Try searching for a different destination</p>
+                </Card>
+              )}
+              
+              {/* Enable Location Prompt */}
+              {!isLoadingHotels && !effectiveLocation && (
+                <Card className="p-6 text-center">
+                  <MapPin className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">Search for a destination or enable location</p>
+                  <p className="text-xs text-muted-foreground mt-1">to see stays near you</p>
                 </Card>
               )}
 
