@@ -30,9 +30,10 @@ import {
   Palette,
   Radio,
   Zap,
-  CloudSun
+  CloudSun,
+  Loader2
 } from "lucide-react";
-import { useMultipleWeather } from "@/hooks/useWeather";
+import { useWeather, useMultipleWeather } from "@/hooks/useWeather";
 import { cn } from "@/lib/utils";
 import BookingDialog from "@/components/dialogs/BookingDialog";
 import DestinationDialog from "@/components/dialogs/DestinationDialog";
@@ -55,6 +56,12 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
   const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
+
+  // Fetch weather for user's current location
+  const { weather: currentLocationWeather, loading: currentWeatherLoading } = useWeather(
+    userData?.currentCity || null,
+    userData?.locationEnabled ?? false
+  );
 
   // Extract city names for weather fetching
   const destinationCities = useMemo(() => [
@@ -286,17 +293,33 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
             <h1 className="text-lg font-bold text-white mb-0.5 truncate">
               Good morning{userData?.name ? `, ${userData.name}` : ''}! 👋
             </h1>
-            <p 
-              className={`text-white/80 text-xs flex items-center gap-1 ${!userData?.locationEnabled ? 'cursor-pointer hover:text-white transition-colors' : ''}`}
-              onClick={() => {
-                if (!userData?.locationEnabled && onLocationToggle) {
-                  onLocationToggle(true);
-                }
-              }}
-            >
-              <MapPin className="w-3 h-3 flex-shrink-0" />
-              {userData?.locationEnabled ? (userData?.currentCity || "Fetching...") : "Enable location"}
-            </p>
+            <div className="flex items-center gap-2">
+              <p 
+                className={`text-white/80 text-xs flex items-center gap-1 ${!userData?.locationEnabled ? 'cursor-pointer hover:text-white transition-colors' : ''}`}
+                onClick={() => {
+                  if (!userData?.locationEnabled && onLocationToggle) {
+                    onLocationToggle(true);
+                  }
+                }}
+              >
+                <MapPin className="w-3 h-3 flex-shrink-0" />
+                {userData?.locationEnabled ? (userData?.currentCity || "Fetching...") : "Enable location"}
+              </p>
+              {/* Current Location Weather */}
+              {userData?.locationEnabled && userData?.currentCity && (
+                <span className="text-white/70 text-xs flex items-center gap-1">
+                  <span className="text-white/50">•</span>
+                  {currentWeatherLoading ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : currentLocationWeather ? (
+                    <>
+                      <CloudSun className="w-3 h-3" />
+                      <span>{currentLocationWeather}</span>
+                    </>
+                  ) : null}
+                </span>
+              )}
+            </div>
           </div>
           <Button
             variant="ghost"
