@@ -305,43 +305,44 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
       cab.service.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const platformIcons: Record<string, React.ReactNode> = {
-    makemytrip: <span className="text-lg">🔵</span>,
-    booking: <span className="text-lg">🔷</span>,
-    goibibo: <span className="text-lg">🟢</span>,
-    agoda: <span className="text-lg">🟣</span>,
-    zolo: <span className="text-lg">🟡</span>,
-    irctc: <span className="text-lg">🚆</span>,
-    cleartrip: <span className="text-lg">✈️</span>,
-    ixigo: <span className="text-lg">🎯</span>,
-    redbus: <span className="text-lg">🚌</span>,
-    ola: <span className="text-lg">🚕</span>,
-    uber: <span className="text-lg">🚗</span>,
-    rapido: <span className="text-lg">🏍️</span>,
-    blablacar: <span className="text-lg">🤝</span>,
-    abhibus: <span className="text-lg">🚐</span>,
+  // Platform logos for the 3 main booking platforms
+  const PLATFORM_LOGOS: Record<string, string> = {
+    makemytrip: "https://imgak.mmtcdn.com/pwa_v3/pwa_header_assets/logo.png",
+    goibibo: "https://gos3.ibcdn.com/goibiboLogoVIP-1540542890.png",
+    agoda: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Agoda_transparent_logo.png"
+  };
+
+  const renderPlatformLogo = (platform: string) => {
+    const logoUrl = PLATFORM_LOGOS[platform.toLowerCase()];
+    if (logoUrl) {
+      return (
+        <img 
+          src={logoUrl} 
+          alt={platform} 
+          className="h-5 w-auto max-w-[70px] object-contain"
+        />
+      );
+    }
+    return <span className="text-lg">📦</span>;
   };
 
   const stayComparisons = {
     1: {
       makemytrip: { price: "₹750/night", savings: "₹50" },
-      booking: { price: "₹820/night", savings: "₹0" },
       goibibo: { price: "₹780/night", savings: "₹20" },
       agoda: { price: "₹800/night", savings: "₹0" },
       features: ["Solo female friendly", "24/7 security", "Common areas"],
     },
     2: {
-      makemytrip: { price: "₹1,150/night", savings: "₹50" },
-      booking: { price: "₹1,200/night", savings: "₹0" },
+      makemytrip: { price: "₹1,100/night", savings: "₹100" },
       goibibo: { price: "₹1,180/night", savings: "₹20" },
-      zolo: { price: "₹1,100/night", savings: "₹100" },
+      agoda: { price: "₹1,200/night", savings: "₹0" },
       features: ["Co-working space", "Solo events", "Networking"],
     },
     3: {
       makemytrip: { price: "₹2,300/night", savings: "₹200" },
-      booking: { price: "₹2,500/night", savings: "₹0" },
       goibibo: { price: "₹2,400/night", savings: "₹100" },
-      agoda: { price: "₹2,450/night", savings: "₹50" },
+      agoda: { price: "₹2,500/night", savings: "₹0" },
       features: ["Heritage experience", "Solo dining", "Guided tours"],
     },
   };
@@ -693,7 +694,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                                   )}
                                 >
                                   <div className="flex items-center gap-2">
-                                    {platformIcons[platform] || <span>📦</span>}
+                                    {renderPlatformLogo(platform)}
                                     <span className="font-medium text-sm capitalize">{platform}</span>
                                     {isBest && (
                                       <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
@@ -857,7 +858,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                                 )}
                               >
                                 <div className="flex items-center gap-2">
-                                  {platformIcons[platform.name]}
+                                  {renderPlatformLogo(platform.name)}
                                   <span className="font-medium text-sm capitalize">{platform.name}</span>
                                   {platform.best && (
                                     <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
@@ -987,7 +988,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                                 )}
                               >
                                 <div className="flex items-center gap-2">
-                                  {platformIcons[platform.name]}
+                                  {renderPlatformLogo(platform.name)}
                                   <span className="font-medium text-sm capitalize">{platform.name}</span>
                                   {platform.best && (
                                     <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
@@ -1110,7 +1111,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                                 )}
                               >
                                 <div className="flex items-center gap-2">
-                                  {platformIcons[platform.name]}
+                                  {renderPlatformLogo(platform.name)}
                                   <span className="font-medium text-sm capitalize">{platform.name}</span>
                                   {platform.best && (
                                     <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
@@ -1233,7 +1234,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                               )}
                             >
                               <div className="flex items-center gap-2">
-                                {platformIcons[platform.name]}
+                                {renderPlatformLogo(platform.name)}
                                 <span className="font-medium text-sm capitalize">{platform.name}</span>
                                 {platform.best && (
                                   <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
@@ -1374,7 +1375,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                               )}
                             >
                               <div className="flex items-center gap-2">
-                                {platformIcons[platform.name]}
+                                {renderPlatformLogo(platform.name)}
                                 <span className="font-medium text-sm capitalize">{platform.name}</span>
                                 {platform.best && (
                                   <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
@@ -1507,7 +1508,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                               )}
                             >
                               <div className="flex items-center gap-2">
-                                {platformIcons[platform.name]}
+                                {renderPlatformLogo(platform.name)}
                                 <span className="font-medium text-sm capitalize">{platform.name}</span>
                                 {platform.best && (
                                   <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
