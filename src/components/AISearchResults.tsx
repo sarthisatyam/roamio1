@@ -126,10 +126,6 @@ export const AISearchResults: React.FC<AISearchResultsProps> = ({
                     <div className="text-2xl flex-shrink-0">{dest.image}</div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-sm truncate">{dest.name}</h3>
-                      <Badge variant="outline" className="text-[10px] mt-1 bg-success/10 text-success border-success">
-                        <Shield className="w-2.5 h-2.5 mr-0.5" />
-                        {dest.safety}% Safe
-                      </Badge>
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">

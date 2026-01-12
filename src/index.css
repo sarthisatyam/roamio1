@@ -75,9 +75,9 @@ All colors MUST be HSL.
     --button-height-md: 2.25rem; /* 36px - h-9 */
     --tab-height: 2.75rem; /* 44px - h-11 */
 
-    /* Gradients */
+    /* Gradients - Using primary pink/coral color */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-hero: linear-gradient(135deg, hsl(346 65% 58%) 0%, hsl(188 94% 42%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(346 65% 58%) 0%, hsl(346 65% 50%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
     
     /* Shadows */
