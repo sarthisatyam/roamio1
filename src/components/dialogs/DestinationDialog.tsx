@@ -107,10 +107,6 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
                   <Star className="w-4 h-4 fill-current text-yellow-500" />
                   <span className="text-sm">{destination.rating}</span>
                 </div>
-                <Badge variant="outline" className="text-xs bg-success/10 text-success border-success">
-                  <Shield className="w-3 h-3 mr-1" />
-                  {destination.safety}% Safe
-                </Badge>
                 {weatherLoading ? (
                   <span className="text-xs text-muted-foreground ml-2">Loading weather...</span>
                 ) : weather ? (
