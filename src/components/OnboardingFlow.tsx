@@ -64,9 +64,9 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
       icon: DollarSign, 
       description: "Cost-effective options",
       colorScheme: {
-        selected: "border-green-400 bg-green-50 dark:bg-green-950/30",
-        iconBg: "bg-green-500 text-white",
-        hover: "hover:border-green-300"
+        selected: "border-secondary bg-accent dark:bg-secondary/20",
+        iconBg: "bg-secondary text-white",
+        hover: "hover:border-secondary/60"
       }
     },
     { 
@@ -149,7 +149,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
               <img 
                 src="/og-image.jpg" 
                 alt="Roamio Logo" 
-                className="w-40 h-40 mx-auto object-contain rounded-2xl shadow-strong"
+                className="w-48 h-48 mx-auto object-cover rounded-3xl shadow-strong border-4 border-white/20"
               />
               
               <div className="space-y-4">
