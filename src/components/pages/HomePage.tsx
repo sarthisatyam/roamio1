@@ -411,10 +411,6 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm truncate">{dest.name}</h3>
                         <div className="flex items-center gap-1 mt-1 flex-wrap">
-                          <Badge variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg bg-success/10 text-success border-success/30">
-                            <Shield className="w-2.5 h-2.5 mr-0.5" />
-                            {dest.safety}% Safe
-                          </Badge>
                           {weatherLoading ? (
                             <span className="text-[10px] text-muted-foreground">...</span>
                           ) : weatherMap[dest.name] ? (
@@ -423,6 +419,11 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                               <span className="font-normal">{weatherMap[dest.name]}</span>
                             </Badge>
                           ) : null}
+                          {dest.tags.slice(0, 2).map(tag => (
+                            <Badge key={tag} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
+                              {tag}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
                     </div>

@@ -146,13 +146,15 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
         <div className="flex-1 flex flex-col justify-center items-center p-6 text-center">
           <div className="max-w-sm mx-auto space-y-8">
             <div className="space-y-6">
-              <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto animate-pulse">
-                <MapPin className="w-10 h-10 text-primary-foreground" />
-              </div>
+              <img 
+                src="/og-image.jpg" 
+                alt="Roamio Logo" 
+                className="w-40 h-40 mx-auto object-contain rounded-2xl shadow-strong"
+              />
               
               <div className="space-y-4">
                 <h1 className="text-4xl font-bold text-primary-foreground leading-tight">
-                  Travel Solo.<br />Never Alone.
+                  Travel Solo,<br />Not Alone
                 </h1>
                 <p className="text-lg text-primary-foreground/80 leading-relaxed">
                   Smart, safe, and inspiring journeys built just for you.
