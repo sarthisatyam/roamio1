@@ -251,7 +251,7 @@ const Auth = () => {
           <img
             src="/og-image.jpg"
             alt="Roamio Logo"
-            className="mx-auto mb-4 w-32 h-32 rounded-2xl object-cover shadow-lg"
+            className="mx-auto mb-4 w-50 h-50 rounded-2xl object-cover shadow-lg"
           />
           <CardTitle className="text-2xl font-bold text-foreground">
             {isLogin ? "Welcome Back" : "Join Roamio"}
