@@ -183,8 +183,8 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
   const quickAccess = [
     { icon: Coffee, label: "Cafes", color: "bg-amber-100 text-amber-700" },
     { icon: ShoppingBag, label: "Shopping", color: "bg-purple-100 text-purple-700" },
-    { icon: Camera, label: "Attractions", color: "bg-green-100 text-green-700" },
-    { icon: MoreHorizontal, label: "More", color: "bg-blue-100 text-blue-700", onClick: () => setShowMoreCategories(!showMoreCategories) }
+    { icon: Camera, label: "Attractions", color: "bg-accent text-secondary" },
+    { icon: MoreHorizontal, label: "More", color: "bg-accent text-secondary", onClick: () => setShowMoreCategories(!showMoreCategories) }
   ];
 
   const moreCategories = [

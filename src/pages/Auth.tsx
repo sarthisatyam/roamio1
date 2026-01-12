@@ -246,9 +246,11 @@ const Auth = () => {
 
       <Card className="w-full max-w-md border-0 shadow-xl bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center pb-2">
-          <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center shadow-lg">
-            <MapPin className="w-8 h-8 text-primary-foreground" />
-          </div>
+          <img 
+            src="/og-image.jpg" 
+            alt="Roamio Logo" 
+            className="mx-auto mb-4 w-16 h-16 rounded-2xl object-cover shadow-lg"
+          />
           <CardTitle className="text-2xl font-bold text-foreground">
             {isLogin ? "Welcome Back" : "Join Roamio"}
           </CardTitle>

@@ -413,7 +413,7 @@ export const MyCoCompanionDialog: React.FC<CoCompanionDialogProps> = ({ open, on
                     <p className="text-sm text-muted-foreground">{companion.age} years • {companion.location}</p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className={`w-2 h-2 rounded-full ${companion.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    <div className={`w-2 h-2 rounded-full ${companion.status === 'online' ? 'bg-secondary' : 'bg-gray-400'}`} />
                     <span className="text-xs text-muted-foreground capitalize">{companion.status}</span>
                   </div>
                 </div>

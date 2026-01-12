@@ -24,21 +24,21 @@ All colors MUST be HSL.
     --primary-light: 346 65% 70%;
     --primary-dark: 346 65% 45%;
 
-    /* Secondary: Roamio Blue */
-    --secondary: 200 40% 65%;
-    --secondary-foreground: 222 20% 15%;
+    /* Secondary: Roamio Teal Blue (from logo) */
+    --secondary: 188 94% 42%;
+    --secondary-foreground: 0 0% 100%;
 
     /* Muted: Soft Neutral */
     --muted: 210 15% 95%;
     --muted-foreground: 222 15% 50%;
 
-    /* Accent: Soft Blue */
-    --accent: 200 40% 85%;
+    /* Accent: Roamio Teal Blue Light */
+    --accent: 188 70% 85%;
     --accent-foreground: 222 20% 15%;
 
-    /* Safety Colors */
-    --success: 142 76% 36%;
-    --success-foreground: 210 20% 98%;
+    /* Safety Colors - Using Roamio Teal Blue for success */
+    --success: 188 94% 42%;
+    --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 222 20% 15%;
     --destructive: 0 84% 60%;
@@ -77,7 +77,7 @@ All colors MUST be HSL.
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-hero: linear-gradient(135deg, hsl(346 65% 58%) 0%, hsl(200 40% 65%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(346 65% 58%) 0%, hsl(188 94% 42%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
     
     /* Shadows */
