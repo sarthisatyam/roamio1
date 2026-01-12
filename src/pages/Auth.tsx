@@ -28,7 +28,9 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         navigate("/");
       }
@@ -45,7 +47,7 @@ const Auth = () => {
 
   const validateForm = () => {
     const newErrors: { email?: string; phone?: string; password?: string } = {};
-    
+
     if (authMethod === "email") {
       const emailResult = emailSchema.safeParse(email);
       if (!emailResult.success) {
@@ -57,12 +59,12 @@ const Auth = () => {
         newErrors.phone = phoneResult.error.errors[0].message;
       }
     }
-    
+
     const passwordResult = passwordSchema.safeParse(password);
     if (!passwordResult.success) {
       newErrors.password = passwordResult.error.errors[0].message;
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -76,7 +78,7 @@ const Auth = () => {
           redirectTo: `${window.location.origin}/`,
         },
       });
-      
+
       if (error) {
         toast({
           title: "Google sign-in failed",
@@ -97,9 +99,9 @@ const Auth = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setLoading(true);
 
     try {
@@ -109,7 +111,7 @@ const Auth = () => {
             email,
             password,
           });
-          
+
           if (error) {
             if (error.message.includes("Invalid login credentials")) {
               toast({
@@ -132,7 +134,7 @@ const Auth = () => {
           }
         } else {
           const redirectUrl = `${window.location.origin}/`;
-          
+
           const { error } = await supabase.auth.signUp({
             email,
             password,
@@ -143,7 +145,7 @@ const Auth = () => {
               },
             },
           });
-          
+
           if (error) {
             if (error.message.includes("User already registered")) {
               toast({
@@ -172,11 +174,11 @@ const Auth = () => {
             phone,
             password,
           });
-          
+
           if (error) {
             toast({
               title: "Login failed",
-              description: error.message.includes("Invalid login credentials") 
+              description: error.message.includes("Invalid login credentials")
                 ? "Invalid phone number or password. Please try again."
                 : error.message,
               variant: "destructive",
@@ -197,7 +199,7 @@ const Auth = () => {
               },
             },
           });
-          
+
           if (error) {
             if (error.message.includes("User already registered")) {
               toast({
@@ -246,18 +248,16 @@ const Auth = () => {
 
       <Card className="w-full max-w-md border-0 shadow-xl bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center pb-2">
-          <img 
-            src="/og-image.jpg" 
-            alt="Roamio Logo" 
-            className="mx-auto mb-4 w-28 h-28 rounded-2xl object-cover shadow-lg"
+          <img
+            src="/og-image.jpg"
+            alt="Roamio Logo"
+            className="mx-auto mb-4 w-32 h-32 rounded-2xl object-cover shadow-lg"
           />
           <CardTitle className="text-2xl font-bold text-foreground">
             {isLogin ? "Welcome Back" : "Join Roamio"}
           </CardTitle>
           <CardDescription className="text-muted-foreground">
-            {isLogin
-              ? "Sign in to continue your journey"
-              : "Create an account to start exploring"}
+            {isLogin ? "Sign in to continue your journey" : "Create an account to start exploring"}
           </CardDescription>
         </CardHeader>
 
@@ -320,7 +320,9 @@ const Auth = () => {
             <form onSubmit={handleAuth} className="space-y-4">
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="displayName" className="text-foreground">Display Name</Label>
+                  <Label htmlFor="displayName" className="text-foreground">
+                    Display Name
+                  </Label>
                   <Input
                     id="displayName"
                     type="text"
@@ -334,7 +336,9 @@ const Auth = () => {
 
               <TabsContent value="email" className="mt-0 space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground">Email</Label>
+                  <Label htmlFor="email" className="text-foreground">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -346,15 +350,15 @@ const Auth = () => {
                     }}
                     className={`bg-background border-border focus:border-primary ${errors.email ? "border-destructive" : ""}`}
                   />
-                  {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email}</p>
-                  )}
+                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                 </div>
               </TabsContent>
 
               <TabsContent value="phone" className="mt-0 space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
+                  <Label htmlFor="phone" className="text-foreground">
+                    Phone Number
+                  </Label>
                   <Input
                     id="phone"
                     type="tel"
@@ -366,15 +370,15 @@ const Auth = () => {
                     }}
                     className={`bg-background border-border focus:border-primary ${errors.phone ? "border-destructive" : ""}`}
                   />
-                  {errors.phone && (
-                    <p className="text-sm text-destructive">{errors.phone}</p>
-                  )}
+                  {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
                   <p className="text-xs text-muted-foreground">Include country code (e.g., +1 for US)</p>
                 </div>
               </TabsContent>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground">Password</Label>
+                <Label htmlFor="password" className="text-foreground">
+                  Password
+                </Label>
                 <Input
                   id="password"
                   type="password"
@@ -386,9 +390,7 @@ const Auth = () => {
                   }}
                   className={`bg-background border-border focus:border-primary ${errors.password ? "border-destructive" : ""}`}
                 />
-                {errors.password && (
-                  <p className="text-sm text-destructive">{errors.password}</p>
-                )}
+                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
               </div>
 
@@ -402,8 +404,10 @@ const Auth = () => {
                     <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                     {isLogin ? "Signing in..." : "Creating account..."}
                   </div>
+                ) : isLogin ? (
+                  "Sign In"
                 ) : (
-                  isLogin ? "Sign In" : "Create Account"
+                  "Create Account"
                 )}
               </Button>
             </form>
@@ -418,9 +422,7 @@ const Auth = () => {
               }}
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Sign in"}
+              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </button>
           </div>
         </CardContent>
