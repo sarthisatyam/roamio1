@@ -4,13 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  Search, 
-  User, 
-  MapPin, 
-  Shield, 
-  Wifi, 
-  Coffee, 
+import {
+  Search,
+  User,
+  MapPin,
+  Shield,
+  Wifi,
+  Coffee,
   ArrowRight,
   Compass,
   Bookmark,
@@ -31,7 +31,7 @@ import {
   Radio,
   Zap,
   CloudSun,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { useWeather, useMultipleWeather } from "@/hooks/useWeather";
 import { cn } from "@/lib/utils";
@@ -41,7 +41,14 @@ import { useAISearch, AIDestination } from "@/hooks/useAISearch";
 import AISearchResults from "@/components/AISearchResults";
 
 interface HomePageProps {
-  userData?: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean; currentCity?: string | null } | null;
+  userData?: {
+    name: string;
+    emailOrPhone: string;
+    preferences: string[];
+    language: string;
+    locationEnabled: boolean;
+    currentCity?: string | null;
+  } | null;
   onNavigateToAccount?: () => void;
   bookmarkedPlaces?: { id: number; name: string; image: string }[];
   onToggleBookmark?: (place: { id: number; name: string; image: string }) => void;
@@ -49,7 +56,14 @@ interface HomePageProps {
   onLocationToggle?: (enabled: boolean) => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, bookmarkedPlaces = [], onToggleBookmark, onAddToPlanner, onLocationToggle }) => {
+const HomePage: React.FC<HomePageProps> = ({
+  userData,
+  onNavigateToAccount,
+  bookmarkedPlaces = [],
+  onToggleBookmark,
+  onAddToPlanner,
+  onLocationToggle,
+}) => {
   const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
@@ -60,16 +74,12 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
   // Fetch weather for user's current location
   const { weather: currentLocationWeather, loading: currentWeatherLoading } = useWeather(
     userData?.currentCity || null,
-    userData?.locationEnabled ?? false
+    userData?.locationEnabled ?? false,
   );
 
   // Extract city names for weather fetching
-  const destinationCities = useMemo(() => [
-    "Goa, India",
-    "Manali, Himachal Pradesh", 
-    "Udaipur, Rajasthan"
-  ], []);
-  
+  const destinationCities = useMemo(() => ["Goa, India", "Manali, Himachal Pradesh", "Udaipur, Rajasthan"], []);
+
   const { weatherMap, loading: weatherLoading } = useMultipleWeather(destinationCities);
 
   const destinations = [
@@ -89,8 +99,8 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
             { time: "8:00 AM", activity: "Sunrise at Palolem Beach", type: "Scenic" },
             { time: "10:00 AM", activity: "Breakfast at Beach Shack", type: "Food" },
             { time: "2:00 PM", activity: "Water Sports at Baga Beach", type: "Adventure" },
-            { time: "6:00 PM", activity: "Sunset at Vagator Beach", type: "Scenic" }
-          ]
+            { time: "6:00 PM", activity: "Sunset at Vagator Beach", type: "Scenic" },
+          ],
         },
         {
           day: 2,
@@ -98,15 +108,15 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           activities: [
             { time: "9:00 AM", activity: "Old Goa Churches Tour", type: "Heritage" },
             { time: "1:00 PM", activity: "Goan Thali Lunch", type: "Food" },
-            { time: "4:00 PM", activity: "Fontainhas Latin Quarter Walk", type: "Heritage" }
-          ]
-        }
+            { time: "4:00 PM", activity: "Fontainhas Latin Quarter Walk", type: "Heritage" },
+          ],
+        },
       ],
       eateries: [
         { name: "Gunpowder", type: "Goan Cuisine", rating: 4.6, priceRange: "₹₹", specialty: "Prawn Balchao" },
         { name: "Thalassa", type: "Greek-Goan", rating: 4.7, priceRange: "₹₹₹", specialty: "Seafood Platter" },
-        { name: "Ritz Classic", type: "Local", rating: 4.5, priceRange: "₹", specialty: "Fish Curry Rice" }
-      ]
+        { name: "Ritz Classic", type: "Local", rating: 4.5, priceRange: "₹", specialty: "Fish Curry Rice" },
+      ],
     },
     {
       id: 2,
@@ -124,8 +134,8 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
             { time: "7:00 AM", activity: "Sunrise Trek to Jogini Falls", type: "Adventure" },
             { time: "11:00 AM", activity: "Visit Hadimba Temple", type: "Heritage" },
             { time: "3:00 PM", activity: "Mall Road Shopping", type: "Shopping" },
-            { time: "6:00 PM", activity: "Cafe Hopping in Old Manali", type: "Food" }
-          ]
+            { time: "6:00 PM", activity: "Cafe Hopping in Old Manali", type: "Food" },
+          ],
         },
         {
           day: 2,
@@ -133,15 +143,15 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           activities: [
             { time: "8:00 AM", activity: "Paragliding at Solang Valley", type: "Adventure" },
             { time: "12:00 PM", activity: "Atal Tunnel Visit", type: "Scenic" },
-            { time: "4:00 PM", activity: "Hot Springs at Vashisht", type: "Wellness" }
-          ]
-        }
+            { time: "4:00 PM", activity: "Hot Springs at Vashisht", type: "Wellness" },
+          ],
+        },
       ],
       eateries: [
         { name: "Drifters' Cafe", type: "Continental", rating: 4.5, priceRange: "₹₹", specialty: "Wood-fired Pizza" },
         { name: "Johnson's Cafe", type: "Multi-cuisine", rating: 4.4, priceRange: "₹₹", specialty: "Trout Fish" },
-        { name: "Lazy Dog", type: "Cafe", rating: 4.6, priceRange: "₹", specialty: "Pancakes & Coffee" }
-      ]
+        { name: "Lazy Dog", type: "Cafe", rating: 4.6, priceRange: "₹", specialty: "Pancakes & Coffee" },
+      ],
     },
     {
       id: 3,
@@ -159,8 +169,8 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
             { time: "9:00 AM", activity: "City Palace Tour", type: "Heritage" },
             { time: "1:00 PM", activity: "Lunch at Ambrai Ghat", type: "Food" },
             { time: "4:00 PM", activity: "Boat Ride on Lake Pichola", type: "Scenic" },
-            { time: "7:00 PM", activity: "Sunset at Sajjangarh", type: "Scenic" }
-          ]
+            { time: "7:00 PM", activity: "Sunset at Sajjangarh", type: "Scenic" },
+          ],
         },
         {
           day: 2,
@@ -168,106 +178,123 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
           activities: [
             { time: "10:00 AM", activity: "Bagore Ki Haveli & Folk Dance", type: "Cultural" },
             { time: "2:00 PM", activity: "Hathi Pol Bazaar Shopping", type: "Shopping" },
-            { time: "5:00 PM", activity: "High Tea at Taj Lake Palace", type: "Food" }
-          ]
-        }
+            { time: "5:00 PM", activity: "High Tea at Taj Lake Palace", type: "Food" },
+          ],
+        },
       ],
       eateries: [
         { name: "Ambrai", type: "Rajasthani", rating: 4.7, priceRange: "₹₹₹", specialty: "Lake View Dining" },
         { name: "Savage Garden", type: "Fusion", rating: 4.5, priceRange: "₹₹", specialty: "Rooftop Ambiance" },
-        { name: "Natraj Dining Hall", type: "Thali", rating: 4.4, priceRange: "₹", specialty: "Unlimited Rajasthani Thali" }
-      ]
-    }
+        {
+          name: "Natraj Dining Hall",
+          type: "Thali",
+          rating: 4.4,
+          priceRange: "₹",
+          specialty: "Unlimited Rajasthani Thali",
+        },
+      ],
+    },
   ];
 
   const quickAccess = [
     { icon: Coffee, label: "Cafes", color: "bg-amber-100 text-amber-700" },
     { icon: ShoppingBag, label: "Shopping", color: "bg-purple-100 text-purple-700" },
     { icon: Camera, label: "Attractions", color: "bg-accent text-secondary" },
-    { icon: MoreHorizontal, label: "More", color: "bg-accent text-secondary", onClick: () => setShowMoreCategories(!showMoreCategories) }
+    {
+      icon: MoreHorizontal,
+      label: "More",
+      color: "bg-accent text-secondary",
+      onClick: () => setShowMoreCategories(!showMoreCategories),
+    },
   ];
 
   const moreCategories = [
     { icon: Fuel, label: "Petrol", color: "bg-red-100 text-red-700" },
     { icon: Stethoscope, label: "Clinics", color: "bg-pink-100 text-pink-700" },
     { icon: Building2, label: "Museums", color: "bg-indigo-100 text-indigo-700" },
-    { icon: Utensils, label: "Restaurants", color: "bg-orange-100 text-orange-700" }
+    { icon: Utensils, label: "Restaurants", color: "bg-orange-100 text-orange-700" },
   ];
 
   const hotspots = [
-    { 
-      name: "Live Music Night at Hard Rock Cafe", 
-      type: "Live Event", 
-      distance: "2.5 km", 
+    {
+      name: "Live Music Night at Hard Rock Cafe",
+      type: "Live Event",
+      distance: "2.5 km",
       date: "Today, 8:00 PM",
       duration: "3 hours",
-      rating: 4.5, 
+      rating: 4.5,
       reviews: "12k",
       price: "₹800",
       bookingUrl: "#",
       icon: Music,
       isLive: true,
-      fillingFast: false
+      fillingFast: false,
     },
-    { 
-      name: "Stand-up Comedy Show", 
-      type: "Entertainment", 
-      distance: "4.2 km", 
+    {
+      name: "Stand-up Comedy Show",
+      type: "Entertainment",
+      distance: "4.2 km",
       date: "Tomorrow, 7:30 PM",
       duration: "2 hours",
-      rating: 4.3, 
+      rating: 4.3,
       reviews: "8.5k",
       price: "₹500",
       bookingUrl: "#",
       icon: Laugh,
       isLive: false,
-      fillingFast: true
+      fillingFast: true,
     },
-    { 
-      name: "Food Festival at Kingdom of Dreams", 
-      type: "Food & Culture", 
-      distance: "8.5 km", 
+    {
+      name: "Food Festival at Kingdom of Dreams",
+      type: "Food & Culture",
+      distance: "8.5 km",
       date: "Mar 25-26",
       duration: "All Day",
-      rating: 4.6, 
+      rating: 4.6,
       reviews: "15k",
       price: "₹1,200",
       bookingUrl: "#",
       icon: UtensilsCrossed,
       isLive: true,
-      fillingFast: true
+      fillingFast: true,
     },
-    { 
-      name: "Art Exhibition - Modern India", 
-      type: "Art & Culture", 
-      distance: "3.1 km", 
+    {
+      name: "Art Exhibition - Modern India",
+      type: "Art & Culture",
+      distance: "3.1 km",
       date: "This Week",
       duration: "4 hours",
-      rating: 4.4, 
+      rating: 4.4,
       reviews: "20k",
       price: "₹350",
       bookingUrl: "#",
       icon: Palette,
       isLive: false,
-      fillingFast: false
-    }
+      fillingFast: false,
+    },
   ];
 
   // AI Search hook
-  const { results: aiResults, isLoading: aiLoading, error: aiError } = useAISearch(searchQuery, {
-    pageContext: 'home'
+  const {
+    results: aiResults,
+    isLoading: aiLoading,
+    error: aiError,
+  } = useAISearch(searchQuery, {
+    pageContext: "home",
   });
 
   // Filter destinations based on search
-  const filteredDestinations = destinations.filter(dest =>
-    dest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    dest.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredDestinations = destinations.filter(
+    (dest) =>
+      dest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      dest.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   // Filter hotspots based on search
-  const filteredHotspots = hotspots.filter(spot =>
-    spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    spot.type.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredHotspots = hotspots.filter(
+    (spot) =>
+      spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      spot.type.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Check if we should show AI results (no static matches and search is active)
@@ -278,10 +305,10 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
     setDestinationDialogOpen(true);
   };
 
-  const getHotspotPlatforms = (spot: typeof hotspots[0]) => [
+  const getHotspotPlatforms = (spot: (typeof hotspots)[0]) => [
     { name: "BookMyShow", price: "₹800", savings: "₹100", url: "https://bookmyshow.com", icon: "🎬" },
     { name: "Paytm", price: "₹850", savings: "₹50", url: "https://paytm.com", icon: "💳" },
-    { name: "MakeMyTrip", price: "₹900", savings: "₹0", url: "https://makemytrip.com", icon: "🔵" }
+    { name: "MakeMyTrip", price: "₹900", savings: "₹0", url: "https://makemytrip.com", icon: "🔵" },
   ];
 
   return (
@@ -291,11 +318,11 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
         <div className="flex items-center justify-between mb-3">
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-bold text-white mb-0.5 truncate">
-              Good morning{userData?.name ? `, ${userData.name}` : ''}! 👋
+              Good morning{userData?.name ? `, ${userData.name}` : ""}! 👋
             </h1>
             <div className="flex items-center gap-2">
-              <p 
-                className={`text-white/80 text-xs flex items-center gap-1 ${!userData?.locationEnabled ? 'cursor-pointer hover:text-white transition-colors' : ''}`}
+              <p
+                className={`text-white/80 text-xs flex items-center gap-1 ${!userData?.locationEnabled ? "cursor-pointer hover:text-white transition-colors" : ""}`}
                 onClick={() => {
                   if (!userData?.locationEnabled && onLocationToggle) {
                     onLocationToggle(true);
@@ -303,7 +330,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                 }}
               >
                 <MapPin className="w-3 h-3 flex-shrink-0" />
-                {userData?.locationEnabled ? (userData?.currentCity || "Fetching...") : "Enable location"}
+                {userData?.locationEnabled ? userData?.currentCity || "Fetching..." : "Enable location"}
               </p>
               {/* Current Location Weather */}
               {userData?.locationEnabled && userData?.currentCity && (
@@ -330,10 +357,10 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
             <User className="w-4 h-4" />
           </Button>
         </div>
-        
+
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
+          <Input
             placeholder="Search destinations, activities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -345,33 +372,40 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {/* Quick Access */}
-        {/* <div className="px-4 py-3">
+        <div className="px-4 py-3">
           <div className="grid grid-cols-4 gap-2">
             {quickAccess.map((item) => {
               const Icon = item.icon;
               return (
-                <Card 
-                  key={item.label} 
+                <Card
+                  key={item.label}
                   className="p-3 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0"
                   onClick={item.onClick}
                 >
-                  <div className={cn("w-10 h-10 rounded-xl mx-auto mb-1.5 flex items-center justify-center", item.color)}>
+                  <div
+                    className={cn("w-10 h-10 rounded-xl mx-auto mb-1.5 flex items-center justify-center", item.color)}
+                  >
                     <Icon className="w-5 h-5" />
                   </div>
                   <p className="text-[10px] font-medium leading-tight">{item.label}</p>
                 </Card>
               );
             })}
-          </div> */}
-          
+          </div>
+
           {/* Additional Categories */}
           {showMoreCategories && (
             <div className="grid grid-cols-4 gap-2 mt-3">
               {moreCategories.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <Card key={item.label} className="p-3 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0">
-                    <div className={cn("w-10 h-10 rounded-xl mx-auto mb-1.5 flex items-center justify-center", item.color)}>
+                  <Card
+                    key={item.label}
+                    className="p-3 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0"
+                  >
+                    <div
+                      className={cn("w-10 h-10 rounded-xl mx-auto mb-1.5 flex items-center justify-center", item.color)}
+                    >
                       <Icon className="w-5 h-5" />
                     </div>
                     <p className="text-[10px] font-medium leading-tight">{item.label}</p>
@@ -393,12 +427,12 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
               See all <ArrowRight className="w-3 h-3 ml-1" />
             </Button>
           </div>
-          
+
           {filteredDestinations.length > 0 ? (
             <div className="space-y-3">
               {filteredDestinations.map((dest) => (
-                <Card 
-                  key={dest.id} 
+                <Card
+                  key={dest.id}
                   className="p-3 shadow-soft hover:shadow-medium transition-all cursor-pointer rounded-2xl border-0"
                   onClick={() => {
                     setSelectedDestination(dest);
@@ -407,19 +441,24 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl flex-shrink-0">{dest.image}</div>
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl flex-shrink-0">
+                        {dest.image}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm truncate">{dest.name}</h3>
                         <div className="flex items-center gap-1 mt-1 flex-wrap">
                           {weatherLoading ? (
                             <span className="text-[10px] text-muted-foreground">...</span>
                           ) : weatherMap[dest.name] ? (
-                            <Badge variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg bg-sky-500/10 text-sky-600 border-sky-300">
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] py-0.5 px-2 rounded-lg bg-sky-500/10 text-sky-600 border-sky-300"
+                            >
                               <CloudSun className="w-2.5 h-2.5 mr-0.5" />
                               <span className="font-normal">{weatherMap[dest.name]}</span>
                             </Badge>
                           ) : null}
-                          {dest.tags.slice(0, 2).map(tag => (
+                          {dest.tags.slice(0, 2).map((tag) => (
                             <Badge key={tag} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
                               {tag}
                             </Badge>
@@ -428,12 +467,12 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                       </div>
                     </div>
                     <div className="flex flex-col items-end flex-shrink-0">
-                      <Bookmark 
+                      <Bookmark
                         className={cn(
                           "w-4 h-4 cursor-pointer transition-colors",
-                          bookmarkedPlaces.find(p => p.id === dest.id)
+                          bookmarkedPlaces.find((p) => p.id === dest.id)
                             ? "text-primary fill-current"
-                            : "text-muted-foreground hover:text-primary"
+                            : "text-muted-foreground hover:text-primary",
                         )}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -443,7 +482,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                       <p className="font-bold text-sm text-primary mt-1">{dest.price}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-1 mt-2">
                     {dest.tags.slice(0, 2).map((tag) => (
                       <Badge key={tag} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">
@@ -459,21 +498,22 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
                 </Card>
               ))}
             </div>
-          ) : showAIResults && (
-            <AISearchResults
-              results={aiResults}
-              isLoading={aiLoading}
-              error={aiError}
-              searchQuery={searchQuery}
-              onSelectDestination={handleAIDestinationSelect}
-              showDestinations={true}
-              showStays={true}
-              showTravel={true}
-              bookmarkedIds={bookmarkedPlaces.map(p => p.id)}
-            />
+          ) : (
+            showAIResults && (
+              <AISearchResults
+                results={aiResults}
+                isLoading={aiLoading}
+                error={aiError}
+                searchQuery={searchQuery}
+                onSelectDestination={handleAIDestinationSelect}
+                showDestinations={true}
+                showStays={true}
+                showTravel={true}
+                bookmarkedIds={bookmarkedPlaces.map((p) => p.id)}
+              />
+            )
           )}
         </section>
-
       </div>
 
       {/* Booking Dialog */}
@@ -489,7 +529,7 @@ const HomePage: React.FC<HomePageProps> = ({ userData, onNavigateToAccount, book
             duration: selectedHotspot.duration,
             location: selectedHotspot.distance,
             rating: selectedHotspot.rating,
-            reviews: selectedHotspot.reviews
+            reviews: selectedHotspot.reviews,
           }}
         />
       )}
