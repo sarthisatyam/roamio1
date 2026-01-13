@@ -394,7 +394,7 @@ const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Additional Categories */}
-          {showMoreCategories && (
+          {/* {showMoreCategories && (
             <div className="grid grid-cols-4 gap-2 mt-3">
               {moreCategories.map((item) => {
                 const Icon = item.icon;
@@ -413,7 +413,7 @@ const HomePage: React.FC<HomePageProps> = ({
                 );
               })}
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Safe Destinations */}
