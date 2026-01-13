@@ -86,41 +86,41 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   const [hotelError, setHotelError] = useState<string | null>(null);
 
   // Static fallback options (used when no search query)
-  const staticStayOptions = [
-    {
-      id: 1,
-      name: "Hyderabad Backpackers Hub",
-      location: "Banjara Hills, Hyderabad",
-      price: "₹800/night",
-      rating: 4.7,
-      icon: Bed,
-      amenities: ["Free WiFi", "AC", "Lockers", "Common Kitchen"],
-      verified: true,
-      category: "hostel",
-    },
-    {
-      id: 2,
-      name: "Gachibowli Tech Stays",
-      location: "Gachibowli, Hyderabad",
-      price: "₹1,200/night",
-      rating: 4.8,
-      icon: Building2,
-      amenities: ["Co-working space", "Gym", "Rooftop", "24/7 security"],
-      verified: true,
-      category: "coliving",
-    },
-    {
-      id: 3,
-      name: "Jubilee Hills Heritage Hotel",
-      location: "Jubilee Hills, Hyderabad",
-      price: "₹2,500/night",
-      rating: 4.9,
-      icon: Home,
-      amenities: ["Heritage rooms", "Pool", "Spa", "Restaurant"],
-      verified: true,
-      category: "hotel",
-    },
-  ];
+  // const staticStayOptions = [
+  //   {
+  //     id: 1,
+  //     name: "Hyderabad Backpackers Hub",
+  //     location: "Banjara Hills, Hyderabad",
+  //     price: "₹800/night",
+  //     rating: 4.7,
+  //     icon: Bed,
+  //     amenities: ["Free WiFi", "AC", "Lockers", "Common Kitchen"],
+  //     verified: true,
+  //     category: "hostel",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Gachibowli Tech Stays",
+  //     location: "Gachibowli, Hyderabad",
+  //     price: "₹1,200/night",
+  //     rating: 4.8,
+  //     icon: Building2,
+  //     amenities: ["Co-working space", "Gym", "Rooftop", "24/7 security"],
+  //     verified: true,
+  //     category: "coliving",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Jubilee Hills Heritage Hotel",
+  //     location: "Jubilee Hills, Hyderabad",
+  //     price: "₹2,500/night",
+  //     rating: 4.9,
+  //     icon: Home,
+  //     amenities: ["Heritage rooms", "Pool", "Spa", "Restaurant"],
+  //     verified: true,
+  //     category: "hotel",
+  //   },
+  // ];
 
   const flightOptions = [
     {
@@ -274,8 +274,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
           amenities: ["Hotel", `${hotel.stars || 0} Star${hotel.stars !== 1 ? "s" : ""}`],
           verified: hotel.stars >= 4,
           category: hotel.stars >= 4 ? "hotel" : hotel.stars >= 3 ? "coliving" : "hostel",
-        }))
-      : staticStayOptions;
+        }));
 
   // Filter stays based on search (for static options) or use API results directly
   const filteredStayOptions =
