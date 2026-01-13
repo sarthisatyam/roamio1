@@ -274,18 +274,11 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
           amenities: ["Hotel", `${hotel.stars || 0} Star${hotel.stars !== 1 ? "s" : ""}`],
           verified: hotel.stars >= 4,
           category: hotel.stars >= 4 ? "hotel" : hotel.stars >= 3 ? "coliving" : "hostel",
-        }));
+        }))
+      : [];
 
-  // Filter stays based on search (for static options) or use API results directly
-  const filteredStayOptions =
-    effectiveLocation
-      ? stayOptions
-      : stayOptions.filter(
-          (stay) =>
-            stay.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            stay.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            stay.amenities.some((a) => a.toLowerCase().includes(searchQuery.toLowerCase())),
-        );
+  // Filter stays based on search - only show API results
+  const filteredStayOptions = stayOptions;
 
   // Filter flights based on search
   const filteredFlightOptions = flightOptions.filter(
