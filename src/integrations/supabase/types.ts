@@ -207,6 +207,165 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_members: {
+        Row: {
+          id: string
+          joined_at: string
+          role: string
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          role?: string
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          role?: string
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_members_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_messages_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_requests: {
+        Row: {
+          answers: Json | null
+          created_at: string
+          id: string
+          message: string | null
+          reviewed_by: string | null
+          status: string
+          trip_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          reviewed_by?: string | null
+          status?: string
+          trip_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          reviewed_by?: string | null
+          status?: string
+          trip_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_requests_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          budget_range: string
+          created_at: string
+          created_by: string
+          description: string | null
+          destination: string
+          end_date: string
+          group_type: string
+          id: string
+          max_members: number
+          start_date: string
+          status: string
+          trip_style: string | null
+          trip_type: string
+          updated_at: string
+        }
+        Insert: {
+          budget_range: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          destination: string
+          end_date: string
+          group_type: string
+          id?: string
+          max_members?: number
+          start_date: string
+          status?: string
+          trip_style?: string | null
+          trip_type: string
+          updated_at?: string
+        }
+        Update: {
+          budget_range?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          destination?: string
+          end_date?: string
+          group_type?: string
+          id?: string
+          max_members?: number
+          start_date?: string
+          status?: string
+          trip_style?: string | null
+          trip_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_presence: {
         Row: {
           created_at: string
