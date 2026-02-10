@@ -4,29 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Users,
   Search,
-  Filter,
   MapPin,
-  Clock,
-  MessageCircle,
   Shield,
-  Camera,
-  Coffee,
-  Briefcase,
-  Music,
   CheckCircle,
-  Heart,
-  UserPlus,
   User,
   Compass,
-  Zap,
   Mountain,
   Plus,
   Loader2,
+  Calendar,
+  ArrowRight,
+  Send,
+  Clock,
+  MessageCircle,
+  Eye,
+  ChevronLeft,
+  TrendingUp,
+  UserCheck,
 } from "lucide-react";
 import {
   Dialog,
@@ -36,276 +35,214 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useCompanions, Companion } from "@/hooks/useCompanions";
-import { useGroups, Group } from "@/hooks/useGroups";
-import { useConnections } from "@/hooks/useConnections";
-import { useLikedCompanions } from "@/hooks/useLikedCompanions";
-import { usePresence } from "@/hooks/usePresence";
-import GroupChatDialog from "@/components/dialogs/GroupChatDialog";
+import { useTrips, Trip, TripRequest } from "@/hooks/useTrips";
+import TripChatDialog from "@/components/dialogs/TripChatDialog";
 
 interface CompanionPageProps {
   onNavigateToAccount?: () => void;
   userCity?: string | null;
 }
 
+type Stage = "explore" | "intent" | "discover" | "my-trips";
+
+const TRIP_TYPES = [
+  { value: "darshan", label: "Darshan" },
+  { value: "trek", label: "Trek" },
+  { value: "relaxed", label: "Relaxed" },
+  { value: "adventure", label: "Adventure" },
+  { value: "spiritual", label: "Spiritual" },
+];
+
+const BUDGET_RANGES = [
+  { value: "budget", label: "Budget" },
+  { value: "mid-range", label: "Mid-Range" },
+  { value: "premium", label: "Premium" },
+];
+
+const GROUP_TYPES = [
+  { value: "women-only", label: "Women Only" },
+  { value: "mixed", label: "Mixed" },
+  { value: "family", label: "Family" },
+];
+
 const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, userCity }) => {
-  const [activeTab, setActiveTab] = useState("discover");
+  const [stage, setStage] = useState<Stage>("explore");
   const [searchQuery, setSearchQuery] = useState("");
-  const [connectDialogOpen, setConnectDialogOpen] = useState(false);
-  const [selectedCompanion, setSelectedCompanion] = useState<Companion | null>(null);
-  const [connectMessage, setConnectMessage] = useState("");
-  const [isSendingConnection, setIsSendingConnection] = useState(false);
-  const [createGroupOpen, setCreateGroupOpen] = useState(false);
-  const [newGroupName, setNewGroupName] = useState("");
-  const [newGroupDescription, setNewGroupDescription] = useState("");
-  const [newGroupCategory, setNewGroupCategory] = useState("");
-  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
-  const [chatDialogOpen, setChatDialogOpen] = useState(false);
-  const [selectedGroupForChat, setSelectedGroupForChat] = useState<Group | null>(null);
-  const [filters, setFilters] = useState({
-    gender: "all",
-    status: "all",
-    radius: [50],
-    ageRange: [18, 65],
-    interests: [] as string[],
-  });
-
-  // Auth state
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | undefined>();
 
-  // Initialize auth and location
+  // Intent form
+  const [destination, setDestination] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [tripType, setTripType] = useState("");
+  const [budgetRange, setBudgetRange] = useState("");
+  const [groupType, setGroupType] = useState("");
+  const [maxMembers, setMaxMembers] = useState(6);
+  const [tripDescription, setTripDescription] = useState("");
+
+  // Join request
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [joinMessage, setJoinMessage] = useState("");
+  const [joinAnswers, setJoinAnswers] = useState({ arrival: "", first_visit: "", group_stay: "" });
+  const [isSendingRequest, setIsSendingRequest] = useState(false);
+
+  // Request management
+  const [requestsDialogOpen, setRequestsDialogOpen] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState<TripRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [managingTrip, setManagingTrip] = useState<Trip | null>(null);
+
+  // Chat
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatTrip, setChatTrip] = useState<Trip | null>(null);
+
+  // Create trip dialog
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
+  // Auth
   useEffect(() => {
     const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       setCurrentUserId(session?.user?.id || null);
     };
-
     getSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setCurrentUserId(session?.user?.id || null);
     });
-
-    // Get user location via geolocation
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.log("Geolocation not available:", error);
-          // Fallback: try to geocode from userCity if available
-          if (userCity) {
-            // Use a simple geocoding approach for major Indian cities
-            const cityCoords: Record<string, { lat: number; lng: number }> = {
-              "Delhi": { lat: 28.6139, lng: 77.2090 },
-              "New Delhi": { lat: 28.6139, lng: 77.2090 },
-              "Mumbai": { lat: 19.0760, lng: 72.8777 },
-              "Bangalore": { lat: 12.9716, lng: 77.5946 },
-              "Bengaluru": { lat: 12.9716, lng: 77.5946 },
-              "Chennai": { lat: 13.0827, lng: 80.2707 },
-              "Kolkata": { lat: 22.5726, lng: 88.3639 },
-              "Hyderabad": { lat: 17.3850, lng: 78.4867 },
-              "Pune": { lat: 18.5204, lng: 73.8567 },
-              "Jaipur": { lat: 26.9124, lng: 75.7873 },
-              "Ahmedabad": { lat: 23.0225, lng: 72.5714 },
-              "Goa": { lat: 15.2993, lng: 74.1240 },
-              "Manali": { lat: 32.2396, lng: 77.1887 },
-              "Udaipur": { lat: 24.5854, lng: 73.7125 },
-              "Varanasi": { lat: 25.3176, lng: 82.9739 },
-              "Rishikesh": { lat: 30.0869, lng: 78.2676 },
-              "Shimla": { lat: 31.1048, lng: 77.1734 },
-              "Agra": { lat: 27.1767, lng: 78.0081 },
-              "Lucknow": { lat: 26.8467, lng: 80.9462 },
-              "Kochi": { lat: 9.9312, lng: 76.2673 },
-              "Thiruvananthapuram": { lat: 8.5241, lng: 76.9366 },
-            };
-            
-            const normalizedCity = userCity.trim();
-            const coords = cityCoords[normalizedCity];
-            if (coords) {
-              setUserLocation(coords);
-            }
-          }
-        },
-      );
-    }
-
     return () => subscription.unsubscribe();
   }, []);
 
-  // Track user presence
-  usePresence(currentUserId);
+  const { trips, myTrips, isLoading, fetchTrips, fetchMyTrips, createTrip, requestToJoin, handleRequest, getPendingRequests } = useTrips(currentUserId);
 
-  // Data hooks
-  const { companions, isLoading: companionsLoading } = useCompanions(currentUserId, userLocation);
-  const { groups, isLoading: groupsLoading, createGroup, joinGroup, leaveGroup } = useGroups(currentUserId);
-  const { sendConnectionRequest, getConnectionStatus } = useConnections(currentUserId);
-  const { toggleLike, isLiked } = useLikedCompanions(currentUserId);
-
-  // Filter companions based on search and filters
-  const filteredCompanions = companions.filter((companion) => {
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const matchesSearch =
-        companion.display_name?.toLowerCase().includes(query) ||
-        companion.bio?.toLowerCase().includes(query) ||
-        companion.interests.some((i) => i.toLowerCase().includes(query)) ||
-        companion.city?.toLowerCase().includes(query);
-      if (!matchesSearch) return false;
-    }
-
-    if (filters.gender !== "all" && companion.gender !== filters.gender) {
-      return false;
-    }
-    if (filters.status === "online" && !companion.is_online) {
-      return false;
-    }
-    if (companion.distance !== undefined && companion.distance > filters.radius[0]) {
-      return false;
-    }
-    if (companion.age !== null) {
-      if (companion.age < filters.ageRange[0] || companion.age > filters.ageRange[1]) {
-        return false;
-      }
-    }
-    if (filters.interests.length > 0) {
-      const hasMatchingInterest = filters.interests.some((interest) => companion.interests.includes(interest));
-      if (!hasMatchingInterest) {
-        return false;
-      }
-    }
-    return true;
-  });
-
-  const handleConnect = async () => {
-    if (!selectedCompanion || !currentUserId) return;
-
-    try {
-      setIsSendingConnection(true);
-      await sendConnectionRequest(selectedCompanion.user_id, connectMessage);
-      toast.success("Connection request sent!");
-      setConnectDialogOpen(false);
-      setConnectMessage("");
-      setSelectedCompanion(null);
-    } catch (err) {
-      console.error("Failed to send connection:", err);
-      toast.error("Failed to send connection request");
-    } finally {
-      setIsSendingConnection(false);
-    }
+  // Search trips when destination entered in explore
+  const handleExploreSearch = () => {
+    if (!searchQuery.trim()) return;
+    setDestination(searchQuery.trim());
+    fetchTrips(searchQuery.trim());
+    setStage("discover");
   };
 
-  const handleToggleLike = async (userId: string) => {
-    try {
-      await toggleLike(userId);
-    } catch (err) {
-      console.error("Failed to toggle like:", err);
-      toast.error("Failed to update like");
-    }
+  const handleDeclareIntent = () => {
+    if (!destination.trim()) { toast.error("Enter a destination"); return; }
+    if (!startDate || !endDate) { toast.error("Select dates"); return; }
+    if (!tripType) { toast.error("Select trip type"); return; }
+    if (!budgetRange) { toast.error("Select budget range"); return; }
+    setStage("discover");
+    fetchTrips(destination);
   };
 
-  const handleJoinGroup = async (groupId: string, isMember: boolean) => {
-    try {
-      if (isMember) {
-        await leaveGroup(groupId);
-        toast.success("Left the group");
-      } else {
-        await joinGroup(groupId);
-        toast.success("Joined the group successfully!");
-      }
-    } catch (err) {
-      console.error("Failed to join/leave group:", err);
-      toast.error("Failed to update group membership");
-    }
-  };
-
-  const handleCreateGroup = async () => {
-    if (!newGroupName.trim()) {
-      toast.error("Please enter a group name");
+  const handleCreateTrip = async () => {
+    if (!destination.trim() || !startDate || !endDate || !tripType || !budgetRange || !groupType) {
+      toast.error("Please fill all required fields");
       return;
     }
-    if (!newGroupCategory.trim()) {
-      toast.error("Please enter a category");
-      return;
-    }
-
     try {
-      setIsCreatingGroup(true);
-      await createGroup(newGroupName.trim(), newGroupDescription.trim(), newGroupCategory.trim());
-      toast.success(`Group "${newGroupName}" created successfully!`);
-      setNewGroupName("");
-      setNewGroupDescription("");
-      setNewGroupCategory("");
-      setCreateGroupOpen(false);
+      setIsCreating(true);
+      await createTrip({
+        destination: destination.trim(),
+        start_date: startDate,
+        end_date: endDate,
+        trip_type: tripType,
+        budget_range: budgetRange,
+        group_type: groupType || "mixed",
+        max_members: maxMembers,
+        trip_style: tripType,
+        description: tripDescription || undefined,
+      });
+      toast.success("Trip created! You're the trip owner.");
+      setCreateDialogOpen(false);
+      setStage("my-trips");
+      resetForm();
     } catch (err) {
-      console.error("Failed to create group:", err);
-      toast.error("Failed to create group");
+      console.error(err);
+      toast.error("Failed to create trip");
     } finally {
-      setIsCreatingGroup(false);
+      setIsCreating(false);
     }
   };
 
-  const openGroupChat = (group: Group) => {
-    setSelectedGroupForChat(group);
-    setChatDialogOpen(true);
+  const handleRequestJoin = async () => {
+    if (!selectedTrip) return;
+    try {
+      setIsSendingRequest(true);
+      await requestToJoin(selectedTrip.id, joinMessage, joinAnswers);
+      toast.success("Request sent! The trip owner will review it.");
+      setJoinDialogOpen(false);
+      setJoinMessage("");
+      setJoinAnswers({ arrival: "", first_visit: "", group_stay: "" });
+      setSelectedTrip(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to send request");
+    } finally {
+      setIsSendingRequest(false);
+    }
   };
 
-  const getCategoryIcon = (category: string) => {
-    const iconMap: Record<string, React.ElementType> = {
-      Coworking: Briefcase,
-      Safety: Shield,
-      Food: Coffee,
-      Adventure: Mountain,
-      Photography: Camera,
-      Music: Music,
-      Travel: Compass,
-    };
-    return iconMap[category] || Users;
+  const openManageRequests = async (trip: Trip) => {
+    setManagingTrip(trip);
+    setLoadingRequests(true);
+    setRequestsDialogOpen(true);
+    try {
+      const reqs = await getPendingRequests(trip.id);
+      setPendingRequests(reqs);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load requests");
+    } finally {
+      setLoadingRequests(false);
+    }
   };
 
-  const interestIcons: Record<string, React.ReactNode> = {
-    Coworking: <Briefcase className="w-3 h-3" />,
-    "Chai Spots": <Coffee className="w-3 h-3" />,
-    Photography: <Camera className="w-3 h-3" />,
-    Temples: <Mountain className="w-3 h-3" />,
-    Heritage: <Compass className="w-3 h-3" />,
-    "Local Markets": <MapPin className="w-3 h-3" />,
-    Trekking: <Compass className="w-3 h-3" />,
-    "Adventure Sports": <Zap className="w-3 h-3" />,
-    "Street Food": <Coffee className="w-3 h-3" />,
-    "Cultural Events": <Music className="w-3 h-3" />,
+  const handleReviewRequest = async (req: TripRequest, action: "accepted" | "declined") => {
+    try {
+      await handleRequest(req.id, action, req.trip_id, req.user_id);
+      setPendingRequests(prev => prev.filter(r => r.id !== req.id));
+      toast.success(action === "accepted" ? "Request accepted! They can now join the group chat." : "Request declined.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to process request");
+    }
   };
 
-  // Show login prompt if not authenticated
+  const resetForm = () => {
+    setDestination("");
+    setStartDate("");
+    setEndDate("");
+    setTripType("");
+    setBudgetRange("");
+    setGroupType("");
+    setMaxMembers(6);
+    setTripDescription("");
+  };
+
+  const getGroupTypeLabel = (type: string) => GROUP_TYPES.find(g => g.value === type)?.label || type;
+  const getTripTypeLabel = (type: string) => TRIP_TYPES.find(t => t.value === type)?.label || type;
+  const getBudgetLabel = (type: string) => BUDGET_RANGES.find(b => b.value === type)?.label || type;
+
+  // Unauthenticated
   if (!currentUserId) {
     return (
       <div className="flex flex-col h-full bg-background">
         <div className="bg-gradient-hero px-4 py-3 pb-5">
           <h1 className="text-lg font-bold text-white flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Companions
+            <Shield className="w-4 h-4" />
+            Safe Travel Companion
           </h1>
-          <p className="text-white/80 text-[10px]">Connect with verified travelers</p>
+          <p className="text-white/80 text-[10px]">Trip-first, consent-driven travel groups</p>
         </div>
         <div className="flex-1 flex items-center justify-center p-8">
           <Card className="p-6 text-center max-w-sm">
-            <Users className="w-12 h-12 mx-auto text-primary mb-4" />
-            <h2 className="font-semibold text-lg mb-2">Join the Community</h2>
-            <p className="text-muted-foreground text-sm mb-4">Sign in to discover and connect with other travelers</p>
+            <Shield className="w-12 h-12 mx-auto text-primary mb-4" />
+            <h2 className="font-semibold text-lg mb-2">Safe Travel Groups</h2>
+            <p className="text-muted-foreground text-sm mb-4">
+              Sign in to find trip-based travel groups. No direct messaging — all interactions are group-first and consent-driven.
+            </p>
             <Button onClick={onNavigateToAccount} className="bg-gradient-primary text-white">
               Sign In / Sign Up
             </Button>
@@ -320,12 +257,24 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
       {/* Header */}
       <div className="bg-gradient-hero px-4 py-3 pb-5">
         <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Companions
-            </h1>
-            <p className="text-white/80 text-[10px]">Connect with verified travelers</p>
+          <div className="flex items-center gap-2">
+            {stage !== "explore" && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setStage("explore")}
+                className="w-8 h-8 rounded-full bg-white/20 text-white hover:bg-white/30"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+            )}
+            <div>
+              <h1 className="text-lg font-bold text-white flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Safe Companion
+              </h1>
+              <p className="text-white/80 text-[10px]">Trip-first • Group-only • Consent-driven</p>
+            </div>
           </div>
           <Button
             variant="ghost"
@@ -336,629 +285,565 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
             <User className="w-4 h-4" />
           </Button>
         </div>
-
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by interests or cities..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 text-xs bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
-          />
-        </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-[calc(100%-2rem)] grid-cols-2 mx-4 mt-3 h-11 rounded-xl bg-muted">
-            <TabsTrigger
-              value="discover"
-              className="text-xs rounded-lg flex items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-            >
-              <Compass className="w-4 h-4" />
-              Discover
-            </TabsTrigger>
-            <TabsTrigger
-              value="groups"
-              className="text-xs rounded-lg flex items-center gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
-            >
-              <Users className="w-4 h-4" />
-              Groups
-            </TabsTrigger>
-          </TabsList>
+      <div className="flex-1 overflow-y-auto pb-20">
+        {/* ===== STAGE 1: EXPLORE ===== */}
+        {stage === "explore" && (
+          <div className="px-4 pt-4 space-y-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search a destination (e.g., Girnar, Manali...)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleExploreSearch()}
+                className="pl-10 text-xs bg-card border shadow-soft h-10 rounded-xl"
+              />
+            </div>
 
-          {/* Filters - only show on Discover tab */}
-          {activeTab === "discover" && (
-            <div className="px-4 py-3">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
-                  <Badge
-                    variant={filters.gender !== "all" ? "default" : "secondary"}
-                    className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                  >
-                    <Users className="w-3 h-3" />
-                    {filters.gender === "all" ? "All" : filters.gender === "female" ? "Female" : "Male"}
-                  </Badge>
-                  <Badge
-                    variant={filters.radius[0] !== 50 ? "default" : "secondary"}
-                    className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                  >
-                    <MapPin className="w-3 h-3" />
-                    {filters.radius[0]}km
-                  </Badge>
-                  <Badge
-                    variant={filters.status !== "all" ? "default" : "secondary"}
-                    className="gap-1 text-[10px] whitespace-nowrap py-1 px-2.5 rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                  >
-                    <Clock className="w-3 h-3" />
-                    {filters.status === "all" ? "All" : "Online"}
-                  </Badge>
+            {/* Safety Banner */}
+            <Card className="p-4 bg-primary/5 border-primary/20 rounded-2xl">
+              <div className="flex items-start gap-3">
+                <Shield className="w-8 h-8 text-primary flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-sm text-foreground">How it works</h3>
+                  <ul className="text-xs text-muted-foreground mt-1.5 space-y-1">
+                    <li className="flex items-center gap-1.5"><span className="text-primary font-bold">1.</span> Search a destination — see travel patterns, not people</li>
+                    <li className="flex items-center gap-1.5"><span className="text-primary font-bold">2.</span> Declare your intent — destination, dates, style, budget</li>
+                    <li className="flex items-center gap-1.5"><span className="text-primary font-bold">3.</span> Join or create a trip — request access, no direct chat</li>
+                    <li className="flex items-center gap-1.5"><span className="text-primary font-bold">4.</span> Chat unlocks only after consent — group-first, trip-scoped</li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+
+            {/* Tabs: Explore / My Trips */}
+            <Tabs defaultValue="explore-dest" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 h-10 rounded-xl bg-muted">
+                <TabsTrigger value="explore-dest" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Compass className="w-3.5 h-3.5 mr-1.5" />
+                  Explore
+                </TabsTrigger>
+                <TabsTrigger value="my-trips-tab" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm" onClick={() => fetchMyTrips()}>
+                  <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                  My Trips
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="explore-dest" className="mt-3 space-y-3">
+                {/* Quick destination suggestions */}
+                <div>
+                  <h4 className="text-xs font-medium text-muted-foreground mb-2">Popular Destinations</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {["Girnar", "Manali", "Rishikesh", "Goa", "Varanasi", "Ladakh"].map(dest => (
+                      <Badge
+                        key={dest}
+                        variant="secondary"
+                        className="text-xs py-1.5 px-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
+                        onClick={() => {
+                          setSearchQuery(dest);
+                          setDestination(dest);
+                          fetchTrips(dest);
+                          setStage("discover");
+                        }}
+                      >
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {dest}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
 
-                <Popover>
-                  <PopoverTrigger asChild>
+                {/* Intent declaration CTA */}
+                <Card className="p-4 rounded-2xl border-dashed border-2 border-primary/30 bg-primary/5">
+                  <div className="text-center">
+                    <Mountain className="w-8 h-8 mx-auto text-primary mb-2" />
+                    <h3 className="font-semibold text-sm">Plan a Trip</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Declare your travel intent to find or create a group</p>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 text-xs rounded-lg px-3 flex-shrink-0 border-dashed"
+                      className="mt-3 bg-gradient-primary text-white rounded-xl text-xs h-9"
+                      onClick={() => setStage("intent")}
                     >
-                      <Filter className="w-3.5 h-3.5 mr-1.5" />
-                      Filters
+                      Declare Intent
+                      <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-4 rounded-xl bg-popover" align="end">
-                    <div className="space-y-4">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <Filter className="w-4 h-4 text-primary" />
-                        Filter Companions
-                      </h4>
+                  </div>
+                </Card>
+              </TabsContent>
 
-                      {/* Gender Filter */}
-                      <div>
-                        <label className="text-xs font-medium mb-2 block text-muted-foreground">Gender</label>
-                        <div className="grid grid-cols-3 gap-1.5">
-                          {["all", "female", "male"].map((gender) => (
-                            <Button
-                              key={gender}
-                              variant={filters.gender === gender ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => setFilters((prev) => ({ ...prev, gender }))}
-                              className={cn(
-                                "capitalize text-xs h-8 rounded-lg",
-                                filters.gender === gender && "bg-gradient-primary text-white border-0",
-                              )}
-                            >
-                              {gender}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
+              <TabsContent value="my-trips-tab" className="mt-3 space-y-3">
+                {myTrips.length === 0 ? (
+                  <Card className="p-6 text-center rounded-2xl">
+                    <Calendar className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                    <h3 className="font-semibold text-sm">No trips yet</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Create or join a trip to get started</p>
+                  </Card>
+                ) : (
+                  myTrips.map(trip => (
+                    <MyTripCard
+                      key={trip.id}
+                      trip={trip}
+                      onChat={() => { setChatTrip(trip); setChatOpen(true); }}
+                      onManageRequests={() => openManageRequests(trip)}
+                      getGroupTypeLabel={getGroupTypeLabel}
+                      getTripTypeLabel={getTripTypeLabel}
+                    />
+                  ))
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
 
-                      {/* Status Filter */}
-                      <div>
-                        <label className="text-xs font-medium mb-2 block text-muted-foreground">Status</label>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {["all", "online"].map((status) => (
-                            <Button
-                              key={status}
-                              variant={filters.status === status ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => setFilters((prev) => ({ ...prev, status }))}
-                              className={cn(
-                                "capitalize text-xs h-8 rounded-lg",
-                                filters.status === status && "bg-gradient-primary text-white border-0",
-                              )}
-                            >
-                              {status === "online" && <div className="w-2 h-2 rounded-full bg-success mr-1.5" />}
-                              {status}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
+        {/* ===== STAGE 2: INTENT DECLARATION ===== */}
+        {stage === "intent" && (
+          <div className="px-4 pt-4 space-y-4">
+            <h2 className="font-semibold text-base">Declare Your Travel Intent</h2>
+            <p className="text-xs text-muted-foreground">Fill in your travel plans to find or create matching trips. No profiles or chats at this stage.</p>
 
-                      {/* Radius Filter */}
-                      <div>
-                        <label className="text-xs font-medium mb-2 block text-muted-foreground flex items-center gap-1.5">
-                          <MapPin className="w-3 h-3 text-primary" />
-                          Radius: {filters.radius[0]}km
-                        </label>
-                        <Slider
-                          value={filters.radius}
-                          onValueChange={(value) => setFilters((prev) => ({ ...prev, radius: value }))}
-                          max={100}
-                          min={1}
-                          step={1}
-                          className="w-full"
-                        />
-                      </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Destination *</label>
+                <Input value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g., Girnar, Manali" className="rounded-xl text-sm" />
+              </div>
 
-                      {/* Age Range Filter */}
-                      <div>
-                        <label className="text-xs font-medium mb-2 block text-muted-foreground">
-                          Age: {filters.ageRange[0]}-{filters.ageRange[1]}
-                        </label>
-                        <Slider
-                          value={filters.ageRange}
-                          onValueChange={(value) => setFilters((prev) => ({ ...prev, ageRange: value }))}
-                          max={80}
-                          min={18}
-                          step={1}
-                          className="w-full"
-                        />
-                      </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Start Date *</label>
+                  <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="rounded-xl text-sm" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">End Date *</label>
+                  <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="rounded-xl text-sm" />
+                </div>
+              </div>
 
-                      {/* Reset Filters */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setFilters({
-                            gender: "all",
-                            status: "all",
-                            radius: [50],
-                            ageRange: [18, 65],
-                            interests: [],
-                          })
-                        }
-                        className="w-full text-xs h-9 rounded-lg"
-                      >
-                        Reset All Filters
-                      </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Trip Type *</label>
+                <Select value={tripType} onValueChange={setTripType}>
+                  <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent>
+                    {TRIP_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Budget Range *</label>
+                <Select value={budgetRange} onValueChange={setBudgetRange}>
+                  <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Select budget" /></SelectTrigger>
+                  <SelectContent>
+                    {BUDGET_RANGES.map(b => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          )}
 
-          {/* Discover Tab */}
-          <TabsContent value="discover" className="flex-1 overflow-y-auto px-4 pt-1 pb-20">
-            {companionsLoading ? (
+            <div className="flex gap-3 pt-2">
+              <Button
+                className="flex-1 bg-gradient-primary text-white rounded-xl h-11"
+                onClick={() => {
+                  handleDeclareIntent();
+                }}
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Find Matching Trips
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl h-11"
+                onClick={() => {
+                  if (!destination.trim() || !startDate || !endDate || !tripType || !budgetRange) {
+                    toast.error("Fill all required fields first");
+                    return;
+                  }
+                  setCreateDialogOpen(true);
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Trip
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* ===== STAGE 3: TRIP DISCOVERY ===== */}
+        {stage === "discover" && (
+          <div className="px-4 pt-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold text-base flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  Trips to {destination || "Destination"}
+                </h2>
+                <p className="text-[10px] text-muted-foreground">Showing trip groups — no individual profiles</p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl text-xs h-8"
+                onClick={() => setStage("intent")}
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Create
+              </Button>
+            </div>
+
+            {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredCompanions.map((companion) => {
-                  const connectionStatus = getConnectionStatus(companion.user_id);
-                  const isConnected = connectionStatus === "accepted";
-                  const isPending = connectionStatus === "pending";
-
-                  return (
-                    <Card
-                      key={companion.id}
-                      className="p-3 shadow-soft rounded-2xl border-0 cursor-pointer hover:shadow-medium transition-all bg-card"
-                      onClick={() => {
-                        setSelectedCompanion(companion);
-                        setConnectDialogOpen(true);
-                      }}
-                    >
-                      <div className="flex gap-3">
-                        {/* Profile Image */}
-                        <div className="relative flex-shrink-0">
-                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden">
-                            {companion.avatar_url ? (
-                              <img
-                                src={companion.avatar_url}
-                                alt={companion.display_name || "User"}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <User className="w-6 h-6 text-primary" />
-                            )}
-                          </div>
-                          {companion.is_online && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-background" />
-                          )}
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0 flex flex-col">
-                          {/* Header Row */}
-                          <div className="flex-1">
-                            <div className="flex items-center gap-1.5">
-                              <h3 className="font-semibold text-sm text-foreground">
-                                {companion.display_name || "Anonymous"}
-                              </h3>
-                              {companion.is_verified && (
-                                <CheckCircle className="w-3.5 h-3.5 text-success flex-shrink-0" />
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
-                              {companion.age && (
-                                <>
-                                  <span className="font-medium">{companion.age} years</span>
-                                  <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-                                </>
-                              )}
-                              <div className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                <span>
-                                  {companion.distance !== undefined
-                                    ? `${companion.distance.toFixed(1)} km away`
-                                    : companion.city || "Location unknown"}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Interests */}
-                            {companion.interests.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                {companion.interests.slice(0, 3).map((interest) => (
-                                  <Badge
-                                    key={interest}
-                                    variant="secondary"
-                                    className="text-[10px] py-0.5 px-2 rounded-lg bg-primary/10 text-primary border-0"
-                                  >
-                                    {interest}
-                                  </Badge>
-                                ))}
-                                {companion.interests.length > 3 && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-[10px] py-0.5 px-2 rounded-lg bg-muted text-muted-foreground border-0"
-                                  >
-                                    +{companion.interests.length - 3}
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="flex items-center gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
-                            <Button
-                              size="sm"
-                              className={cn(
-                                "text-xs h-9 rounded-xl px-4 flex-1",
-                                isConnected
-                                  ? "bg-success/10 text-success border border-success/30 hover:bg-success/20"
-                                  : isPending
-                                    ? "bg-muted text-muted-foreground"
-                                    : "bg-gradient-primary text-white border-0 shadow-sm",
-                              )}
-                              onClick={() => {
-                                if (!isConnected && !isPending) {
-                                  setSelectedCompanion(companion);
-                                  setConnectDialogOpen(true);
-                                }
-                              }}
-                              disabled={isConnected || isPending}
-                            >
-                              {isConnected ? (
-                                <>
-                                  <CheckCircle className="w-4 h-4 mr-1.5" />
-                                  Connected
-                                </>
-                              ) : isPending ? (
-                                <>
-                                  <Clock className="w-4 h-4 mr-1.5" />
-                                  Pending
-                                </>
-                              ) : (
-                                <>
-                                  <MessageCircle className="w-4 h-4 mr-1.5" />
-                                  Connect
-                                </>
-                              )}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleToggleLike(companion.user_id)}
-                              className={cn(
-                                "w-9 h-9 rounded-xl transition-all flex-shrink-0",
-                                isLiked(companion.user_id)
-                                  ? "text-destructive bg-destructive/10 border-destructive/30"
-                                  : "text-muted-foreground hover:text-destructive hover:bg-destructive/10",
-                              )}
-                            >
-                              <Heart className={cn("w-4 h-4", isLiked(companion.user_id) && "fill-current")} />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-
-                {filteredCompanions.length === 0 && (
-                  <Card className="p-6 text-center">
-                    <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                    <h3 className="font-semibold text-base mb-1">No companions found</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {searchQuery ? `No results for "${searchQuery}"` : "No registered travelers nearby yet"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">Invite your friends to join the community!</p>
-                  </Card>
-                )}
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Groups Tab */}
-          <TabsContent value="groups" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
-            {/* Create Group Button */}
-            <Button
-              onClick={() => setCreateGroupOpen(true)}
-              className="w-full mb-3 bg-gradient-primary text-white border-0 rounded-xl h-10"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create New Group
-            </Button>
-
-            {groupsLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            ) : groups.length === 0 ? (
-              <Card className="p-6 text-center">
-                <Users className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                <h3 className="font-semibold text-base mb-1">No groups yet</h3>
-                <p className="text-sm text-muted-foreground">Be the first to create a group!</p>
+            ) : trips.length === 0 ? (
+              <Card className="p-6 text-center rounded-2xl">
+                <Compass className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
+                <h3 className="font-semibold text-sm">No trips found</h3>
+                <p className="text-xs text-muted-foreground mt-1">Be the first to create a trip to {destination}!</p>
+                <Button
+                  className="mt-4 bg-gradient-primary text-white rounded-xl text-xs"
+                  onClick={() => setStage("intent")}
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1.5" />
+                  Create a Trip
+                </Button>
               </Card>
             ) : (
               <div className="space-y-3">
-                {groups.map((group) => {
-                  const IconComponent = getCategoryIcon(group.category);
-                  const isJoined = group.is_member;
-
-                  return (
-                    <Card
-                      key={group.id}
-                      className="p-4 shadow-soft rounded-2xl border-0 transition-all hover:shadow-medium hover:scale-[1.01]"
-                    >
-                      <div className="flex gap-4">
-                        {/* Icon */}
-                        <div
-                          className={cn(
-                            "w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm",
-                            isJoined
-                              ? "bg-gradient-to-br from-primary to-primary/80"
-                              : "bg-gradient-to-br from-primary/20 to-primary/5",
-                          )}
-                        >
-                          <IconComponent className={cn("w-7 h-7", isJoined ? "text-white" : "text-primary")} />
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0 flex flex-col">
-                          {/* Header */}
-                          <div className="flex items-start justify-between gap-2 mb-1">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-sm text-foreground truncate">{group.name}</h3>
-                              <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground mt-1">
-                                <div className="flex items-center gap-1">
-                                  <Users className="w-3.5 h-3.5" />
-                                  <span className="font-medium">{group.member_count}</span>
-                                </div>
-                                <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-                                <Badge
-                                  variant="secondary"
-                                  className="text-[10px] py-0.5 px-2 rounded-full bg-secondary/80 font-medium"
-                                >
-                                  {group.category}
-                                </Badge>
-                              </div>
-                            </div>
-                            {/* Activity Badge */}
-                            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted/50 text-[10px] text-muted-foreground flex-shrink-0">
-                              <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                              <span>Active</span>
-                            </div>
-                          </div>
-
-                          {/* Description */}
-                          {group.description && (
-                            <p className="text-xs text-muted-foreground mb-3 line-clamp-2 leading-relaxed">
-                              {group.description}
-                            </p>
-                          )}
-
-                          {/* Actions */}
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant={isJoined ? "outline" : "default"}
-                              className={cn(
-                                "text-xs h-9 rounded-xl px-4 flex-1",
-                                !isJoined && "bg-gradient-primary text-white border-0 shadow-sm",
-                              )}
-                              onClick={() => handleJoinGroup(group.id, isJoined)}
-                            >
-                              {isJoined ? (
-                                <>
-                                  <CheckCircle className="w-4 h-4 mr-1.5" />
-                                  Joined
-                                </>
-                              ) : (
-                                <>
-                                  <UserPlus className="w-4 h-4 mr-1.5" />
-                                  Join Group
-                                </>
-                              )}
-                            </Button>
-                            {isJoined && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-xs h-9 rounded-xl px-4"
-                                onClick={() => openGroupChat(group)}
-                              >
-                                <MessageCircle className="w-4 h-4 mr-1.5" />
-                                Chat
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
+                {trips.map(trip => (
+                  <TripCard
+                    key={trip.id}
+                    trip={trip}
+                    onRequestJoin={() => {
+                      setSelectedTrip(trip);
+                      setJoinDialogOpen(true);
+                    }}
+                    getGroupTypeLabel={getGroupTypeLabel}
+                    getTripTypeLabel={getTripTypeLabel}
+                    getBudgetLabel={getBudgetLabel}
+                  />
+                ))}
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </div>
 
-      {/* Connect Dialog */}
-      <Dialog open={connectDialogOpen} onOpenChange={setConnectDialogOpen}>
+      {/* ===== JOIN REQUEST DIALOG ===== */}
+      <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
         <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-primary" />
-              Connect with {selectedCompanion?.display_name || "Traveler"}
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              <Send className="w-4 h-4 text-primary" />
+              Request to Join Trip
             </DialogTitle>
-            <DialogDescription>Send a connection request with an optional message</DialogDescription>
+            <DialogDescription className="text-xs">
+              The trip owner will review your request. No direct chat until accepted.
+            </DialogDescription>
           </DialogHeader>
 
-          {selectedCompanion && (
+          {selectedTrip && (
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden">
-                  {selectedCompanion.avatar_url ? (
-                    <img
-                      src={selectedCompanion.avatar_url}
-                      alt={selectedCompanion.display_name || "User"}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <User className="w-6 h-6 text-primary" />
-                  )}
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm">{selectedCompanion.display_name || "Anonymous"}</h4>
-                  <p className="text-xs text-muted-foreground">{selectedCompanion.city || "Location unknown"}</p>
-                </div>
+              <Card className="p-3 bg-muted/50 rounded-xl">
+                <p className="text-xs font-medium">{selectedTrip.destination}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {selectedTrip.start_date} → {selectedTrip.end_date} • {getGroupTypeLabel(selectedTrip.group_type)}
+                </p>
+              </Card>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">What time do you plan to arrive?</label>
+                <Input value={joinAnswers.arrival} onChange={e => setJoinAnswers(prev => ({ ...prev, arrival: e.target.value }))} placeholder="e.g., Morning, 10 AM" className="rounded-xl text-sm" />
               </div>
 
-              {selectedCompanion.bio && <p className="text-sm text-muted-foreground">{selectedCompanion.bio}</p>}
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Message (optional)</label>
-                <Textarea
-                  placeholder="Hi! I'd love to connect..."
-                  value={connectMessage}
-                  onChange={(e) => setConnectMessage(e.target.value)}
-                  className="min-h-[80px] resize-none rounded-xl"
-                />
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Is this your first visit?</label>
+                <Select value={joinAnswers.first_visit} onValueChange={v => setJoinAnswers(prev => ({ ...prev, first_visit: v }))}>
+                  <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">Yes, first time</SelectItem>
+                    <SelectItem value="no">No, visited before</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Comfortable with group stay?</label>
+                <Select value={joinAnswers.group_stay} onValueChange={v => setJoinAnswers(prev => ({ ...prev, group_stay: v }))}>
+                  <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No, I'll book separately</SelectItem>
+                    <SelectItem value="flexible">Flexible</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Optional message</label>
+                <Textarea value={joinMessage} onChange={e => setJoinMessage(e.target.value)} placeholder="Introduce yourself briefly..." className="rounded-xl text-sm resize-none" rows={2} />
+              </div>
+
+              <DialogFooter>
+                <Button
+                  className="w-full bg-gradient-primary text-white rounded-xl h-10"
+                  onClick={handleRequestJoin}
+                  disabled={isSendingRequest}
+                >
+                  {isSendingRequest ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+                  Send Request
+                </Button>
+              </DialogFooter>
             </div>
           )}
-
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setConnectDialogOpen(false);
-                setConnectMessage("");
-              }}
-              className="rounded-xl"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConnect}
-              disabled={isSendingConnection}
-              className="bg-gradient-primary text-white border-0 rounded-xl"
-            >
-              {isSendingConnection ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Send Request
-                </>
-              )}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Create Group Dialog */}
-      <Dialog open={createGroupOpen} onOpenChange={setCreateGroupOpen}>
+      {/* ===== CREATE TRIP DIALOG ===== */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
-              Create New Group
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              <Plus className="w-4 h-4 text-primary" />
+              Create a Trip
             </DialogTitle>
-            <DialogDescription>Start a community for travelers with shared interests</DialogDescription>
+            <DialogDescription className="text-xs">
+              You'll be the trip owner and can approve/decline join requests.
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Group Name</label>
-              <Input
-                placeholder="e.g., Backpackers India"
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                className="rounded-xl"
-              />
+          <div className="space-y-3">
+            <Card className="p-3 bg-muted/50 rounded-xl">
+              <p className="text-xs font-medium">{destination} • {getTripTypeLabel(tripType)} • {getBudgetLabel(budgetRange)}</p>
+              <p className="text-[10px] text-muted-foreground">{startDate} → {endDate}</p>
+            </Card>
+
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Group Type *</label>
+              <Select value={groupType} onValueChange={setGroupType}>
+                <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Select group type" /></SelectTrigger>
+                <SelectContent>
+                  {GROUP_TYPES.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Category</label>
-              <Input
-                placeholder="e.g., Adventure, Food, Culture"
-                value={newGroupCategory}
-                onChange={(e) => setNewGroupCategory(e.target.value)}
-                className="rounded-xl"
-              />
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Max Members</label>
+              <Select value={String(maxMembers)} onValueChange={v => setMaxMembers(Number(v))}>
+                <SelectTrigger className="rounded-xl text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[3, 4, 5, 6, 8, 10].map(n => <SelectItem key={n} value={String(n)}>{n} people</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
-              <Textarea
-                placeholder="What's your group about?"
-                value={newGroupDescription}
-                onChange={(e) => setNewGroupDescription(e.target.value)}
-                className="min-h-[80px] resize-none rounded-xl"
-              />
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Description (optional)</label>
+              <Textarea value={tripDescription} onChange={e => setTripDescription(e.target.value)} placeholder="Brief trip plan..." className="rounded-xl text-sm resize-none" rows={2} />
             </div>
+
+            <DialogFooter>
+              <Button className="w-full bg-gradient-primary text-white rounded-xl h-10" onClick={handleCreateTrip} disabled={isCreating}>
+                {isCreating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                Create Trip
+              </Button>
+            </DialogFooter>
           </div>
-
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setCreateGroupOpen(false)} className="rounded-xl">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreateGroup}
-              disabled={isCreatingGroup}
-              className="bg-gradient-primary text-white border-0 rounded-xl"
-            >
-              {isCreatingGroup ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Group
-                </>
-              )}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Group Chat Dialog */}
-      <GroupChatDialog
-        open={chatDialogOpen}
-        onOpenChange={setChatDialogOpen}
-        groupId={selectedGroupForChat?.id || null}
-        groupName={selectedGroupForChat?.name || ""}
+      {/* ===== MANAGE REQUESTS DIALOG ===== */}
+      <Dialog open={requestsDialogOpen} onOpenChange={setRequestsDialogOpen}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              <Users className="w-4 h-4 text-primary" />
+              Join Requests — {managingTrip?.destination}
+            </DialogTitle>
+          </DialogHeader>
+
+          {loadingRequests ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            </div>
+          ) : pendingRequests.length === 0 ? (
+            <div className="text-center py-8">
+              <CheckCircle className="w-8 h-8 mx-auto text-muted-foreground/50 mb-2" />
+              <p className="text-sm text-muted-foreground">No pending requests</p>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-[50vh] overflow-y-auto">
+              {pendingRequests.map(req => (
+                <Card key={req.id} className="p-3 rounded-xl">
+                  <p className="text-sm font-medium">{req.sender_name}</p>
+                  {req.answers && (
+                    <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
+                      {req.answers.arrival && <p>Arrival: {req.answers.arrival}</p>}
+                      {req.answers.first_visit && <p>First visit: {req.answers.first_visit}</p>}
+                      {req.answers.group_stay && <p>Group stay: {req.answers.group_stay}</p>}
+                    </div>
+                  )}
+                  {req.message && <p className="text-xs text-muted-foreground mt-1 italic">"{req.message}"</p>}
+                  <div className="flex gap-2 mt-3">
+                    <Button size="sm" className="flex-1 bg-gradient-primary text-white rounded-xl text-xs h-8" onClick={() => handleReviewRequest(req, "accepted")}>
+                      <CheckCircle className="w-3 h-3 mr-1" /> Accept
+                    </Button>
+                    <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-8" onClick={() => handleReviewRequest(req, "declined")}>
+                      Decline
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== TRIP CHAT ===== */}
+      <TripChatDialog
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        tripId={chatTrip?.id || null}
+        tripName={chatTrip?.destination || "Trip"}
         currentUserId={currentUserId}
       />
     </div>
   );
 };
+
+// ===== TRIP CARD COMPONENT (Stage 3 — No profiles, no names) =====
+const TripCard: React.FC<{
+  trip: Trip;
+  onRequestJoin: () => void;
+  getGroupTypeLabel: (t: string) => string;
+  getTripTypeLabel: (t: string) => string;
+  getBudgetLabel: (t: string) => string;
+}> = ({ trip, onRequestJoin, getGroupTypeLabel, getTripTypeLabel, getBudgetLabel }) => {
+  const isPending = trip.my_request_status === "pending";
+  const isAccepted = trip.my_request_status === "accepted" || trip.is_member;
+  const isFull = (trip.member_count || 0) >= trip.max_members;
+
+  return (
+    <Card className="p-4 shadow-soft rounded-2xl border-0 bg-card">
+      <div className="space-y-3">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="font-semibold text-sm flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-primary" />
+              {trip.destination}
+            </h3>
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              {trip.start_date} → {trip.end_date}
+            </p>
+          </div>
+          <Badge variant="secondary" className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">
+            {getTripTypeLabel(trip.trip_type)}
+          </Badge>
+        </div>
+
+        {/* Info badges — NO names, NO profiles */}
+        <div className="flex flex-wrap gap-1.5">
+          <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
+            <Users className="w-3 h-3" />
+            {trip.member_count || 0}/{trip.max_members} people
+          </Badge>
+          <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
+            <Shield className="w-3 h-3" />
+            {getGroupTypeLabel(trip.group_type)}
+          </Badge>
+          <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
+            <TrendingUp className="w-3 h-3" />
+            {getBudgetLabel(trip.budget_range)}
+          </Badge>
+          {trip.verified_count !== undefined && trip.verified_count > 0 && (
+            <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1 text-success border-success/30">
+              <UserCheck className="w-3 h-3" />
+              {trip.member_count && trip.member_count > 0
+                ? `${Math.round((trip.verified_count / trip.member_count) * 100)}% verified`
+                : "Verified"}
+            </Badge>
+          )}
+        </div>
+
+        {trip.description && (
+          <p className="text-xs text-muted-foreground line-clamp-2">{trip.description}</p>
+        )}
+
+        {/* CTA */}
+        <Button
+          className={cn(
+            "w-full rounded-xl text-xs h-9",
+            isAccepted
+              ? "bg-success/10 text-success border border-success/30"
+              : isPending
+                ? "bg-muted text-muted-foreground"
+                : isFull
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-gradient-primary text-white border-0",
+          )}
+          onClick={onRequestJoin}
+          disabled={isAccepted || isPending || isFull}
+        >
+          {isAccepted ? (
+            <><CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Member</>
+          ) : isPending ? (
+            <><Clock className="w-3.5 h-3.5 mr-1.5" /> Request Pending</>
+          ) : isFull ? (
+            "Trip Full"
+          ) : (
+            <><ArrowRight className="w-3.5 h-3.5 mr-1.5" /> Request to Join Trip</>
+          )}
+        </Button>
+      </div>
+    </Card>
+  );
+};
+
+// ===== MY TRIP CARD =====
+const MyTripCard: React.FC<{
+  trip: Trip;
+  onChat: () => void;
+  onManageRequests: () => void;
+  getGroupTypeLabel: (t: string) => string;
+  getTripTypeLabel: (t: string) => string;
+}> = ({ trip, onChat, onManageRequests, getGroupTypeLabel, getTripTypeLabel }) => (
+  <Card className="p-4 shadow-soft rounded-2xl border-0 bg-card">
+    <div className="flex items-start justify-between mb-2">
+      <div>
+        <h3 className="font-semibold text-sm flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-primary" />
+          {trip.destination}
+        </h3>
+        <p className="text-[10px] text-muted-foreground">{trip.start_date} → {trip.end_date}</p>
+      </div>
+      <div className="flex gap-1">
+        <Badge variant="secondary" className="text-[10px] rounded-lg">{getTripTypeLabel(trip.trip_type)}</Badge>
+        {trip.is_owner && <Badge className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">Owner</Badge>}
+      </div>
+    </div>
+
+    <div className="flex flex-wrap gap-1.5 mb-3">
+      <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
+        <Users className="w-3 h-3" />{trip.member_count} members
+      </Badge>
+      <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
+        <Shield className="w-3 h-3" />{getGroupTypeLabel(trip.group_type)}
+      </Badge>
+    </div>
+
+    <div className="flex gap-2">
+      <Button size="sm" className="flex-1 bg-gradient-primary text-white rounded-xl text-xs h-9" onClick={onChat}>
+        <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Group Chat
+      </Button>
+      {trip.is_owner && (
+        <Button size="sm" variant="outline" className="rounded-xl text-xs h-9" onClick={onManageRequests}>
+          <Eye className="w-3.5 h-3.5 mr-1.5" /> Requests
+        </Button>
+      )}
+    </div>
+  </Card>
+);
 
 export default CompanionPage;
