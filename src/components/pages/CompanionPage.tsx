@@ -204,6 +204,8 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
       await handleRequest(req.id, action, req.trip_id, req.user_id);
       setPendingRequests(prev => prev.filter(r => r.id !== req.id));
       toast.success(action === "accepted" ? "Request accepted! They can now join the group chat." : "Request declined.");
+      // Refresh my trips to update member count
+      await fetchMyTrips();
     } catch (err) {
       console.error(err);
       toast.error("Failed to process request");
