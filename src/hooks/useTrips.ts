@@ -230,9 +230,13 @@ export const useTrips = (currentUserId: string | null) => {
     if (error) throw error;
 
     if (action === "accepted") {
-      await supabase
+      const { error: memberError } = await supabase
         .from("trip_members")
         .insert({ trip_id: tripId, user_id: requestUserId });
+      if (memberError) {
+        console.error("Failed to add member:", memberError);
+        throw new Error("Failed to add member to trip");
+      }
     }
 
     await Promise.all([fetchTrips(), fetchMyTrips()]);
