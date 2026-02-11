@@ -810,42 +810,63 @@ const MyTripCard: React.FC<{
   onManageRequests: () => void;
   getGroupTypeLabel: (t: string) => string;
   getTripTypeLabel: (t: string) => string;
-}> = ({ trip, onChat, onManageRequests, getGroupTypeLabel, getTripTypeLabel }) => (
-  <Card className="p-4 shadow-soft rounded-2xl border-0 bg-card">
-    <div className="flex items-start justify-between mb-2">
-      <div>
-        <h3 className="font-semibold text-sm flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-primary" />
-          {trip.destination}
-        </h3>
-        <p className="text-[10px] text-muted-foreground">{trip.start_date} → {trip.end_date}</p>
-      </div>
-      <div className="flex gap-1">
-        <Badge variant="secondary" className="text-[10px] rounded-lg">{getTripTypeLabel(trip.trip_type)}</Badge>
-        {trip.is_owner && <Badge className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">Owner</Badge>}
-      </div>
-    </div>
+}> = ({ trip, onChat, onManageRequests, getGroupTypeLabel, getTripTypeLabel }) => {
+  const isPending = !trip.is_member && trip.my_request_status === "pending";
+  const isDeclined = !trip.is_member && trip.my_request_status === "declined";
+  const isMember = trip.is_member;
 
-    <div className="flex flex-wrap gap-1.5 mb-3">
-      <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
-        <Users className="w-3 h-3" />{trip.member_count} members
-      </Badge>
-      <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
-        <Shield className="w-3 h-3" />{getGroupTypeLabel(trip.group_type)}
-      </Badge>
-    </div>
+  return (
+    <Card className="p-4 shadow-soft rounded-2xl border-0 bg-card">
+      <div className="flex items-start justify-between mb-2">
+        <div>
+          <h3 className="font-semibold text-sm flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-primary" />
+            {trip.destination}
+          </h3>
+          <p className="text-[10px] text-muted-foreground">{trip.start_date} → {trip.end_date}</p>
+        </div>
+        <div className="flex gap-1">
+          <Badge variant="secondary" className="text-[10px] rounded-lg">{getTripTypeLabel(trip.trip_type)}</Badge>
+          {trip.is_owner && <Badge className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">Owner</Badge>}
+          {isPending && <Badge className="text-[10px] rounded-lg bg-yellow-500/10 text-yellow-600 border-0">Pending</Badge>}
+          {isDeclined && <Badge variant="destructive" className="text-[10px] rounded-lg">Declined</Badge>}
+          {isMember && !trip.is_owner && <Badge className="text-[10px] rounded-lg bg-green-500/10 text-green-600 border-0">Accepted</Badge>}
+        </div>
+      </div>
 
-    <div className="flex gap-2">
-      <Button size="sm" className="flex-1 bg-gradient-primary text-white rounded-xl text-xs h-9" onClick={onChat}>
-        <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Group Chat
-      </Button>
-      {trip.is_owner && (
-        <Button size="sm" variant="outline" className="rounded-xl text-xs h-9" onClick={onManageRequests}>
-          <Eye className="w-3.5 h-3.5 mr-1.5" /> Requests
-        </Button>
-      )}
-    </div>
-  </Card>
-);
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
+          <Users className="w-3 h-3" />{trip.member_count} members
+        </Badge>
+        <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
+          <Shield className="w-3 h-3" />{getGroupTypeLabel(trip.group_type)}
+        </Badge>
+      </div>
+
+      {isMember ? (
+        <div className="flex gap-2">
+          <Button size="sm" className="flex-1 bg-gradient-primary text-white rounded-xl text-xs h-9" onClick={onChat}>
+            <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Group Chat
+          </Button>
+          {trip.is_owner && (
+            <Button size="sm" variant="outline" className="rounded-xl text-xs h-9" onClick={onManageRequests}>
+              <Eye className="w-3.5 h-3.5 mr-1.5" /> Requests
+            </Button>
+          )}
+        </div>
+      ) : isPending ? (
+        <div className="flex items-center gap-2 text-xs text-yellow-600 bg-yellow-500/5 rounded-xl px-3 py-2">
+          <Clock className="w-3.5 h-3.5" />
+          <span>Your request is pending review by the trip owner</span>
+        </div>
+      ) : isDeclined ? (
+        <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/5 rounded-xl px-3 py-2">
+          <Shield className="w-3.5 h-3.5" />
+          <span>Your request was declined</span>
+        </div>
+      ) : null}
+    </Card>
+  );
+};
 
 export default CompanionPage;
