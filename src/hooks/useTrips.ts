@@ -120,35 +120,50 @@ export const useTrips = (currentUserId: string | null) => {
   const fetchMyTrips = useCallback(async () => {
     if (!currentUserId) return;
     try {
+      // Fetch trips where user is a member
       const { data: memberships } = await supabase
         .from("trip_members")
         .select("trip_id, role")
         .eq("user_id", currentUserId);
 
-      if (!memberships || memberships.length === 0) {
+      // Fetch trips where user has sent requests (pending/accepted/declined)
+      const { data: myRequests } = await supabase
+        .from("trip_requests")
+        .select("trip_id, status")
+        .eq("user_id", currentUserId);
+
+      const memberTripIds = (memberships || []).map((m: any) => m.trip_id);
+      const requestTripIds = (myRequests || [])
+        .filter((r: any) => !memberTripIds.includes(r.trip_id))
+        .map((r: any) => r.trip_id);
+
+      const allTripIds = [...memberTripIds, ...requestTripIds];
+
+      if (allTripIds.length === 0) {
         setMyTrips([]);
         return;
       }
 
-      const tripIds = memberships.map((m: any) => m.trip_id);
       const { data: tripsData } = await supabase
         .from("trips")
         .select("*")
-        .in("id", tripIds);
+        .in("id", allTripIds);
 
       const { data: allMembers } = await supabase
         .from("trip_members")
         .select("trip_id, user_id, role")
-        .in("trip_id", tripIds);
+        .in("trip_id", allTripIds);
 
       const enriched: Trip[] = (tripsData || []).map((trip: any) => {
         const members = (allMembers || []).filter((m: any) => m.trip_id === trip.id);
-        const myRole = memberships.find((m: any) => m.trip_id === trip.id);
+        const myRole = (memberships || []).find((m: any) => m.trip_id === trip.id);
+        const myRequest = (myRequests || []).find((r: any) => r.trip_id === trip.id);
         return {
           ...trip,
           member_count: members.length,
-          is_member: true,
+          is_member: !!myRole,
           is_owner: myRole?.role === "owner",
+          my_request_status: myRequest?.status || null,
         };
       });
 
