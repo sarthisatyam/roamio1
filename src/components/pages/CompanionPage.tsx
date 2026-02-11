@@ -813,7 +813,8 @@ const MyTripCard: React.FC<{
 }> = ({ trip, onChat, onManageRequests, getGroupTypeLabel, getTripTypeLabel }) => {
   const isPending = !trip.is_member && trip.my_request_status === "pending";
   const isDeclined = !trip.is_member && trip.my_request_status === "declined";
-  const isMember = trip.is_member;
+  // Treat accepted request status as member (covers edge case where trip_members insert may not have propagated)
+  const isMember = trip.is_member || trip.my_request_status === "accepted";
 
   return (
     <Card className="p-4 shadow-soft rounded-2xl border-0 bg-card">
