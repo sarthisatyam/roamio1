@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useTrips, Trip, TripRequest } from "@/hooks/useTrips";
 import TripChatDialog from "@/components/dialogs/TripChatDialog";
+import SelfieVerificationDialog from "@/components/SelfieVerificationDialog";
 
 interface CompanionPageProps {
   onNavigateToAccount?: () => void;
@@ -104,6 +105,11 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
+  // Selfie verification
+  const [selfieDialogOpen, setSelfieDialogOpen] = useState(false);
+  const [selfieAction, setSelfieAction] = useState<"create" | "join" | null>(null);
+  const [genderVerified, setGenderVerified] = useState(false);
+
   // Auth
   useEffect(() => {
     const getSession = async () => {
@@ -141,6 +147,16 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
       toast.error("Please fill all required fields");
       return;
     }
+    // Gate women-only through selfie verification
+    if (groupType === "women-only" && !genderVerified) {
+      setSelfieAction("create");
+      setSelfieDialogOpen(true);
+      return;
+    }
+    await executeCreateTrip();
+  };
+
+  const executeCreateTrip = async () => {
     try {
       setIsCreating(true);
       await createTrip({
@@ -158,6 +174,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
       setCreateDialogOpen(false);
       setStage("my-trips");
       resetForm();
+      setGenderVerified(false);
     } catch (err) {
       console.error(err);
       toast.error("Failed to create trip");
@@ -168,6 +185,17 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
 
   const handleRequestJoin = async () => {
     if (!selectedTrip) return;
+    // Gate women-only through selfie verification
+    if (selectedTrip.group_type === "women-only" && !genderVerified) {
+      setSelfieAction("join");
+      setSelfieDialogOpen(true);
+      return;
+    }
+    await executeRequestJoin();
+  };
+
+  const executeRequestJoin = async () => {
+    if (!selectedTrip) return;
     try {
       setIsSendingRequest(true);
       await requestToJoin(selectedTrip.id, joinMessage, joinAnswers);
@@ -176,12 +204,31 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
       setJoinMessage("");
       setJoinAnswers({ arrival: "", first_visit: "", group_stay: "" });
       setSelectedTrip(null);
+      setGenderVerified(false);
     } catch (err) {
       console.error(err);
       toast.error("Failed to send request");
     } finally {
       setIsSendingRequest(false);
     }
+  };
+
+  const handleSelfieVerified = () => {
+    setGenderVerified(true);
+    setSelfieDialogOpen(false);
+    // Auto-proceed with the gated action
+    if (selfieAction === "create") {
+      // Small delay to let dialog close
+      setTimeout(() => executeCreateTrip(), 300);
+    } else if (selfieAction === "join") {
+      setTimeout(() => executeRequestJoin(), 300);
+    }
+    setSelfieAction(null);
+  };
+
+  const handleSelfieDenied = () => {
+    setSelfieAction(null);
+    setGenderVerified(false);
   };
 
   const openManageRequests = async (trip: Trip) => {
@@ -709,6 +756,14 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
         tripId={chatTrip?.id || null}
         tripName={chatTrip?.destination || "Trip"}
         currentUserId={currentUserId}
+      />
+
+      {/* ===== SELFIE VERIFICATION ===== */}
+      <SelfieVerificationDialog
+        open={selfieDialogOpen}
+        onOpenChange={setSelfieDialogOpen}
+        onVerified={handleSelfieVerified}
+        onDenied={handleSelfieDenied}
       />
     </div>
   );

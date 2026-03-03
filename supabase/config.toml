@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.hotels-search]
 verify_jwt = false
+
+[functions.verify-gender]
+verify_jwt = false
