@@ -104,56 +104,218 @@ interface ParentalControlDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export const ParentalControlDialog: React.FC<ParentalControlDialogProps> = ({ open, onOpenChange }) => {
-  const [settings, setSettings] = useState({
-    locationSharing: true,
-    tripNotifications: true,
-    sosAlerts: true,
+interface ParentDetails {
+  name: string;
+  phone: string;
+  email: string;
+}
+
+const SETTINGS_KEY = "parental_controls";
+const PARENT_KEY = "parent_details";
+
+const loadSettings = () => {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return {
+    locationSharing: false,
+    tripNotifications: false,
+    sosAlerts: false,
     checkInReminders: false,
-    nightModeRestrictions: false
-  });
+    nightModeRestrictions: false,
+  };
+};
+
+const loadParentDetails = (): ParentDetails | null => {
+  try {
+    const raw = localStorage.getItem(PARENT_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+};
+
+// Simulated feature helpers
+let locationInterval: ReturnType<typeof setInterval> | null = null;
+let checkinInterval: ReturnType<typeof setInterval> | null = null;
+
+const startLiveLocation = () => {
+  if (locationInterval) return;
+  locationInterval = setInterval(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        // Simulate sending GPS to /api/location
+        console.log("[ParentalControl] Sending GPS:", pos.coords.latitude, pos.coords.longitude);
+      });
+    }
+  }, 30000); // every 30s
+};
+const stopLiveLocation = () => {
+  if (locationInterval) { clearInterval(locationInterval); locationInterval = null; }
+};
+
+const startCheckinReminders = () => {
+  if (checkinInterval) return;
+  checkinInterval = setInterval(() => {
+    toast.info("Check-in reminder: Let your guardian know you're safe!");
+  }, 60 * 60 * 1000); // every 60 min
+};
+const stopCheckinReminders = () => {
+  if (checkinInterval) { clearInterval(checkinInterval); checkinInterval = null; }
+};
+
+const sendTripUpdate = (type: "start" | "end") => {
+  console.log(`[ParentalControl] Trip ${type} update sent to /api/trip-update`);
+  toast.info(`Trip ${type} update sent to guardian.`);
+};
+
+const triggerAutoSOS = () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      console.log("[ParentalControl] Auto SOS sent to /api/sos", pos.coords.latitude, pos.coords.longitude);
+      toast.error("Auto SOS triggered! Location sent to guardian.");
+    });
+  }
+};
+
+export const ParentalControlDialog: React.FC<ParentalControlDialogProps> = ({ open, onOpenChange }) => {
+  const [settings, setSettings] = useState(loadSettings);
+  const [showParentForm, setShowParentForm] = useState(false);
+  const [parentForm, setParentForm] = useState<ParentDetails>({ name: "", phone: "", email: "" });
+  const [pendingToggle, setPendingToggle] = useState<{ key: string; checked: boolean } | null>(null);
+
+  // Reload settings from localStorage every time dialog opens
+  React.useEffect(() => {
+    if (open) {
+      setSettings(loadSettings());
+    }
+  }, [open]);
+
+  // Apply side-effects when settings change and are saved
+  const applyFeatures = (s: typeof settings) => {
+    s.locationSharing ? startLiveLocation() : stopLiveLocation();
+    s.checkInReminders ? startCheckinReminders() : stopCheckinReminders();
+    // tripNotifications & sosAlerts are event-driven, stored for later use
+  };
+
+  const handleToggle = (key: string, checked: boolean) => {
+    const parentDetails = loadParentDetails();
+    if (!parentDetails) {
+      setPendingToggle({ key, checked });
+      setShowParentForm(true);
+      return;
+    }
+    setSettings((prev: typeof settings) => ({ ...prev, [key]: checked }));
+  };
+
+  const handleSaveParentDetails = () => {
+    if (!parentForm.name.trim() || !parentForm.phone.trim() || !parentForm.email.trim()) {
+      toast.error("Please fill in all parent/guardian details.");
+      return;
+    }
+    localStorage.setItem(PARENT_KEY, JSON.stringify(parentForm));
+    toast.success("Guardian details saved!");
+    setShowParentForm(false);
+    // Now apply the pending toggle
+    if (pendingToggle) {
+      setSettings((prev: typeof settings) => ({ ...prev, [pendingToggle.key]: pendingToggle.checked }));
+      setPendingToggle(null);
+    }
+  };
 
   const handleSave = () => {
-    toast.success("Parental control settings saved!");
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    applyFeatures(settings);
+    toast.success("Parental controls updated");
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Settings className="w-5 h-5 text-warning" />
-            Parental Controls
-          </DialogTitle>
-          <DialogDescription>Configure safety settings and restrictions</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-warning" />
+              Parental Controls
+            </DialogTitle>
+            <DialogDescription>Configure safety settings and restrictions</DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-4">
-          {Object.entries({
-            locationSharing: "Share live location with guardians",
-            tripNotifications: "Send trip updates to guardians",
-            sosAlerts: "Automatic SOS on emergency",
-            checkInReminders: "Periodic check-in reminders",
-            nightModeRestrictions: "Restrict bookings after 10 PM"
-          }).map(([key, label]) => (
-            <div key={key} className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
-              <span className="text-sm">{label}</span>
-              <Switch
-                checked={settings[key as keyof typeof settings]}
-                onCheckedChange={(checked) => setSettings({ ...settings, [key]: checked })}
+          <div className="space-y-4">
+            {Object.entries({
+              locationSharing: "Share live location with guardians",
+              tripNotifications: "Send trip updates to guardians",
+              sosAlerts: "Automatic SOS on emergency",
+              checkInReminders: "Periodic check-in reminders",
+              nightModeRestrictions: "Restrict bookings after 10 PM"
+            }).map(([key, label]) => (
+              <div key={key} className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
+                <span className="text-sm">{label}</span>
+                <Switch
+                  checked={settings[key as keyof typeof settings]}
+                  onCheckedChange={(checked) => handleToggle(key, checked)}
+                />
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter>
+            <Button onClick={handleSave} className="w-full bg-gradient-primary text-white border-0 rounded-xl">
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Parent Details Form Modal */}
+      <Dialog open={showParentForm} onOpenChange={setShowParentForm}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-primary" />
+              Guardian Details Required
+            </DialogTitle>
+            <DialogDescription>Please add a parent/guardian before enabling controls.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Parent / Guardian Name</Label>
+              <Input
+                placeholder="Full name"
+                value={parentForm.name}
+                onChange={(e) => setParentForm((p) => ({ ...p, name: e.target.value }))}
+                className="rounded-xl mt-1"
               />
             </div>
-          ))}
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handleSave} className="w-full bg-gradient-primary text-white border-0 rounded-xl">
-            Save Settings
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <div>
+              <Label className="text-xs">Phone Number</Label>
+              <Input
+                placeholder="+91 XXXXX XXXXX"
+                value={parentForm.phone}
+                onChange={(e) => setParentForm((p) => ({ ...p, phone: e.target.value }))}
+                className="rounded-xl mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Email</Label>
+              <Input
+                type="email"
+                placeholder="parent@email.com"
+                value={parentForm.email}
+                onChange={(e) => setParentForm((p) => ({ ...p, email: e.target.value }))}
+                className="rounded-xl mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSaveParentDetails} className="w-full bg-gradient-primary text-white border-0 rounded-xl">
+              Save & Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
