@@ -7,6 +7,7 @@ import CompanionPage from "./pages/CompanionPage";
 import JourneyPage from "./pages/JourneyPage";
 import AccountPage from "./pages/AccountPage";
 import FloatingAIBot from "./FloatingAIBot";
+import { PrivacyPolicyDialog, TermsOfServiceDialog, ContactDialog } from "./dialogs/LegalContactDialogs";
 
 interface MainAppProps {
   userData: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
@@ -19,6 +20,9 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [likedCompanions, setLikedCompanions] = useState<number[]>([]);
   const [bookmarkedPlaces, setBookmarkedPlaces] = useState<{ id: number; name: string; image: string }[]>([]);
   const [plannerActivities, setPlannerActivities] = useState<{ title: string; location: string; type: string }[]>([]);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   
   // Location state with localStorage persistence
   const [locationEnabled, setLocationEnabled] = useState(() => {
@@ -128,6 +132,15 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
         {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
 
+      {/* Footer Links */}
+      <div className="bg-muted/50 border-t border-border px-4 py-2 flex justify-center gap-4">
+        <button onClick={() => setPrivacyOpen(true)} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</button>
+        <span className="text-muted-foreground/40 text-[10px]">•</span>
+        <button onClick={() => setTermsOpen(true)} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Terms of Service</button>
+        <span className="text-muted-foreground/40 text-[10px]">•</span>
+        <button onClick={() => setContactOpen(true)} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Contact Us</button>
+      </div>
+
       {/* Bottom Navigation */}
       <nav className="bg-card border-t border-border px-2 py-2 shadow-soft">
         <div className="flex justify-around">
@@ -156,6 +169,11 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
 
       {/* Floating AI Bot */}
       <FloatingAIBot />
+
+      {/* Legal & Contact Dialogs */}
+      <PrivacyPolicyDialog open={privacyOpen} onOpenChange={setPrivacyOpen} />
+      <TermsOfServiceDialog open={termsOpen} onOpenChange={setTermsOpen} />
+      <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
     </div>
   );
 };

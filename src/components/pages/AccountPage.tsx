@@ -36,6 +36,7 @@ import {
   TravelListDialog
 } from "@/components/dialogs/AccountSectionDialogs";
 import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
+import { PrivacyPolicyDialog, TermsOfServiceDialog, ContactDialog } from "@/components/dialogs/LegalContactDialogs";
 
 interface AccountPageProps {
   userData: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
@@ -59,6 +60,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [coCompanionDialogOpen, setCoCompanionDialogOpen] = useState(false);
   const [interestsDialogOpen, setInterestsDialogOpen] = useState(false);
   const [travelListDialogOpen, setTravelListDialogOpen] = useState(false);
+  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
+  const [termsDialogOpen, setTermsDialogOpen] = useState(false);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
 
   // Mock companion data for displaying liked companions with detailed info
   const companions = [
@@ -192,6 +196,30 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       color: "text-success",
       bgColor: "bg-success/10",
       action: () => setSupportDialogOpen(true)
+    },
+    {
+      icon: Shield,
+      title: "Privacy Policy",
+      description: "How we handle your data",
+      color: "text-muted-foreground",
+      bgColor: "bg-muted",
+      action: () => setPrivacyDialogOpen(true)
+    },
+    {
+      icon: CheckCircle,
+      title: "Terms of Service",
+      description: "Usage terms and conditions",
+      color: "text-muted-foreground",
+      bgColor: "bg-muted",
+      action: () => setTermsDialogOpen(true)
+    },
+    {
+      icon: Mail,
+      title: "Contact Us",
+      description: "Get in touch with our team",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      action: () => setContactDialogOpen(true)
     }
   ];
 
@@ -391,6 +419,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <VerifyDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen} />
       <SupportDialog open={supportDialogOpen} onOpenChange={setSupportDialogOpen} />
       <TravelGuideDialog open={travelGuideDialogOpen} onOpenChange={setTravelGuideDialogOpen} />
+      <PrivacyPolicyDialog open={privacyDialogOpen} onOpenChange={setPrivacyDialogOpen} />
+      <TermsOfServiceDialog open={termsDialogOpen} onOpenChange={setTermsDialogOpen} />
+      <ContactDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} />
     </div>
   );
 };
