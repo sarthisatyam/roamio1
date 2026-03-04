@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.verify-gender]
 verify_jwt = false
+
+[functions.parental-location]
+verify_jwt = false
+
+[functions.parental-sos]
+verify_jwt = false
+
+[functions.parental-trip-update]
+verify_jwt = false

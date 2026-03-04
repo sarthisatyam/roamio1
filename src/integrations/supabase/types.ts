@@ -156,6 +156,147 @@ export type Database = {
         }
         Relationships: []
       }
+      parental_guardians: {
+        Row: {
+          created_at: string
+          id: string
+          parent_email: string
+          parent_name: string
+          parent_phone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          parent_email: string
+          parent_name: string
+          parent_phone: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          parent_email?: string
+          parent_name?: string
+          parent_phone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      parental_location_logs: {
+        Row: {
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      parental_settings: {
+        Row: {
+          checkin_reminders: boolean
+          created_at: string
+          id: string
+          location_sharing: boolean
+          restrict_late_bookings: boolean
+          sos_alerts: boolean
+          trip_notifications: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          checkin_reminders?: boolean
+          created_at?: string
+          id?: string
+          location_sharing?: boolean
+          restrict_late_bookings?: boolean
+          sos_alerts?: boolean
+          trip_notifications?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          checkin_reminders?: boolean
+          created_at?: string
+          id?: string
+          location_sharing?: boolean
+          restrict_late_bookings?: boolean
+          sos_alerts?: boolean
+          trip_notifications?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      parental_sos_alerts: {
+        Row: {
+          created_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      parental_trip_updates: {
+        Row: {
+          created_at: string
+          id: string
+          trip_details: Json | null
+          update_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          trip_details?: Json | null
+          update_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          trip_details?: Json | null
+          update_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null

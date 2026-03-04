@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -135,20 +136,28 @@ const loadParentDetails = (): ParentDetails | null => {
   return null;
 };
 
-// Simulated feature helpers
+// Feature helpers that call real edge functions
 let locationInterval: ReturnType<typeof setInterval> | null = null;
 let checkinInterval: ReturnType<typeof setInterval> | null = null;
 
+const sendLocationToBackend = async () => {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    try {
+      await supabase.functions.invoke("parental-location", {
+        body: { latitude: pos.coords.latitude, longitude: pos.coords.longitude },
+      });
+      console.log("[ParentalControl] Location sent successfully");
+    } catch (err) {
+      console.error("[ParentalControl] Failed to send location:", err);
+    }
+  });
+};
+
 const startLiveLocation = () => {
   if (locationInterval) return;
-  locationInterval = setInterval(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        // Simulate sending GPS to /api/location
-        console.log("[ParentalControl] Sending GPS:", pos.coords.latitude, pos.coords.longitude);
-      });
-    }
-  }, 30000); // every 30s
+  sendLocationToBackend(); // send immediately
+  locationInterval = setInterval(sendLocationToBackend, 30000); // every 30s
 };
 const stopLiveLocation = () => {
   if (locationInterval) { clearInterval(locationInterval); locationInterval = null; }
@@ -164,17 +173,38 @@ const stopCheckinReminders = () => {
   if (checkinInterval) { clearInterval(checkinInterval); checkinInterval = null; }
 };
 
-const sendTripUpdate = (type: "start" | "end") => {
-  console.log(`[ParentalControl] Trip ${type} update sent to /api/trip-update`);
-  toast.info(`Trip ${type} update sent to guardian.`);
+export const sendTripUpdate = async (type: "start" | "end", tripDetails?: Record<string, unknown>) => {
+  try {
+    const { error } = await supabase.functions.invoke("parental-trip-update", {
+      body: { update_type: type, trip_details: tripDetails ?? null },
+    });
+    if (error) throw error;
+    toast.info(`Trip ${type} update sent to guardian.`);
+  } catch (err) {
+    console.error("[ParentalControl] Trip update failed:", err);
+  }
 };
 
-const triggerAutoSOS = () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      console.log("[ParentalControl] Auto SOS sent to /api/sos", pos.coords.latitude, pos.coords.longitude);
-      toast.error("Auto SOS triggered! Location sent to guardian.");
+export const triggerAutoSOS = async () => {
+  const getCoords = (): Promise<{ latitude: number; longitude: number } | null> =>
+    new Promise((resolve) => {
+      if (!navigator.geolocation) return resolve(null);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+        () => resolve(null)
+      );
     });
+
+  const coords = await getCoords();
+  try {
+    const { error } = await supabase.functions.invoke("parental-sos", {
+      body: { latitude: coords?.latitude ?? null, longitude: coords?.longitude ?? null },
+    });
+    if (error) throw error;
+    toast.error("Auto SOS triggered! Location sent to guardian.");
+  } catch (err) {
+    console.error("[ParentalControl] SOS failed:", err);
+    toast.error("SOS alert could not be sent.");
   }
 };
 
@@ -208,24 +238,57 @@ export const ParentalControlDialog: React.FC<ParentalControlDialogProps> = ({ op
     setSettings((prev: typeof settings) => ({ ...prev, [key]: checked }));
   };
 
-  const handleSaveParentDetails = () => {
+  const handleSaveParentDetails = async () => {
     if (!parentForm.name.trim() || !parentForm.phone.trim() || !parentForm.email.trim()) {
       toast.error("Please fill in all parent/guardian details.");
       return;
     }
     localStorage.setItem(PARENT_KEY, JSON.stringify(parentForm));
+
+    // Persist to database
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("parental_guardians").upsert({
+          user_id: user.id,
+          parent_name: parentForm.name,
+          parent_phone: parentForm.phone,
+          parent_email: parentForm.email,
+        }, { onConflict: "user_id" });
+      }
+    } catch (err) {
+      console.error("Failed to save guardian to DB:", err);
+    }
+
     toast.success("Guardian details saved!");
     setShowParentForm(false);
-    // Now apply the pending toggle
     if (pendingToggle) {
       setSettings((prev: typeof settings) => ({ ...prev, [pendingToggle.key]: pendingToggle.checked }));
       setPendingToggle(null);
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
     applyFeatures(settings);
+
+    // Persist settings to database
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("parental_settings").upsert({
+          user_id: user.id,
+          location_sharing: settings.locationSharing,
+          trip_notifications: settings.tripNotifications,
+          sos_alerts: settings.sosAlerts,
+          checkin_reminders: settings.checkInReminders,
+          restrict_late_bookings: settings.nightModeRestrictions,
+        }, { onConflict: "user_id" });
+      }
+    } catch (err) {
+      console.error("Failed to save settings to DB:", err);
+    }
+
     toast.success("Parental controls updated");
     onOpenChange(false);
   };
