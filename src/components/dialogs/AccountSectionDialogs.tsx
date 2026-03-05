@@ -126,10 +126,11 @@ export const EmergencyDialog: React.FC<EmergencyDialogProps> = ({ open, onOpenCh
         <div className="space-y-4">
           <Button 
             onClick={handleSOS}
+            disabled={sosLoading}
             className="w-full h-16 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-lg font-bold rounded-xl"
           >
             <AlertTriangle className="w-6 h-6 mr-2" />
-            SOS - Send Alert Now
+            {sosLoading ? "Getting location..." : "SOS - Send Alert Now"}
           </Button>
 
           <div className="space-y-3">
