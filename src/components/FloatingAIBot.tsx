@@ -1,80 +1,193 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Send, Bot, X, Sparkles } from "lucide-react";
+import { MessageCircle, Send, Bot, X, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+interface ChatMessage {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+  time: string;
+}
+
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chatbot`;
+
+async function streamChat({
+  messages,
+  onDelta,
+  onDone,
+  onError,
+}: {
+  messages: { role: string; content: string }[];
+  onDelta: (text: string) => void;
+  onDone: () => void;
+  onError: (err: string) => void;
+}) {
+  const resp = await fetch(CHAT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    },
+    body: JSON.stringify({ messages }),
+  });
+
+  if (!resp.ok) {
+    const data = await resp.json().catch(() => ({}));
+    onError(data.error || `Error ${resp.status}`);
+    return;
+  }
+
+  if (!resp.body) {
+    onError("No response body");
+    return;
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let textBuffer = "";
+  let streamDone = false;
+
+  while (!streamDone) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    textBuffer += decoder.decode(value, { stream: true });
+
+    let newlineIndex: number;
+    while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+      let line = textBuffer.slice(0, newlineIndex);
+      textBuffer = textBuffer.slice(newlineIndex + 1);
+
+      if (line.endsWith("\r")) line = line.slice(0, -1);
+      if (line.startsWith(":") || line.trim() === "") continue;
+      if (!line.startsWith("data: ")) continue;
+
+      const jsonStr = line.slice(6).trim();
+      if (jsonStr === "[DONE]") {
+        streamDone = true;
+        break;
+      }
+
+      try {
+        const parsed = JSON.parse(jsonStr);
+        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+        if (content) onDelta(content);
+      } catch {
+        textBuffer = line + "\n" + textBuffer;
+        break;
+      }
+    }
+  }
+
+  // Final flush
+  if (textBuffer.trim()) {
+    for (let raw of textBuffer.split("\n")) {
+      if (!raw) continue;
+      if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+      if (raw.startsWith(":") || raw.trim() === "") continue;
+      if (!raw.startsWith("data: ")) continue;
+      const jsonStr = raw.slice(6).trim();
+      if (jsonStr === "[DONE]") continue;
+      try {
+        const parsed = JSON.parse(jsonStr);
+        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+        if (content) onDelta(content);
+      } catch { /* ignore */ }
+    }
+  }
+
+  onDone();
+}
 
 const FloatingAIBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
-      text: "Hi! I'm Roamio AI, your travel companion. How can I help you today?",
-      isBot: true,
-      time: "now"
-    }
+      role: "assistant",
+      content: "Hi! I'm Roamio AI, your travel companion. How can I help you today? 🌍",
+      time: "now",
+    },
   ]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const nextIdRef = useRef(2);
 
   const quickActions = [
     "Find safe hostels",
     "Emergency contacts",
     "Local customs",
-    "Transportation tips"
+    "Transportation tips",
   ];
 
-  const getAIResponse = (userMessage: string): string => {
-    const msg = userMessage.toLowerCase();
-    
-    if (msg.includes("hostel") || msg.includes("stay") || msg.includes("hotel")) {
-      return "For safe hostels in Delhi, I recommend Hyderabad Backpackers Hub in Banjara Hills (₹800/night) or Gachibowli Tech Stays (₹1,200/night). Both have 24/7 security, verified reviews, and are solo-traveler friendly. Would you like me to show you booking options?";
-    }
-    if (msg.includes("emergency") || msg.includes("help") || msg.includes("sos")) {
-      return "For emergencies in India:\n• Police: 100\n• Tourist Helpline: 1363\n• Women's Helpline: 181\n• Ambulance: 102\n\nYou can also set up SOS alerts in your Account → Emergency Details. Stay safe!";
-    }
-    if (msg.includes("transport") || msg.includes("cab") || msg.includes("metro") || msg.includes("travel")) {
-      return "Delhi has excellent transport options:\n• Metro: Fastest & safest (₹20-60)\n• Uber/Ola: Reliable, share trip with contacts\n• Auto: Negotiate or use meter\n\nFor intercity travel, check the Bookings tab for flights, trains, and cabs!";
-    }
-    if (msg.includes("food") || msg.includes("eat") || msg.includes("restaurant")) {
-      return "Must-try Delhi food spots:\n• Paranthe Wali Gali (Old Delhi) - Famous paranthas\n• Chandni Chowk - Street food heaven\n• Khan Market - Cafes & restaurants\n\nAlways check hygiene ratings and carry water. Want me to add a food tour to your journey?";
-    }
-    if (msg.includes("safe") || msg.includes("custom") || msg.includes("culture")) {
-      return "Delhi travel tips:\n• Dress modestly at religious sites\n• Keep valuables secure\n• Use women-only metro coaches\n• Avoid isolated areas at night\n• Share live location with trusted contacts\n\nCheck the Travel Guide in your Account for more tips!";
-    }
-    
-    return "I can help you with safe hostels, emergency contacts, transportation, food recommendations, and local customs. What would you like to know about?";
-  };
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
+  const handleSendMessage = async (text?: string) => {
+    const msg = (text || inputMessage).trim();
+    if (!msg || isLoading) return;
 
-    const newMessage = {
-      id: messages.length + 1,
-      text: inputMessage,
-      isBot: false,
-      time: "now"
+    const userMsg: ChatMessage = {
+      id: nextIdRef.current++,
+      role: "user",
+      content: msg,
+      time: "now",
     };
 
-    setMessages(prev => [...prev, newMessage]);
-    const userInput = inputMessage;
+    setMessages((prev) => [...prev, userMsg]);
     setInputMessage("");
+    setIsLoading(true);
 
-    // Generate contextual AI response
-    setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 2,
-        text: getAIResponse(userInput),
-        isBot: true,
-        time: "now"
-      };
-      setMessages(prev => [...prev, botResponse]);
-    }, 800);
+    // Build history for context (skip the initial greeting for cleaner context)
+    const history = [...messages.slice(1), userMsg].map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    let assistantContent = "";
+    const assistantId = nextIdRef.current++;
+
+    const upsert = (chunk: string) => {
+      assistantContent += chunk;
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && last.id === assistantId) {
+          return prev.map((m) =>
+            m.id === assistantId ? { ...m, content: assistantContent } : m
+          );
+        }
+        return [
+          ...prev,
+          { id: assistantId, role: "assistant" as const, content: assistantContent, time: "now" },
+        ];
+      });
+    };
+
+    try {
+      await streamChat({
+        messages: history,
+        onDelta: upsert,
+        onDone: () => setIsLoading(false),
+        onError: (err) => {
+          toast.error(err);
+          setIsLoading(false);
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to get AI response");
+      setIsLoading(false);
+    }
   };
 
   const handleQuickAction = (action: string) => {
-    setInputMessage(action);
+    handleSendMessage(action);
   };
 
   return (
@@ -132,27 +245,35 @@ const FloatingAIBot: React.FC = () => {
                   key={message.id}
                   className={cn(
                     "flex",
-                    message.isBot ? "justify-start" : "justify-end"
+                    message.role === "assistant" ? "justify-start" : "justify-end"
                   )}
                 >
                   <div
                     className={cn(
                       "max-w-[80%] p-3 rounded-2xl text-sm",
-                      message.isBot
+                      message.role === "assistant"
                         ? "bg-muted text-foreground"
                         : "bg-gradient-primary text-white"
                     )}
                   >
-                    {message.isBot && (
+                    {message.role === "assistant" && (
                       <div className="flex items-center gap-2 mb-1">
                         <Sparkles className="w-3 h-3" />
                         <span className="text-xs font-medium">Roamio AI</span>
                       </div>
                     )}
-                    <p>{message.text}</p>
+                    <p className="whitespace-pre-wrap">{message.content}</p>
                   </div>
                 </div>
               ))}
+              {isLoading && messages[messages.length - 1]?.role === "user" && (
+                <div className="flex justify-start">
+                  <div className="bg-muted p-3 rounded-2xl text-sm">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Quick Actions */}
@@ -178,15 +299,17 @@ const FloatingAIBot: React.FC = () => {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Ask me anything..."
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   className="flex-1"
+                  disabled={isLoading}
                 />
                 <Button
                   size="sm"
-                  onClick={handleSendMessage}
+                  onClick={() => handleSendMessage()}
                   className="bg-gradient-primary text-white"
+                  disabled={isLoading}
                 >
-                  <Send className="w-4 h-4" />
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </Button>
               </div>
             </div>
