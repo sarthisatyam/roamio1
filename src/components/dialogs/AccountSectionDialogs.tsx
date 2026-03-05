@@ -33,12 +33,28 @@ interface EmergencyDialogProps {
 }
 
 export const EmergencyDialog: React.FC<EmergencyDialogProps> = ({ open, onOpenChange }) => {
-  const [contacts, setContacts] = useState([
-    { name: "Emergency Contact 1", phone: "+91 98765 43210", relation: "Parent" },
-    { name: "Emergency Contact 2", phone: "+91 87654 32109", relation: "Sibling" }
-  ]);
-
+  const [guardianContacts, setGuardianContacts] = useState<{ name: string; phone: string; email: string }[]>([]);
+  const [showParentalForm, setShowParentalForm] = useState(false);
   const [sosLoading, setSosLoading] = useState(false);
+
+  // Fetch guardian from DB when dialog opens
+  useEffect(() => {
+    if (!open) return;
+    const fetchGuardian = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("parental_guardians")
+        .select("parent_name, parent_phone, parent_email")
+        .eq("user_id", user.id);
+      if (data && data.length > 0) {
+        setGuardianContacts(data.map(g => ({ name: g.parent_name, phone: g.parent_phone, email: g.parent_email })));
+      } else {
+        setGuardianContacts([]);
+      }
+    };
+    fetchGuardian();
+  }, [open]);
 
   const handleSOS = async () => {
     setSosLoading(true);
