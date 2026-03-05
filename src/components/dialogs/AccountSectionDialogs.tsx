@@ -33,12 +33,28 @@ interface EmergencyDialogProps {
 }
 
 export const EmergencyDialog: React.FC<EmergencyDialogProps> = ({ open, onOpenChange }) => {
-  const [contacts, setContacts] = useState([
-    { name: "Emergency Contact 1", phone: "+91 98765 43210", relation: "Parent" },
-    { name: "Emergency Contact 2", phone: "+91 87654 32109", relation: "Sibling" }
-  ]);
-
+  const [guardianContacts, setGuardianContacts] = useState<{ name: string; phone: string; email: string }[]>([]);
+  const [showParentalForm, setShowParentalForm] = useState(false);
   const [sosLoading, setSosLoading] = useState(false);
+
+  // Fetch guardian from DB when dialog opens
+  useEffect(() => {
+    if (!open) return;
+    const fetchGuardian = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("parental_guardians")
+        .select("parent_name, parent_phone, parent_email")
+        .eq("user_id", user.id);
+      if (data && data.length > 0) {
+        setGuardianContacts(data.map(g => ({ name: g.parent_name, phone: g.parent_phone, email: g.parent_email })));
+      } else {
+        setGuardianContacts([]);
+      }
+    };
+    fetchGuardian();
+  }, [open]);
 
   const handleSOS = async () => {
     setSosLoading(true);
@@ -113,6 +129,7 @@ export const EmergencyDialog: React.FC<EmergencyDialogProps> = ({ open, onOpenCh
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
@@ -135,21 +152,23 @@ export const EmergencyDialog: React.FC<EmergencyDialogProps> = ({ open, onOpenCh
 
           <div className="space-y-3">
             <h4 className="font-semibold text-sm">Emergency Contacts</h4>
-            {contacts.map((contact, index) => (
+            {guardianContacts.length > 0 ? guardianContacts.map((contact, index) => (
               <Card key={index} className="p-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-sm">{contact.name}</p>
                     <p className="text-xs text-muted-foreground">{contact.phone}</p>
-                    <Badge variant="secondary" className="text-xs mt-1">{contact.relation}</Badge>
+                    <Badge variant="secondary" className="text-xs mt-1">Guardian</Badge>
                   </div>
-                  <Button size="sm" variant="outline" className="rounded-lg">
+                  <Button size="sm" variant="outline" className="rounded-lg" onClick={() => window.location.href = `tel:${contact.phone}`}>
                     <Phone className="w-4 h-4" />
                   </Button>
                 </div>
               </Card>
-            ))}
-            <Button variant="outline" className="w-full rounded-xl">
+            )) : (
+              <p className="text-xs text-muted-foreground">No emergency contacts added yet.</p>
+            )}
+            <Button variant="outline" className="w-full rounded-xl" onClick={() => setShowParentalForm(true)}>
               + Add Emergency Contact
             </Button>
           </div>
@@ -164,6 +183,93 @@ export const EmergencyDialog: React.FC<EmergencyDialogProps> = ({ open, onOpenCh
             </div>
           </div>
         </div>
+      </DialogContent>
+    </Dialog>
+
+    <ParentalGuardianFormDialog
+      open={showParentalForm}
+      onOpenChange={setShowParentalForm}
+      onSaved={() => {
+        const refetch = async () => {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+          const { data } = await supabase
+            .from("parental_guardians")
+            .select("parent_name, parent_phone, parent_email")
+            .eq("user_id", user.id);
+          if (data && data.length > 0) {
+            setGuardianContacts(data.map(g => ({ name: g.parent_name, phone: g.parent_phone, email: g.parent_email })));
+          }
+        };
+        refetch();
+      }}
+    />
+  </>
+  );
+};
+
+// Shared Guardian Details Form Dialog
+interface ParentalGuardianFormDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSaved: () => void;
+}
+
+const ParentalGuardianFormDialog: React.FC<ParentalGuardianFormDialogProps> = ({ open, onOpenChange, onSaved }) => {
+  const [form, setForm] = useState<ParentDetails>({ name: "", phone: "", email: "" });
+
+  const handleSave = async () => {
+    if (!form.name.trim() || !form.phone.trim() || !form.email.trim()) {
+      toast.error("Please fill in all guardian details.");
+      return;
+    }
+    localStorage.setItem(PARENT_KEY, JSON.stringify(form));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("parental_guardians").upsert({
+          user_id: user.id,
+          parent_name: form.name,
+          parent_phone: form.phone,
+          parent_email: form.email,
+        }, { onConflict: "user_id" });
+      }
+    } catch (err) {
+      console.error("Failed to save guardian to DB:", err);
+    }
+    toast.success("Guardian details saved!");
+    setForm({ name: "", phone: "", email: "" });
+    onOpenChange(false);
+    onSaved();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm rounded-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-primary" />
+            Guardian Details Required
+          </DialogTitle>
+          <DialogDescription>Please add a parent/guardian as emergency contact.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs">Parent / Guardian Name</Label>
+            <Input placeholder="Full name" value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} className="rounded-xl mt-1" />
+          </div>
+          <div>
+            <Label className="text-xs">Phone Number</Label>
+            <Input placeholder="+91 XXXXX XXXXX" value={form.phone} onChange={(e) => setForm(p => ({ ...p, phone: e.target.value }))} className="rounded-xl mt-1" />
+          </div>
+          <div>
+            <Label className="text-xs">Email</Label>
+            <Input type="email" placeholder="parent@email.com" value={form.email} onChange={(e) => setForm(p => ({ ...p, email: e.target.value }))} className="rounded-xl mt-1" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSave} className="w-full bg-gradient-primary text-white border-0 rounded-xl">Save & Continue</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
