@@ -151,21 +151,23 @@ export const EmergencyDialog: React.FC<EmergencyDialogProps> = ({ open, onOpenCh
 
           <div className="space-y-3">
             <h4 className="font-semibold text-sm">Emergency Contacts</h4>
-            {contacts.map((contact, index) => (
+            {guardianContacts.length > 0 ? guardianContacts.map((contact, index) => (
               <Card key={index} className="p-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium text-sm">{contact.name}</p>
                     <p className="text-xs text-muted-foreground">{contact.phone}</p>
-                    <Badge variant="secondary" className="text-xs mt-1">{contact.relation}</Badge>
+                    <Badge variant="secondary" className="text-xs mt-1">Guardian</Badge>
                   </div>
-                  <Button size="sm" variant="outline" className="rounded-lg">
+                  <Button size="sm" variant="outline" className="rounded-lg" onClick={() => window.location.href = `tel:${contact.phone}`}>
                     <Phone className="w-4 h-4" />
                   </Button>
                 </div>
               </Card>
-            ))}
-            <Button variant="outline" className="w-full rounded-xl">
+            )) : (
+              <p className="text-xs text-muted-foreground">No emergency contacts added yet.</p>
+            )}
+            <Button variant="outline" className="w-full rounded-xl" onClick={() => setShowParentalForm(true)}>
               + Add Emergency Contact
             </Button>
           </div>
@@ -182,6 +184,26 @@ export const EmergencyDialog: React.FC<EmergencyDialogProps> = ({ open, onOpenCh
         </div>
       </DialogContent>
     </Dialog>
+
+    <ParentalGuardianFormDialog
+      open={showParentalForm}
+      onOpenChange={setShowParentalForm}
+      onSaved={() => {
+        const refetch = async () => {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+          const { data } = await supabase
+            .from("parental_guardians")
+            .select("parent_name, parent_phone, parent_email")
+            .eq("user_id", user.id);
+          if (data && data.length > 0) {
+            setGuardianContacts(data.map(g => ({ name: g.parent_name, phone: g.parent_phone, email: g.parent_email })));
+          }
+        };
+        refetch();
+      }}
+    />
+  </>
   );
 };
 
