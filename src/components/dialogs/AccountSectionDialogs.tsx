@@ -38,9 +38,78 @@ export const EmergencyDialog: React.FC<EmergencyDialogProps> = ({ open, onOpenCh
     { name: "Emergency Contact 2", phone: "+91 87654 32109", relation: "Sibling" }
   ]);
 
-  const handleSOS = () => {
-    toast.success("SOS alert sent to all emergency contacts!");
-    // In real app, this would trigger actual SOS
+  const [sosLoading, setSosLoading] = useState(false);
+
+  const handleSOS = async () => {
+    setSosLoading(true);
+    try {
+      // 1. Get GPS location
+      const coords = await new Promise<{ latitude: number; longitude: number } | null>((resolve) => {
+        if (!navigator.geolocation) {
+          toast.error("Geolocation is not supported by your device.");
+          return resolve(null);
+        }
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+          () => {
+            toast.error("Could not get your location. Please enable GPS.");
+            resolve(null);
+          }
+        );
+      });
+
+      if (!coords) {
+        setSosLoading(false);
+        return;
+      }
+
+      // 2. Create Google Maps link
+      const mapsLink = `https://maps.google.com/?q=${coords.latitude},${coords.longitude}`;
+
+      // 3. Fetch guardian phone from DB
+      const { data: { user } } = await supabase.auth.getUser();
+      let guardianPhone = "";
+
+      if (user) {
+        const { data: guardian } = await supabase
+          .from("parental_guardians")
+          .select("parent_phone")
+          .eq("user_id", user.id)
+          .single();
+
+        if (guardian?.parent_phone) {
+          guardianPhone = guardian.parent_phone;
+        }
+      }
+
+      if (!guardianPhone) {
+        // Fallback to localStorage
+        const stored = localStorage.getItem("parent_details");
+        if (stored) {
+          try {
+            guardianPhone = JSON.parse(stored).phone || "";
+          } catch {}
+        }
+      }
+
+      if (!guardianPhone) {
+        toast.error("No guardian phone number found. Please set up Parental Controls first.");
+        setSosLoading(false);
+        return;
+      }
+
+      // 4. Open SMS with prefilled message
+      const message = `🚨 SOS ALERT\n\nI may need help.\n\nMy location: ${mapsLink}`;
+      const encodedMessage = encodeURIComponent(message);
+      window.location.href = `sms:${guardianPhone}?body=${encodedMessage}`;
+
+      toast.success("Opening SMS with SOS alert...");
+    } catch (err) {
+      console.error("[SOS] Error:", err);
+      toast.error("Failed to send SOS. Please try again.");
+    } finally {
+      setSosLoading(false);
+    }
   };
 
   return (
