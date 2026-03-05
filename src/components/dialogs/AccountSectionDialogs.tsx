@@ -208,6 +208,73 @@ export const EmergencyDialog: React.FC<EmergencyDialogProps> = ({ open, onOpenCh
   );
 };
 
+// Shared Guardian Details Form Dialog
+interface ParentalGuardianFormDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSaved: () => void;
+}
+
+const ParentalGuardianFormDialog: React.FC<ParentalGuardianFormDialogProps> = ({ open, onOpenChange, onSaved }) => {
+  const [form, setForm] = useState<ParentDetails>({ name: "", phone: "", email: "" });
+
+  const handleSave = async () => {
+    if (!form.name.trim() || !form.phone.trim() || !form.email.trim()) {
+      toast.error("Please fill in all guardian details.");
+      return;
+    }
+    localStorage.setItem(PARENT_KEY, JSON.stringify(form));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("parental_guardians").upsert({
+          user_id: user.id,
+          parent_name: form.name,
+          parent_phone: form.phone,
+          parent_email: form.email,
+        }, { onConflict: "user_id" });
+      }
+    } catch (err) {
+      console.error("Failed to save guardian to DB:", err);
+    }
+    toast.success("Guardian details saved!");
+    setForm({ name: "", phone: "", email: "" });
+    onOpenChange(false);
+    onSaved();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm rounded-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-primary" />
+            Guardian Details Required
+          </DialogTitle>
+          <DialogDescription>Please add a parent/guardian as emergency contact.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <Label className="text-xs">Parent / Guardian Name</Label>
+            <Input placeholder="Full name" value={form.name} onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))} className="rounded-xl mt-1" />
+          </div>
+          <div>
+            <Label className="text-xs">Phone Number</Label>
+            <Input placeholder="+91 XXXXX XXXXX" value={form.phone} onChange={(e) => setForm(p => ({ ...p, phone: e.target.value }))} className="rounded-xl mt-1" />
+          </div>
+          <div>
+            <Label className="text-xs">Email</Label>
+            <Input type="email" placeholder="parent@email.com" value={form.email} onChange={(e) => setForm(p => ({ ...p, email: e.target.value }))} className="rounded-xl mt-1" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSave} className="w-full bg-gradient-primary text-white border-0 rounded-xl">Save & Continue</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // Parental Control Dialog
 interface ParentalControlDialogProps {
   open: boolean;
