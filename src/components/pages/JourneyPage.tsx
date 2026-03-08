@@ -452,7 +452,15 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
           <TabsContent value="expenses" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
             {travelMode === "group" ? (
               <>
-                <GroupMembersManager members={groupMembers} onMembersChange={setGroupMembers} />
+                <GroupMembersManager
+                  members={groupMembers}
+                  onMembersChange={setGroupMembers}
+                  onSearchUsers={searchUsers}
+                  onSendInvite={sendInvite}
+                  onRespondToInvite={respondToInvite}
+                  getInviteStatus={getInviteStatusForUser}
+                  pendingInvites={pendingReceived}
+                />
                 <ExpenseSplitter expenses={groupExpenses} onExpensesChange={setGroupExpenses} members={groupMembers} />
               </>
             ) : (
