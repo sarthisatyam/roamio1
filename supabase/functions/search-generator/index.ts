@@ -25,7 +25,7 @@ serve(async (req) => {
 IMPORTANT: Always generate results that match the search query. If user searches for "Paris", generate Paris-related content. If they search for "beach", generate beach destinations.
 
 Generate the following in JSON format:
-- For destinations: Include name, emoji icon, rating (4.0-5.0), price per day in INR, safety score (85-99), relevant tags, 2-day itinerary, and popular eateries
+- For destinations: Include name, emoji icon, rating (4.0-5.0), price per day in INR, safety score (85-99), relevant tags, 2-day itinerary with activities spread across morning (6-12), daytime (12-17), evening (17-21), and night (21+) time slots, popular eateries, AND a travelGuide with exactly 5 tips (mix of general suggestions, DOs, and DON'Ts). The travel guide tips should be practical, authentic advice as if sourced from Google reviews, Reddit travel forums, and local travel blogs. Include safety tips, cultural etiquette, local transport advice, food/water safety, and scam awareness.
 - For stays: Include name, location, price per night in INR, rating, amenities, category (hostel/hotel/coliving)
 - For travel: Include flights/trains with realistic names, times, duration, price in INR, and features
 
