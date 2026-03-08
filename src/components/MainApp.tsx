@@ -26,9 +26,7 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [likedCompanions, setLikedCompanions] = useState<number[]>([]);
   const [bookmarkedPlaces, setBookmarkedPlaces] = useState<{ id: number; name: string; image: string }[]>([]);
   const [plannerActivities, setPlannerActivities] = useState<{ title: string; location: string; type: string }[]>([]);
-  const [privacyOpen, setPrivacyOpen] = useState(false);
-  const [termsOpen, setTermsOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
+  const [helpLegalOpen, setHelpLegalOpen] = useState(false);
 
   // Fetch current user
   React.useEffect(() => {
