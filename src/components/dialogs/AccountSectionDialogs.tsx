@@ -857,6 +857,9 @@ const INTEREST_OPTIONS = [
 const GENDER_OPTIONS = [
   { label: "Male", value: "male" },
   { label: "Female", value: "female" },
+  { label: "Non-binary", value: "non-binary" },
+  { label: "Genderfluid", value: "genderfluid" },
+  { label: "Prefer not to say", value: "prefer_not_to_say" },
   { label: "Other", value: "other" },
 ];
 
