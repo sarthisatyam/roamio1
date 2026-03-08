@@ -25,7 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCompanions, Companion } from "@/hooks/useCompanions";
 import { useConnections } from "@/hooks/useConnections";
 import { useGroups, useGroupMessages, Group } from "@/hooks/useGroups";
-import { usePlans } from "@/hooks/usePlans";
+
 import { useDirectMessages } from "@/hooks/useDirectMessages";
 import GroupChatDialog from "@/components/dialogs/GroupChatDialog";
 import DirectChatDialog from "@/components/dialogs/DirectChatDialog";
