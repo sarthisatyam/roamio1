@@ -734,6 +734,16 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
     }
   };
 
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery.trim()) return groups;
+    const q = searchQuery.toLowerCase();
+    return groups.filter(g =>
+      g.name.toLowerCase().includes(q) ||
+      g.category.toLowerCase().includes(q) ||
+      g.description?.toLowerCase().includes(q)
+    );
+  }, [groups, searchQuery]);
+
   return (
     <div className="px-4 pt-3 space-y-3">
       {/* Create Group Button */}
