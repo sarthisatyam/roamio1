@@ -135,6 +135,10 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
             <Compass className="w-3.5 h-3.5" />
             Discover
           </TabsTrigger>
+          <TabsTrigger value="plangroups" className="flex-1 rounded-lg text-xs gap-1.5 data-[state=active]:bg-background">
+            <UsersRound className="w-3.5 h-3.5" />
+            Groups
+          </TabsTrigger>
           <TabsTrigger value="groups" className="flex-1 rounded-lg text-xs gap-1.5 data-[state=active]:bg-background">
             <Users className="w-3.5 h-3.5" />
             Community
@@ -143,6 +147,10 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
 
         <TabsContent value="discover" className="flex-1 overflow-y-auto mt-0 pb-24">
           <DiscoverTab currentUserId={currentUserId} searchQuery={searchQuery} />
+        </TabsContent>
+
+        <TabsContent value="plangroups" className="flex-1 overflow-y-auto mt-0 pb-24">
+          <PlanGroupsTab currentUserId={currentUserId} searchQuery={searchQuery} />
         </TabsContent>
 
         <TabsContent value="groups" className="flex-1 overflow-y-auto mt-0 pb-24">
