@@ -933,14 +933,16 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
                           <Users className="w-3 h-3" />
                           Members
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 text-[10px] rounded-lg text-destructive"
-                          onClick={() => handleLeave(group.id)}
-                        >
-                          Leave
-                        </Button>
+                        {!group.plan_id && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-[10px] rounded-lg text-destructive"
+                            onClick={() => handleLeave(group.id)}
+                          >
+                            Leave
+                          </Button>
+                        )}
                       </>
                     ) : (
                       <Button
