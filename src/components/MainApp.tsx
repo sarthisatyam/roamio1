@@ -214,10 +214,8 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
       {/* Floating AI Bot */}
       <FloatingAIBot currentCity={currentCity} locationEnabled={locationEnabled} latitude={userLat} longitude={userLng} />
 
-      {/* Legal & Contact Dialogs */}
-      <PrivacyPolicyDialog open={privacyOpen} onOpenChange={setPrivacyOpen} />
-      <TermsOfServiceDialog open={termsOpen} onOpenChange={setTermsOpen} />
-      <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />
+      {/* Help & Legal Dialog */}
+      <HelpLegalDialog open={helpLegalOpen} onOpenChange={setHelpLegalOpen} />
     </div>
   );
 };
