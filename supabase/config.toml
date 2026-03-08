@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.ai-hotel-search]
 verify_jwt = false
+
+[functions.generate-cover-image]
+verify_jwt = false
