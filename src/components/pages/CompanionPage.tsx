@@ -760,15 +760,15 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
-      ) : groups.length === 0 ? (
+      ) : filteredGroups.length === 0 ? (
         <Card className="p-6 text-center rounded-2xl">
           <Users className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
-          <h3 className="font-semibold text-sm">No groups yet</h3>
-          <p className="text-xs text-muted-foreground mt-1">Be the first to create a travel community!</p>
+          <h3 className="font-semibold text-sm">{searchQuery ? "No groups match your search" : "No groups yet"}</h3>
+          <p className="text-xs text-muted-foreground mt-1">{searchQuery ? "Try a different search term." : "Be the first to create a travel community!"}</p>
         </Card>
       ) : (
         <div className="space-y-3">
-          {groups.map(group => (
+          {filteredGroups.map(group => (
             <Card key={group.id} className="p-3 rounded-2xl shadow-soft border-0 bg-card">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center text-lg flex-shrink-0">
