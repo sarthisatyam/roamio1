@@ -41,9 +41,6 @@ const GROUP_CATEGORIES = [
   "Backpacking", "Road Trips", "Weekend Trips", "Adventure", "Food Trips", "Digital Nomads",
 ];
 
-const GROUP_CATEGORIES = [
-  "Backpacking", "Road Trips", "Weekend Trips", "Adventure", "Food Trips", "Digital Nomads",
-];
 
 const INTEREST_LIST = [
   "Photography", "Trekking", "Food", "Culture", "Nightlife", "Shopping",
