@@ -113,7 +113,42 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     getSession();
   }, []);
 
-  const { myPlans, fetchMyPlans, handleJoinRequest, getPendingRequests } = usePlans(currentUserId);
+  const { myPlans, fetchMyPlans, handleJoinRequest, getPendingRequests, leavePlan, removeMember, getPlanMembers } = usePlans(currentUserId);
+
+  const openManageMembers = async (plan: Plan) => {
+    setMembersPlan(plan);
+    setLoadingMembers(true);
+    setMembersDialogOpen(true);
+    try {
+      const members = await getPlanMembers(plan.id);
+      setPlanMembers(members);
+    } catch {
+      toast.error("Failed to load members");
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  const handleRemoveMember = async (planId: string, userId: string) => {
+    try {
+      await removeMember(planId, userId);
+      setPlanMembers(prev => prev.filter(m => m.user_id !== userId));
+      toast.success("Member removed from trip and group");
+      await fetchMyPlans();
+    } catch {
+      toast.error("Failed to remove member");
+    }
+  };
+
+  const handleLeavePlan = async (planId: string) => {
+    try {
+      await leavePlan(planId);
+      toast.success("You left the trip");
+      await fetchMyPlans();
+    } catch {
+      toast.error("Failed to leave trip");
+    }
+  };
 
   const getGroupBadge = (type: string) => {
     if (type === "females_only") return { label: "Females Only", color: "bg-pink-500/10 text-pink-600" };
