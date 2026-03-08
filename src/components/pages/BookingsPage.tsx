@@ -49,51 +49,6 @@ interface AILandmark {
   name: string;
 }
 
-const CITY_LANDMARKS: Record<string, string[]> = {
-  hyderabad: ["Charminar", "Golconda Fort", "Hussain Sagar Lake"],
-  delhi: ["India Gate", "Red Fort", "Qutub Minar"],
-  mumbai: ["Gateway of India", "Marine Drive", "Elephanta Caves"],
-  bangalore: ["Lalbagh Garden", "Bangalore Palace", "Cubbon Park"],
-  bengaluru: ["Lalbagh Garden", "Bangalore Palace", "Cubbon Park"],
-  chennai: ["Marina Beach", "Kapaleeshwarar Temple", "Fort St. George"],
-  kolkata: ["Victoria Memorial", "Howrah Bridge", "Indian Museum"],
-  jaipur: ["Hawa Mahal", "Amber Fort", "City Palace"],
-  goa: ["Calangute Beach", "Basilica of Bom Jesus", "Fort Aguada"],
-  agra: ["Taj Mahal", "Agra Fort", "Fatehpur Sikri"],
-  varanasi: ["Kashi Vishwanath Temple", "Dashashwamedh Ghat", "Sarnath"],
-  udaipur: ["City Palace", "Lake Pichola", "Jag Mandir"],
-  shimla: ["Mall Road", "Jakhoo Temple", "Christ Church"],
-  manali: ["Hadimba Temple", "Solang Valley", "Old Manali"],
-  rishikesh: ["Laxman Jhula", "Ram Jhula", "Triveni Ghat"],
-  mysore: ["Mysore Palace", "Chamundi Hills", "Brindavan Gardens"],
-  ooty: ["Botanical Garden", "Ooty Lake", "Doddabetta Peak"],
-  munnar: ["Tea Gardens", "Eravikulam National Park", "Mattupetty Dam"],
-  pondicherry: ["Promenade Beach", "Auroville", "French Quarter"],
-  amritsar: ["Golden Temple", "Jallianwala Bagh", "Wagah Border"],
-  darjeeling: ["Tiger Hill", "Batasia Loop", "Peace Pagoda"],
-  leh: ["Leh Palace", "Pangong Lake", "Shanti Stupa"],
-  pune: ["Shaniwar Wada", "Aga Khan Palace", "Sinhagad Fort"],
-  ahmedabad: ["Sabarmati Ashram", "Adalaj Stepwell", "Kankaria Lake"],
-  lucknow: ["Bara Imambara", "Rumi Darwaza", "Hazratganj"],
-  kochi: ["Fort Kochi", "Chinese Fishing Nets", "Mattancherry Palace"],
-  jodhpur: ["Mehrangarh Fort", "Umaid Bhawan Palace", "Jaswant Thada"],
-  pushkar: ["Pushkar Lake", "Brahma Temple", "Savitri Temple"],
-  alleppey: ["Backwaters", "Alappuzha Beach", "Krishnapuram Palace"],
-  coorg: ["Abbey Falls", "Raja's Seat", "Dubare Elephant Camp"],
-};
-
-function getCityLandmarks(location: string): string[] {
-  const key = location.toLowerCase().trim();
-  for (const [city, landmarks] of Object.entries(CITY_LANDMARKS)) {
-    if (key.includes(city)) return landmarks;
-  }
-  return ["Main Market", "Railway Station", "Bus Stand"];
-}
-
-function getRandomDistance(): string {
-  const distances = [0.5, 0.8, 1.2, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0];
-  return distances[Math.floor(Math.random() * distances.length)].toFixed(1);
-}
 
 const TYPE_TABS = [
   { key: "all", label: "All", icon: Home },
