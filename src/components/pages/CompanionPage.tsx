@@ -875,7 +875,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
         onClick={() => setCreateDialogOpen(true)}
       >
         <Plus className="w-4 h-4" />
-        Create New Group
+        Create New Community
       </Button>
 
       {/* Groups list */}
