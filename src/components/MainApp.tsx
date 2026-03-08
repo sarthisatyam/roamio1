@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { Home, Calendar, Users, Map } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Home, Calendar, Users, Map, Compass, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HomePage from "./pages/HomePage";
 import BookingsPage from "./pages/BookingsPage";
 import CompanionPage from "./pages/CompanionPage";
 import JourneyPage from "./pages/JourneyPage";
+import ExplorePage from "./pages/ExplorePage";
+import PlanBuilder from "./PlanBuilder";
 import AccountPage from "./pages/AccountPage";
 import FloatingAIBot from "./FloatingAIBot";
 import { PrivacyPolicyDialog, TermsOfServiceDialog, ContactDialog } from "./dialogs/LegalContactDialogs";
@@ -17,12 +20,28 @@ interface MainAppProps {
 const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [showAccount, setShowAccount] = useState(false);
+  const [showPlanBuilder, setShowPlanBuilder] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [userGender, setUserGender] = useState<string | null>(null);
   const [likedCompanions, setLikedCompanions] = useState<number[]>([]);
   const [bookmarkedPlaces, setBookmarkedPlaces] = useState<{ id: number; name: string; image: string }[]>([]);
   const [plannerActivities, setPlannerActivities] = useState<{ title: string; location: string; type: string }[]>([]);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+
+  // Fetch current user
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id || null;
+      setCurrentUserId(uid);
+      if (uid) {
+        supabase.from("profiles").select("gender").eq("user_id", uid).maybeSingle().then(({ data: p }) => {
+          setUserGender((p as any)?.gender || null);
+        });
+      }
+    });
+  }, []);
   
   // Location state with localStorage persistence
   const [locationEnabled, setLocationEnabled] = useState(() => {
@@ -112,10 +131,11 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   };
 
   const tabs = [
-    { id: 0, name: "Home", icon: Home, component: HomePage },
-    { id: 1, name: "Bookings", icon: Calendar, component: BookingsPage },
-    { id: 2, name: "Companion", icon: Users, component: CompanionPage },
-    { id: 3, name: "Journey", icon: Map, component: JourneyPage },
+    { id: 0, name: "Home", icon: Home },
+    { id: 1, name: "Explore", icon: Compass },
+    { id: 2, name: "Create", icon: Plus, isCreate: true },
+    { id: 3, name: "Companion", icon: Users },
+    { id: 4, name: "Journey", icon: Map },
   ];
 
   const handleNavigateToAccount = () => {
@@ -136,14 +156,25 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
     return <AccountPage userData={mergedUserData} onNavigateBack={handleNavigateBack} onLogout={handleLogout} likedCompanions={likedCompanions} bookmarkedPlaces={bookmarkedPlaces} onLocationToggle={handleLocationToggle} />;
   }
 
+  if (showPlanBuilder && currentUserId) {
+    return (
+      <PlanBuilder
+        currentUserId={currentUserId}
+        userGender={userGender}
+        onComplete={() => { setShowPlanBuilder(false); setActiveTab(1); }}
+        onClose={() => setShowPlanBuilder(false)}
+      />
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} />}
-        {activeTab === 1 && <BookingsPage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} />}
-        {activeTab === 2 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
-        {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
+        {activeTab === 1 && <ExplorePage onNavigateToAccount={handleNavigateToAccount} />}
+        {activeTab === 3 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
+        {activeTab === 4 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
 
       {/* Footer Links */}
@@ -161,20 +192,29 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+            const isCreate = (tab as any).isCreate;
             
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  if (isCreate) {
+                    setShowPlanBuilder(true);
+                  } else {
+                    setActiveTab(tab.id);
+                  }
+                }}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200",
-                  isActive
-                    ? "bg-gradient-primary text-white shadow-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200",
+                  isCreate
+                    ? "bg-gradient-primary text-white shadow-medium scale-105 -mt-2"
+                    : isActive
+                      ? "bg-gradient-primary text-white shadow-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
               >
-                <Icon className={cn("w-5 h-5", isActive && "scale-110")} />
-                <span className="text-xs font-medium">{tab.name}</span>
+                <Icon className={cn("w-5 h-5", (isActive || isCreate) && "scale-110")} />
+                <span className="text-[10px] font-medium">{tab.name}</span>
               </button>
             );
           })}

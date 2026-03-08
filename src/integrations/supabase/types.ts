@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      co_companions: {
+        Row: {
+          companion_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          companion_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          companion_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       companion_connections: {
         Row: {
           created_at: string
@@ -134,6 +155,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      join_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          plan_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          plan_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          plan_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "join_requests_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       liked_companions: {
         Row: {
@@ -294,6 +353,101 @@ export type Database = {
           trip_details?: Json | null
           update_type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      plan_members: {
+        Row: {
+          id: string
+          joined_at: string
+          plan_id: string
+          role: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          plan_id: string
+          role?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          plan_id?: string
+          role?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_members_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          creator_id: string
+          destination_name: string
+          end_date: string
+          group_type: string
+          id: string
+          interests: string[] | null
+          latitude: number | null
+          longitude: number | null
+          max_members: number
+          plan_name: string
+          plan_visibility: string
+          start_date: string
+          status: string
+          trip_description: string | null
+          updated_at: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          creator_id: string
+          destination_name: string
+          end_date: string
+          group_type?: string
+          id?: string
+          interests?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          max_members?: number
+          plan_name: string
+          plan_visibility?: string
+          start_date: string
+          status?: string
+          trip_description?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          creator_id?: string
+          destination_name?: string
+          end_date?: string
+          group_type?: string
+          id?: string
+          interests?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          max_members?: number
+          plan_name?: string
+          plan_visibility?: string
+          start_date?: string
+          status?: string
+          trip_description?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
