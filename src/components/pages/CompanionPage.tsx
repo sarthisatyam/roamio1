@@ -81,7 +81,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
             <Compass className="w-12 h-12 mx-auto text-primary mb-4" />
             <h2 className="font-semibold text-lg mb-2">Find Companions</h2>
             <p className="text-muted-foreground text-sm mb-4">
-              Sign in to discover travel companions, join groups, and plan trips together.
+              Sign in to discover travel companions, join communities, and plan trips together.
             </p>
             <Button onClick={onNavigateToAccount} className="bg-gradient-primary text-primary-foreground">
               Sign In / Sign Up
@@ -120,7 +120,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search companions, groups, or destinations..."
+            placeholder="Search companions, communities, or destinations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 text-xs bg-card border shadow-soft h-10 rounded-xl"
@@ -137,7 +137,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
           </TabsTrigger>
           <TabsTrigger value="groups" className="flex-1 rounded-lg text-xs gap-1.5 data-[state=active]:bg-background">
             <Users className="w-3.5 h-3.5" />
-            Groups
+            Community
           </TabsTrigger>
           <TabsTrigger value="trips" className="flex-1 rounded-lg text-xs gap-1.5 data-[state=active]:bg-background">
             <Mountain className="w-3.5 h-3.5" />
@@ -875,7 +875,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
         onClick={() => setCreateDialogOpen(true)}
       >
         <Plus className="w-4 h-4" />
-        Create New Group
+        Create New Community
       </Button>
 
       {/* Groups list */}
@@ -886,7 +886,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
       ) : filteredGroups.length === 0 ? (
         <Card className="p-6 text-center rounded-2xl">
           <Users className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
-          <h3 className="font-semibold text-sm">{searchQuery ? "No groups match your search" : "No groups yet"}</h3>
+          <h3 className="font-semibold text-sm">{searchQuery ? "No communities match your search" : "No communities yet"}</h3>
           <p className="text-xs text-muted-foreground mt-1">{searchQuery ? "Try a different search term." : "Be the first to create a travel community!"}</p>
         </Card>
       ) : (
