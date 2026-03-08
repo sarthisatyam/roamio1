@@ -585,7 +585,7 @@ const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({
 };
 
 // ==================== GROUPS TAB ====================
-const GroupsTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => {
+const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ currentUserId, searchQuery }) => {
   const { groups, isLoading, createGroup, joinGroup, leaveGroup, refetch } = useGroups(currentUserId);
 
   // Create group
