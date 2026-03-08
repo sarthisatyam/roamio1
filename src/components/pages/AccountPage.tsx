@@ -509,7 +509,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
                         </p>
                         <div className="flex gap-1">
                           <Badge className={cn("text-[10px] rounded-lg border-0", groupBadge.color)}>{groupBadge.label}</Badge>
-                          {plan.is_owner && <Badge className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">Owner</Badge>}
+                          {plan.is_owner && <Badge className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">Admin</Badge>}
                           {isPending && <Badge className="text-[10px] rounded-lg bg-warning/10 text-warning border-0">Pending</Badge>}
                           {isRejected && <Badge variant="destructive" className="text-[10px] rounded-lg">Rejected</Badge>}
                           {isMember && !plan.is_owner && <Badge className="text-[10px] rounded-lg bg-success/10 text-success border-0">Joined</Badge>}
