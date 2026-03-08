@@ -564,9 +564,21 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         open={interestsDialogOpen} 
         onOpenChange={setInterestsDialogOpen} 
         interests={userProfile?.interests || userData?.preferences || []}
-        gender={userProfile?.gender || 'Not specified'}
+        gender={userProfile?.gender || ''}
         age={userProfile?.age || null}
-        about={userProfile?.bio || "No bio yet. Tap edit to add one."}
+        about={userProfile?.bio || ""}
+        displayName={userProfile?.display_name || userData?.name || ""}
+        onProfileUpdated={async () => {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user?.id) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('gender, age, bio, interests, display_name')
+              .eq('user_id', session.user.id)
+              .single();
+            if (profile) setUserProfile(profile);
+          }
+        }}
       />
       <TravelListDialog open={travelListDialogOpen} onOpenChange={setTravelListDialogOpen} places={bookmarkedPlaces} />
       <EmergencyDialog open={emergencyDialogOpen} onOpenChange={setEmergencyDialogOpen} />
