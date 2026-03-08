@@ -158,7 +158,7 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
       <PlanBuilder
         currentUserId={currentUserId}
         userGender={userGender}
-        onComplete={() => { setShowPlanBuilder(false); setActiveTab(1); }}
+        onComplete={() => { setShowPlanBuilder(false); setActiveTab(0); }}
         onClose={() => setShowPlanBuilder(false)}
       />
     );
