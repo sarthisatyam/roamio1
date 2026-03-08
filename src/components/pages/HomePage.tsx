@@ -291,8 +291,8 @@ const HomePage: React.FC<HomePageProps> = ({
                 <h2 className="text-sm font-semibold">Popular Destinations</h2>
                 <p className="text-[10px] text-muted-foreground">
                   {userData?.locationEnabled && userData?.currentCity
-                    ? `Trending near ${userData.currentCity}`
-                    : "Trending places in India"}
+                    ? `3 nearby ${userData.currentCity} + 2 must-visit across India`
+                    : "3 nearby + 2 must-visit across India"}
                 </p>
               </div>
             </div>
