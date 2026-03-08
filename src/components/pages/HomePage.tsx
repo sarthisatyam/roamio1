@@ -1,36 +1,20 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Search,
   User,
   MapPin,
   Shield,
-  Wifi,
-  Coffee,
   ArrowRight,
   Compass,
   Bookmark,
-  TrendingUp,
-  ShoppingBag,
-  Camera,
-  MoreHorizontal,
-  Fuel,
-  Stethoscope,
-  Building2,
-  Utensils,
   Calendar,
   Clock,
-  Music,
-  Laugh,
-  UtensilsCrossed,
-  Palette,
-  Radio,
-  Zap,
   CloudSun,
   Loader2,
   Users,
@@ -39,9 +23,8 @@ import {
   Sparkles,
   Plus,
 } from "lucide-react";
-import { useWeather, useMultipleWeather } from "@/hooks/useWeather";
+import { useWeather } from "@/hooks/useWeather";
 import { cn } from "@/lib/utils";
-import BookingDialog from "@/components/dialogs/BookingDialog";
 import DestinationDialog from "@/components/dialogs/DestinationDialog";
 import { useAISearch, AIDestination } from "@/hooks/useAISearch";
 import AISearchResults from "@/components/AISearchResults";
@@ -69,6 +52,12 @@ interface HomePageProps {
   onCreatePlan?: () => void;
 }
 
+const quickAccessCategories = [
+  { icon: Shield, label: "Safe Places", color: "bg-emerald-500/10 text-emerald-600" },
+  { icon: Compass, label: "Solo-Friendly", color: "bg-blue-500/10 text-blue-600" },
+  { icon: Users, label: "Women-Safe", color: "bg-pink-500/10 text-pink-600" },
+];
+
 const HomePage: React.FC<HomePageProps> = ({
   userData,
   onNavigateToAccount,
@@ -78,12 +67,13 @@ const HomePage: React.FC<HomePageProps> = ({
   onLocationToggle,
   onCreatePlan,
 }) => {
-  const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
-  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
   const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
+
+  // Popular destinations state
+  const [popularDestinations, setPopularDestinations] = useState<AIDestination[]>([]);
+  const [popularLoading, setPopularLoading] = useState(true);
 
   // Explore plans state
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -101,6 +91,30 @@ const HomePage: React.FC<HomePageProps> = ({
   useEffect(() => {
     fetchPlans();
   }, [fetchPlans]);
+
+  // Fetch popular destinations based on user's city
+  const fetchPopularDestinations = useCallback(async () => {
+    setPopularLoading(true);
+    try {
+      const city = userData?.locationEnabled && userData?.currentCity
+        ? userData.currentCity
+        : "India";
+      const { data, error } = await supabase.functions.invoke('search-generator', {
+        body: { query: `popular destinations near ${city}`, pageContext: "home" }
+      });
+      if (!error && data?.destinations) {
+        setPopularDestinations(data.destinations);
+      }
+    } catch (err) {
+      console.error('Failed to fetch popular destinations:', err);
+    } finally {
+      setPopularLoading(false);
+    }
+  }, [userData?.locationEnabled, userData?.currentCity]);
+
+  useEffect(() => {
+    fetchPopularDestinations();
+  }, [fetchPopularDestinations]);
 
   const handleJoinRequest = async () => {
     if (!selectedPlan) return;
@@ -130,239 +144,23 @@ const HomePage: React.FC<HomePageProps> = ({
     userData?.locationEnabled ?? false,
   );
 
-  // Extract city names for weather fetching
-  const destinationCities = useMemo(() => ["Goa, India", "Manali, Himachal Pradesh", "Udaipur, Rajasthan"], []);
-
-  const { weatherMap, loading: weatherLoading } = useMultipleWeather(destinationCities);
-
-  const destinations = [
-    {
-      id: 1,
-      name: "Goa, India",
-      image: "🏖️",
-      rating: 4.8,
-      price: "₹1,500/day",
-      safety: 92,
-      tags: ["Solo-friendly", "Beach vibes", "Safe transport"],
-      itinerary: [
-        {
-          day: 1,
-          title: "Beach & Chill",
-          activities: [
-            { time: "8:00 AM", activity: "Sunrise at Palolem Beach", type: "Scenic" },
-            { time: "10:00 AM", activity: "Breakfast at Beach Shack", type: "Food" },
-            { time: "2:00 PM", activity: "Water Sports at Baga Beach", type: "Adventure" },
-            { time: "6:00 PM", activity: "Sunset at Vagator Beach", type: "Scenic" },
-          ],
-        },
-        {
-          day: 2,
-          title: "Heritage & Culture",
-          activities: [
-            { time: "9:00 AM", activity: "Old Goa Churches Tour", type: "Heritage" },
-            { time: "1:00 PM", activity: "Goan Thali Lunch", type: "Food" },
-            { time: "4:00 PM", activity: "Fontainhas Latin Quarter Walk", type: "Heritage" },
-          ],
-        },
-      ],
-      eateries: [
-        { name: "Gunpowder", type: "Goan Cuisine", rating: 4.6, priceRange: "₹₹", specialty: "Prawn Balchao" },
-        { name: "Thalassa", type: "Greek-Goan", rating: 4.7, priceRange: "₹₹₹", specialty: "Seafood Platter" },
-        { name: "Ritz Classic", type: "Local", rating: 4.5, priceRange: "₹", specialty: "Fish Curry Rice" },
-      ],
-    },
-    {
-      id: 2,
-      name: "Manali, Himachal Pradesh",
-      image: "🏔️",
-      rating: 4.9,
-      price: "₹1,200/day",
-      safety: 95,
-      tags: ["Women-safe", "Adventure hub", "Mountain retreat"],
-      itinerary: [
-        {
-          day: 1,
-          title: "Mountain Exploration",
-          activities: [
-            { time: "7:00 AM", activity: "Sunrise Trek to Jogini Falls", type: "Adventure" },
-            { time: "11:00 AM", activity: "Visit Hadimba Temple", type: "Heritage" },
-            { time: "3:00 PM", activity: "Mall Road Shopping", type: "Shopping" },
-            { time: "6:00 PM", activity: "Cafe Hopping in Old Manali", type: "Food" },
-          ],
-        },
-        {
-          day: 2,
-          title: "Solang Valley Day",
-          activities: [
-            { time: "8:00 AM", activity: "Paragliding at Solang Valley", type: "Adventure" },
-            { time: "12:00 PM", activity: "Atal Tunnel Visit", type: "Scenic" },
-            { time: "4:00 PM", activity: "Hot Springs at Vashisht", type: "Wellness" },
-          ],
-        },
-      ],
-      eateries: [
-        { name: "Drifters' Cafe", type: "Continental", rating: 4.5, priceRange: "₹₹", specialty: "Wood-fired Pizza" },
-        { name: "Johnson's Cafe", type: "Multi-cuisine", rating: 4.4, priceRange: "₹₹", specialty: "Trout Fish" },
-        { name: "Lazy Dog", type: "Cafe", rating: 4.6, priceRange: "₹", specialty: "Pancakes & Coffee" },
-      ],
-    },
-    {
-      id: 3,
-      name: "Udaipur, Rajasthan",
-      image: "🏰",
-      rating: 4.7,
-      price: "₹2,000/day",
-      safety: 94,
-      tags: ["Heritage city", "Solo traveler friendly", "Palace stays"],
-      itinerary: [
-        {
-          day: 1,
-          title: "Royal Heritage",
-          activities: [
-            { time: "9:00 AM", activity: "City Palace Tour", type: "Heritage" },
-            { time: "1:00 PM", activity: "Lunch at Ambrai Ghat", type: "Food" },
-            { time: "4:00 PM", activity: "Boat Ride on Lake Pichola", type: "Scenic" },
-            { time: "7:00 PM", activity: "Sunset at Sajjangarh", type: "Scenic" },
-          ],
-        },
-        {
-          day: 2,
-          title: "Art & Culture",
-          activities: [
-            { time: "10:00 AM", activity: "Bagore Ki Haveli & Folk Dance", type: "Cultural" },
-            { time: "2:00 PM", activity: "Hathi Pol Bazaar Shopping", type: "Shopping" },
-            { time: "5:00 PM", activity: "High Tea at Taj Lake Palace", type: "Food" },
-          ],
-        },
-      ],
-      eateries: [
-        { name: "Ambrai", type: "Rajasthani", rating: 4.7, priceRange: "₹₹₹", specialty: "Lake View Dining" },
-        { name: "Savage Garden", type: "Fusion", rating: 4.5, priceRange: "₹₹", specialty: "Rooftop Ambiance" },
-        {
-          name: "Natraj Dining Hall",
-          type: "Thali",
-          rating: 4.4,
-          priceRange: "₹",
-          specialty: "Unlimited Rajasthani Thali",
-        },
-      ],
-    },
-  ];
-
-  const quickAccess = [
-    { icon: Coffee, label: "Cafes", color: "bg-amber-100 text-amber-700" },
-    { icon: ShoppingBag, label: "Shopping", color: "bg-purple-100 text-purple-700" },
-    { icon: Camera, label: "Attractions", color: "bg-accent text-secondary" },
-    {
-      icon: MoreHorizontal,
-      label: "More",
-      color: "bg-accent text-secondary",
-      onClick: () => setShowMoreCategories(!showMoreCategories),
-    },
-  ];
-
-  const moreCategories = [
-    { icon: Fuel, label: "Petrol", color: "bg-red-100 text-red-700" },
-    { icon: Stethoscope, label: "Clinics", color: "bg-pink-100 text-pink-700" },
-    { icon: Building2, label: "Museums", color: "bg-indigo-100 text-indigo-700" },
-    { icon: Utensils, label: "Restaurants", color: "bg-orange-100 text-orange-700" },
-  ];
-
-  const hotspots = [
-    {
-      name: "Live Music Night at Hard Rock Cafe",
-      type: "Live Event",
-      distance: "2.5 km",
-      date: "Today, 8:00 PM",
-      duration: "3 hours",
-      rating: 4.5,
-      reviews: "12k",
-      price: "₹800",
-      bookingUrl: "#",
-      icon: Music,
-      isLive: true,
-      fillingFast: false,
-    },
-    {
-      name: "Stand-up Comedy Show",
-      type: "Entertainment",
-      distance: "4.2 km",
-      date: "Tomorrow, 7:30 PM",
-      duration: "2 hours",
-      rating: 4.3,
-      reviews: "8.5k",
-      price: "₹500",
-      bookingUrl: "#",
-      icon: Laugh,
-      isLive: false,
-      fillingFast: true,
-    },
-    {
-      name: "Food Festival at Kingdom of Dreams",
-      type: "Food & Culture",
-      distance: "8.5 km",
-      date: "Mar 25-26",
-      duration: "All Day",
-      rating: 4.6,
-      reviews: "15k",
-      price: "₹1,200",
-      bookingUrl: "#",
-      icon: UtensilsCrossed,
-      isLive: true,
-      fillingFast: true,
-    },
-    {
-      name: "Art Exhibition - Modern India",
-      type: "Art & Culture",
-      distance: "3.1 km",
-      date: "This Week",
-      duration: "4 hours",
-      rating: 4.4,
-      reviews: "20k",
-      price: "₹350",
-      bookingUrl: "#",
-      icon: Palette,
-      isLive: false,
-      fillingFast: false,
-    },
-  ];
-
   // AI Search hook
   const {
     results: aiResults,
     isLoading: aiLoading,
     error: aiError,
-  } = useAISearch(searchQuery, {
-    pageContext: "home",
-  });
+  } = useAISearch(searchQuery, { pageContext: "home" });
 
-  // Filter destinations based on search
-  const filteredDestinations = destinations.filter(
-    (dest) =>
-      dest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dest.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
-  );
-
-  // Filter hotspots based on search
-  const filteredHotspots = hotspots.filter(
-    (spot) =>
-      spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      spot.type.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  // Check if we should show AI results (no static matches and search is active)
-  const showAIResults = searchQuery.length >= 2 && filteredDestinations.length === 0;
+  const showAIResults = searchQuery.length >= 2;
 
   const handleAIDestinationSelect = (dest: AIDestination) => {
     setSelectedDestination(dest);
     setDestinationDialogOpen(true);
   };
 
-  const getHotspotPlatforms = (spot: (typeof hotspots)[0]) => [
-    { name: "BookMyShow", price: "₹800", savings: "₹100", url: "https://bookmyshow.com", icon: "🎬" },
-    { name: "Paytm", price: "₹850", savings: "₹50", url: "https://paytm.com", icon: "💳" },
-    { name: "MakeMyTrip", price: "₹900", savings: "₹0", url: "https://makemytrip.com", icon: "🔵" },
-  ];
+  const handleCategoryClick = (label: string) => {
+    setSearchQuery(label);
+  };
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -385,7 +183,6 @@ const HomePage: React.FC<HomePageProps> = ({
                 <MapPin className="w-3 h-3 flex-shrink-0" />
                 {userData?.locationEnabled ? userData?.currentCity || "Fetching..." : "Enable location"}
               </p>
-              {/* Current Location Weather */}
               {userData?.locationEnabled && userData?.currentCity && (
                 <span className="text-white/70 text-xs flex items-center gap-1">
                   <span className="text-white/50">•</span>
@@ -424,149 +221,143 @@ const HomePage: React.FC<HomePageProps> = ({
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {/* Quick Access */}
+        {/* Quick Access Categories */}
         <div className="px-4 py-3">
-          {/* <div className="grid grid-cols-4 gap-2">
-            {quickAccess.map((item) => {
+          <div className="grid grid-cols-3 gap-2">
+            {quickAccessCategories.map((item) => {
               const Icon = item.icon;
               return (
                 <Card
                   key={item.label}
-                  className="p-3 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0"
-                  onClick={item.onClick}
+                  className={cn(
+                    "p-3 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0",
+                    searchQuery === item.label && "ring-2 ring-primary"
+                  )}
+                  onClick={() => handleCategoryClick(item.label)}
                 >
-                  <div
-                    className={cn("w-10 h-10 rounded-xl mx-auto mb-1.5 flex items-center justify-center", item.color)}
-                  >
+                  <div className={cn("w-10 h-10 rounded-xl mx-auto mb-1.5 flex items-center justify-center", item.color)}>
                     <Icon className="w-5 h-5" />
                   </div>
                   <p className="text-[10px] font-medium leading-tight">{item.label}</p>
                 </Card>
               );
             })}
-          </div> */}
-
-          {/* Additional Categories */}
-          {/* {showMoreCategories && (
-            <div className="grid grid-cols-4 gap-2 mt-3">
-              {moreCategories.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Card
-                    key={item.label}
-                    className="p-3 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0"
-                  >
-                    <div
-                      className={cn("w-10 h-10 rounded-xl mx-auto mb-1.5 flex items-center justify-center", item.color)}
-                    >
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <p className="text-[10px] font-medium leading-tight">{item.label}</p>
-                  </Card>
-                );
-              })}
-            </div>
-          )} */}
+          </div>
         </div>
 
-        {/* Safe Destinations */}
-        <section className="px-4 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="text-sm font-semibold">Safe Destinations</h2>
-              <p className="text-[10px] text-muted-foreground">Verified solo-friendly places</p>
-            </div>
-            <Button variant="ghost" size="sm" className="text-primary text-xs h-8 px-2">
-              See all <ArrowRight className="w-3 h-3 ml-1" />
-            </Button>
-          </div>
+        {/* AI Search Results (shown when searching) */}
+        {showAIResults && (
+          <section className="px-4 mb-4">
+            <AISearchResults
+              results={aiResults}
+              isLoading={aiLoading}
+              error={aiError}
+              searchQuery={searchQuery}
+              onSelectDestination={handleAIDestinationSelect}
+              showDestinations={true}
+              showStays={true}
+              showTravel={true}
+              bookmarkedIds={bookmarkedPlaces.map((p) => p.id)}
+            />
+          </section>
+        )}
 
-          {filteredDestinations.length > 0 ? (
-            <div className="space-y-3">
-              {filteredDestinations.map((dest) => (
-                <Card
-                  key={dest.id}
-                  className="p-3 shadow-soft hover:shadow-medium transition-all cursor-pointer rounded-2xl border-0"
-                  onClick={() => {
-                    setSelectedDestination(dest);
-                    setDestinationDialogOpen(true);
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl flex-shrink-0">
-                        {dest.image}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm truncate">{dest.name}</h3>
-                        <div className="flex items-center gap-1 mt-1 flex-wrap">
-                          {weatherLoading ? (
-                            <span className="text-[10px] text-muted-foreground">...</span>
-                          ) : weatherMap[dest.name] ? (
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] py-0.5 px-2 rounded-lg bg-sky-500/10 text-sky-600 border-sky-300"
-                            >
-                              <CloudSun className="w-2.5 h-2.5 mr-0.5" />
-                              <span className="font-normal">{weatherMap[dest.name]}</span>
-                            </Badge>
-                          ) : null}
-                          {dest.tags.slice(0, 2).map((tag) => (
-                            <Badge key={tag} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
-                              {tag}
-                            </Badge>
-                          ))}
+        {/* Popular Destinations (shown when NOT searching) */}
+        {!showAIResults && (
+          <section className="px-4 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h2 className="text-sm font-semibold">Popular Destinations</h2>
+                <p className="text-[10px] text-muted-foreground">
+                  {userData?.locationEnabled && userData?.currentCity
+                    ? `Trending near ${userData.currentCity}`
+                    : "Trending places in India"}
+                </p>
+              </div>
+            </div>
+
+            {popularLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="p-3 rounded-2xl border-0 shadow-soft">
+                    <div className="flex items-start gap-2.5">
+                      <Skeleton className="w-10 h-10 rounded-xl" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <div className="flex gap-1">
+                          <Skeleton className="h-5 w-16" />
+                          <Skeleton className="h-5 w-16" />
                         </div>
                       </div>
+                      <Skeleton className="h-5 w-16" />
                     </div>
-                    <div className="flex flex-col items-end flex-shrink-0">
-                      <Bookmark
-                        className={cn(
-                          "w-4 h-4 cursor-pointer transition-colors",
-                          bookmarkedPlaces.find((p) => p.id === dest.id)
-                            ? "text-primary fill-current"
-                            : "text-muted-foreground hover:text-primary",
-                        )}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onToggleBookmark?.({ id: dest.id, name: dest.name, image: dest.image });
-                        }}
-                      />
-                      <p className="font-bold text-sm text-primary mt-1">{dest.price}</p>
+                  </Card>
+                ))}
+              </div>
+            ) : popularDestinations.length > 0 ? (
+              <div className="space-y-3">
+                {popularDestinations.map((dest) => (
+                  <Card
+                    key={dest.id}
+                    className="p-3 shadow-soft hover:shadow-medium transition-all cursor-pointer rounded-2xl border-0"
+                    onClick={() => {
+                      setSelectedDestination(dest);
+                      setDestinationDialogOpen(true);
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl flex-shrink-0">
+                          {dest.image}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm truncate">{dest.name}</h3>
+                          <div className="flex items-center gap-1 mt-1 flex-wrap">
+                            {dest.tags.slice(0, 2).map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end flex-shrink-0">
+                        <Bookmark
+                          className={cn(
+                            "w-4 h-4 cursor-pointer transition-colors",
+                            bookmarkedPlaces.find((p) => p.id === dest.id)
+                              ? "text-primary fill-current"
+                              : "text-muted-foreground hover:text-primary",
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleBookmark?.({ id: dest.id, name: dest.name, image: dest.image });
+                          }}
+                        />
+                        <p className="font-bold text-sm text-primary mt-1">{dest.price}</p>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {dest.tags.slice(0, 2).map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">
-                        {tag}
-                      </Badge>
-                    ))}
-                    {dest.tags.length > 2 && (
-                      <Badge variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">
-                        +{dest.tags.length - 2}
-                      </Badge>
-                    )}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            showAIResults && (
-              <AISearchResults
-                results={aiResults}
-                isLoading={aiLoading}
-                error={aiError}
-                searchQuery={searchQuery}
-                onSelectDestination={handleAIDestinationSelect}
-                showDestinations={true}
-                showStays={true}
-                showTravel={true}
-                bookmarkedIds={bookmarkedPlaces.map((p) => p.id)}
-              />
-            )
-          )}
-        </section>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
+                <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm font-medium text-muted-foreground">No destinations found</p>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {!userData?.locationEnabled ? (
+                    <span
+                      className="text-primary cursor-pointer"
+                      onClick={() => onLocationToggle?.(true)}
+                    >
+                      Enable location for nearby recommendations
+                    </span>
+                  ) : "Try searching for a destination above"}
+                </p>
+              </Card>
+            )}
+          </section>
+        )}
 
         {/* Explore Plans Section */}
         <section className="px-4 mb-4">
@@ -598,7 +389,6 @@ const HomePage: React.FC<HomePageProps> = ({
                 const badge = getGroupBadge(plan.group_type);
                 return (
                   <Card key={plan.id} className="overflow-hidden rounded-2xl border-0 shadow-soft">
-                    {/* Cover */}
                     <div className="aspect-[2/1] relative bg-muted">
                       {plan.cover_image_url ? (
                         <img src={plan.cover_image_url} alt={plan.plan_name} className="w-full h-full object-cover" loading="lazy" />
@@ -669,23 +459,6 @@ const HomePage: React.FC<HomePageProps> = ({
         </section>
       </div>
 
-      {/* Booking Dialog */}
-      {selectedHotspot && (
-        <BookingDialog
-          open={bookingDialogOpen}
-          onOpenChange={setBookingDialogOpen}
-          title={selectedHotspot.name}
-          subtitle="Compare prices across platforms"
-          platforms={getHotspotPlatforms(selectedHotspot)}
-          eventDetails={{
-            date: selectedHotspot.date,
-            duration: selectedHotspot.duration,
-            location: selectedHotspot.distance,
-            rating: selectedHotspot.rating,
-            reviews: selectedHotspot.reviews,
-          }}
-        />
-      )}
       {/* Destination Dialog */}
       <DestinationDialog
         open={destinationDialogOpen}
