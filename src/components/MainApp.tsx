@@ -174,10 +174,6 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
         {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
 
-      {/* Footer Links */}
-      <div className="bg-muted/50 border-t border-border px-4 py-2 flex justify-center gap-4">
-        <button onClick={() => setHelpLegalOpen(true)} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Help & Support</button>
-      </div>
 
       {/* Bottom Navigation */}
       <nav className="bg-card border-t border-border px-2 py-2 shadow-soft">
