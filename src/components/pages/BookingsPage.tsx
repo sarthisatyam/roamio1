@@ -42,6 +42,11 @@ interface AIHotel {
   mapLink: string;
   amenities: string[];
   imageSearchUrl?: string;
+  landmarkDistances?: Record<string, number>;
+}
+
+interface AILandmark {
+  name: string;
 }
 
 const CITY_LANDMARKS: Record<string, string[]> = {

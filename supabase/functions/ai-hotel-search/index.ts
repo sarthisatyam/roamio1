@@ -28,20 +28,23 @@ serve(async (req) => {
 
 Search query: "${searchQuery}"
 
-Return a JSON array of 5-8 real hotels/hostels that actually exist near this location. For each, provide:
-- name: Real hotel/hostel name
-- type: "hotel", "hostel", "guesthouse", or "resort"
-- stars: Star rating (1-5)
-- pricePerNight: Approximate price in INR (realistic for the area)
-- distance: Approximate distance from user location (e.g. "1.2 km", "3.5 km")
-- address: Real or approximate address
-- mapLink: Google Maps search link (https://www.google.com/maps/search/HOTEL+NAME+CITY)
-- amenities: Array of 3-5 key amenities
-- description: One-line description (under 20 words)
-- safetyRating: "High", "Medium" based on area reputation for solo women travelers
-- imageSearchUrl: Google image search URL for the hotel
+Return a JSON object with two keys:
+1. "landmarks": An array of exactly 3 famous landmarks/tourist attractions in or near this city/destination. Each landmark object should have:
+   - name: The landmark name (e.g. "Charminar", "Taj Mahal")
 
-IMPORTANT: Use real hotel names that exist in the area. Provide realistic prices for the Indian market. Sort by distance from user.`;
+2. "hotels": A JSON array of 5-8 real hotels/hostels that actually exist near this location. For each hotel, provide:
+   - name: Real hotel/hostel name
+   - type: "hotel", "hostel", "guesthouse", or "resort"
+   - stars: Star rating (1-5)
+   - pricePerNight: Approximate price in INR (realistic for the area)
+   - distance: Approximate distance from user location (e.g. "1.2 km", "3.5 km")
+   - address: Real or approximate address
+   - mapLink: Google Maps search link (https://www.google.com/maps/search/HOTEL+NAME+CITY)
+   - amenities: Array of 3-5 key amenities
+   - description: One-line description (under 20 words)
+   - landmarkDistances: An object where keys are the landmark names (matching the landmarks array) and values are realistic distances in km as numbers (e.g. {"Charminar": 2.5, "Golconda Fort": 8.1, "Hussain Sagar Lake": 3.2}). These must be realistic approximate road distances from the hotel to each landmark.
+
+IMPORTANT: Use real hotel names that exist in the area. Provide realistic prices for the Indian market. The landmark distances must be realistic — use actual approximate distances. Sort by distance from user.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -54,7 +57,7 @@ IMPORTANT: Use real hotel names that exist in the area. Provide realistic prices
         messages: [
           {
             role: "system",
-            content: "You are a hotel search assistant. Return ONLY a valid JSON array of hotel objects. No markdown, no explanation, just the JSON array. Use real hotel names that exist in the specified location."
+            content: "You are a hotel search assistant. Return ONLY a valid JSON object with 'landmarks' and 'hotels' keys. No markdown, no explanation, just the JSON object. Use real hotel names and real landmark distances."
           },
           { role: "user", content: prompt }
         ],
@@ -80,28 +83,35 @@ IMPORTANT: Use real hotel names that exist in the area. Provide realistic prices
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "[]";
+    const content = data.choices?.[0]?.message?.content || "{}";
 
-    // Parse the JSON from the AI response
-    let hotels = [];
+    let result = { landmarks: [], hotels: [] };
     try {
-      // Remove markdown code blocks if present
       const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      hotels = JSON.parse(cleaned);
+      const parsed = JSON.parse(cleaned);
+      if (Array.isArray(parsed)) {
+        // Fallback: if AI returned just an array of hotels
+        result = { landmarks: [], hotels: parsed };
+      } else {
+        result = parsed;
+      }
     } catch (parseError) {
       console.error("Failed to parse AI response:", content);
-      // Try to extract JSON array from response
-      const match = content.match(/\[[\s\S]*\]/);
+      const match = content.match(/\{[\s\S]*\}/);
       if (match) {
         try {
-          hotels = JSON.parse(match[0]);
+          result = JSON.parse(match[0]);
         } catch {
           console.error("Second parse attempt failed");
         }
       }
     }
 
-    return new Response(JSON.stringify({ hotels, location: location || query }), {
+    return new Response(JSON.stringify({ 
+      hotels: result.hotels || [], 
+      landmarks: result.landmarks || [],
+      location: location || query 
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
