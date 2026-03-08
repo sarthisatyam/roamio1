@@ -12,6 +12,7 @@ export interface Group {
   member_count: number;
   is_member: boolean;
   last_activity: string | null;
+  plan_id?: string | null;
 }
 
 export interface GroupMessage {
@@ -29,10 +30,80 @@ export const useGroups = (currentUserId: string | null) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const ensurePlanGroups = async () => {
+    if (!currentUserId) return;
+
+    // Fetch plans where user is an approved member
+    const { data: myMemberships } = await supabase
+      .from("plan_members")
+      .select("plan_id")
+      .eq("user_id", currentUserId);
+
+    if (!myMemberships || myMemberships.length === 0) return;
+
+    const planIds = myMemberships.map(m => m.plan_id);
+
+    // Fetch plan details
+    const { data: plans } = await supabase
+      .from("plans")
+      .select("id, plan_name, destination_name, group_type")
+      .in("id", planIds);
+
+    if (!plans || plans.length === 0) return;
+
+    // Check which plans already have groups
+    const { data: existingGroups } = await supabase
+      .from("groups")
+      .select("plan_id")
+      .in("plan_id", planIds);
+
+    const existingPlanIds = new Set(existingGroups?.map(g => g.plan_id) || []);
+
+    // Create groups for plans that don't have one yet
+    for (const plan of plans) {
+      if (existingPlanIds.has(plan.id)) continue;
+
+      const { data: newGroup, error: createErr } = await supabase
+        .from("groups")
+        .insert({
+          name: plan.plan_name,
+          description: `Plan community for ${plan.destination_name}`,
+          category: "Plan",
+          icon: "MapPin",
+          created_by: currentUserId,
+          plan_id: plan.id
+        })
+        .select()
+        .single();
+
+      if (createErr) {
+        console.error("Failed to create plan group:", createErr);
+        continue;
+      }
+
+      // Add all plan members to the group
+      const { data: planMembers } = await supabase
+        .from("plan_members")
+        .select("user_id")
+        .eq("plan_id", plan.id);
+
+      if (planMembers && newGroup) {
+        const inserts = planMembers.map(m => ({
+          group_id: newGroup.id,
+          user_id: m.user_id
+        }));
+        await supabase.from("group_members").insert(inserts);
+      }
+    }
+  };
+
   const fetchGroups = async () => {
     try {
       setIsLoading(true);
       setError(null);
+
+      // Ensure plan-based groups exist first
+      await ensurePlanGroups();
 
       // Fetch all groups
       const { data: groupsData, error: groupsError } = await supabase
@@ -66,7 +137,7 @@ export const useGroups = (currentUserId: string | null) => {
       const userGroupIds = new Set(userMemberships?.map(m => m.group_id) || []);
 
       // Fetch last message for each group
-      const { data: lastMessages, error: lastMsgError } = await supabase
+      const { data: lastMessages } = await supabase
         .from("group_messages")
         .select("group_id, created_at")
         .order("created_at", { ascending: false });
@@ -81,6 +152,7 @@ export const useGroups = (currentUserId: string | null) => {
 
       const groupsWithData: Group[] = (groupsData || []).map(group => ({
         ...group,
+        plan_id: (group as any).plan_id || null,
         member_count: memberCountMap.get(group.id) || 0,
         is_member: userGroupIds.has(group.id),
         last_activity: lastActivityMap.get(group.id) || group.created_at

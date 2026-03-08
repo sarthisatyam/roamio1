@@ -156,6 +156,7 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          plan_id: string | null
           updated_at: string
         }
         Insert: {
@@ -166,6 +167,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          plan_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -176,9 +178,18 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          plan_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "groups_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       join_requests: {
         Row: {

@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Users, Search, MapPin, Shield, CheckCircle, User, Compass,
-  Mountain, Plus, Loader2, Calendar, ArrowRight, Send, Clock,
+  Plus, Loader2, Calendar, ArrowRight, Send, Clock,
   MessageCircle, Eye, ChevronLeft, TrendingUp, UserCheck,
   Heart, Filter, X, RefreshCw,
 } from "lucide-react";
@@ -25,7 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCompanions, Companion } from "@/hooks/useCompanions";
 import { useConnections } from "@/hooks/useConnections";
 import { useGroups, useGroupMessages, Group } from "@/hooks/useGroups";
-import { usePlans, Plan } from "@/hooks/usePlans";
+
 import { useDirectMessages } from "@/hooks/useDirectMessages";
 import GroupChatDialog from "@/components/dialogs/GroupChatDialog";
 import DirectChatDialog from "@/components/dialogs/DirectChatDialog";
@@ -120,7 +120,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search companions, communities, or destinations..."
+            placeholder="Search companions or communities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 text-xs bg-card border shadow-soft h-10 rounded-xl"
@@ -139,10 +139,6 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
             <Users className="w-3.5 h-3.5" />
             Community
           </TabsTrigger>
-          <TabsTrigger value="trips" className="flex-1 rounded-lg text-xs gap-1.5 data-[state=active]:bg-background">
-            <Mountain className="w-3.5 h-3.5" />
-            Trips
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="discover" className="flex-1 overflow-y-auto mt-0 pb-24">
@@ -151,10 +147,6 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
 
         <TabsContent value="groups" className="flex-1 overflow-y-auto mt-0 pb-24">
           <GroupsTab currentUserId={currentUserId} searchQuery={searchQuery} />
-        </TabsContent>
-
-        <TabsContent value="trips" className="flex-1 overflow-y-auto mt-0 pb-24 relative">
-          <TripsTab currentUserId={currentUserId} onNavigateToAccount={onNavigateToAccount} searchQuery={searchQuery} onCreatePlan={onCreatePlan} />
         </TabsContent>
       </Tabs>
     </div>
@@ -847,6 +839,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
 
   const getCategoryIcon = (category: string) => {
     switch (category.toLowerCase()) {
+      case "plan": return "📋";
       case "backpacking": return "🎒";
       case "road trips": return "🚗";
       case "weekend trips": return "🏕️";
@@ -940,14 +933,16 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
                           <Users className="w-3 h-3" />
                           Members
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 text-[10px] rounded-lg text-destructive"
-                          onClick={() => handleLeave(group.id)}
-                        >
-                          Leave
-                        </Button>
+                        {!group.plan_id && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-[10px] rounded-lg text-destructive"
+                            onClick={() => handleLeave(group.id)}
+                          >
+                            Leave
+                          </Button>
+                        )}
                       </>
                     ) : (
                       <Button
@@ -1111,178 +1106,5 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
   );
 };
 
-// ==================== TRIPS TAB ====================
-const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => void; searchQuery: string; onCreatePlan?: () => void }> = ({ currentUserId, onNavigateToAccount, searchQuery, onCreatePlan }) => {
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-  const [joinMessage, setJoinMessage] = useState("");
-  const [isJoining, setIsJoining] = useState(false);
-
-  const { plans, isLoading, fetchPlans, requestToJoin } = usePlans(currentUserId);
-
-  useEffect(() => {
-    if (searchQuery.length > 2) {
-      const timer = setTimeout(() => fetchPlans(searchQuery), 300);
-      return () => clearTimeout(timer);
-    } else if (searchQuery.length === 0) {
-      fetchPlans();
-    }
-  }, [searchQuery, fetchPlans]);
-
-  const handleJoinRequest = async () => {
-    if (!selectedPlan) return;
-    setIsJoining(true);
-    try {
-      await requestToJoin(selectedPlan.id, joinMessage || undefined);
-      toast.success("Join request sent! ✈️");
-      setSelectedPlan(null);
-      setJoinMessage("");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to send request");
-    } finally {
-      setIsJoining(false);
-    }
-  };
-
-  const getGroupBadge = (type: string) => {
-    switch (type) {
-      case "males_only": return { label: "Males Only", color: "bg-blue-500/10 text-blue-600" };
-      case "females_only": return { label: "Females Only", color: "bg-pink-500/10 text-pink-600" };
-      default: return { label: "Everyone", color: "bg-green-500/10 text-green-600" };
-    }
-  };
-
-  return (
-    <div className="px-4 pt-3 space-y-4">
-      {/* Create Plan Button */}
-      {onCreatePlan && (
-        <Button
-          onClick={onCreatePlan}
-          className="w-full bg-gradient-primary text-primary-foreground rounded-xl h-10 text-xs gap-1.5"
-        >
-          <Plus className="w-4 h-4" />
-          Create New Plan
-        </Button>
-      )}
-
-      {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      ) : plans.length === 0 ? (
-        <div className="text-center py-20">
-          <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <p className="text-lg font-medium">No plans yet</p>
-          <p className="text-sm text-muted-foreground">Be the first to create a plan!</p>
-        </div>
-      ) : (
-        plans.map(plan => {
-          const badge = getGroupBadge(plan.group_type);
-          return (
-            <Card key={plan.id} className="overflow-hidden rounded-2xl border-border shadow-sm">
-              {/* Cover Image */}
-              <div className="aspect-[16/9] relative bg-muted">
-                {plan.cover_image_url ? (
-                  <img
-                    src={plan.cover_image_url}
-                    alt={plan.plan_name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-                    <MapPin className="w-12 h-12 text-primary/40" />
-                  </div>
-                )}
-                {/* Badges */}
-                <div className="absolute top-3 left-3 flex gap-2">
-                  <Badge className={cn("text-xs", badge.color)}>{badge.label}</Badge>
-                  <Badge className={cn("text-xs", plan.plan_visibility === "public" ? "bg-accent/80 text-accent-foreground" : "bg-muted/80 text-muted-foreground")}>
-                    {plan.plan_visibility === "public" ? <Eye className="w-3 h-3 mr-1" /> : null}
-                    {plan.plan_visibility === "public" ? "Public" : "Private"}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Info */}
-              <div className="p-4 space-y-3">
-                <h3 className="font-bold text-lg leading-tight">{plan.plan_name}</h3>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span>{plan.destination_name}</span>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>{format(new Date(plan.start_date), "MMM dd")} – {format(new Date(plan.end_date), "MMM dd")}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>{plan.member_count || 1} / {plan.max_members}</span>
-                  </div>
-                </div>
-
-                {/* Interests */}
-                {plan.interests && plan.interests.length > 0 && (
-                  <div className="flex gap-2 flex-wrap">
-                    {plan.interests.map(i => (
-                      <Badge key={i} variant="secondary" className="text-xs">{i}</Badge>
-                    ))}
-                  </div>
-                )}
-
-                {/* Action */}
-                {plan.is_owner ? (
-                  <Badge className="bg-primary/10 text-primary">Your Plan</Badge>
-                ) : plan.is_member ? (
-                  <Badge className="bg-green-500/10 text-green-600">Joined</Badge>
-                ) : plan.my_request_status === "pending" ? (
-                  <Badge className="bg-yellow-500/10 text-yellow-600">
-                    <Clock className="w-3 h-3 mr-1" /> Pending
-                  </Badge>
-                ) : plan.my_request_status === "rejected" ? (
-                  <Badge className="bg-destructive/10 text-destructive">Declined</Badge>
-                ) : (
-                  <Button
-                    onClick={() => setSelectedPlan(plan)}
-                    className="w-full rounded-xl bg-gradient-primary"
-                    size="sm"
-                  >
-                    Request to Join <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                )}
-              </div>
-            </Card>
-          );
-        })
-      )}
-
-
-
-      {/* Join Request Dialog */}
-      <Dialog open={!!selectedPlan} onOpenChange={() => setSelectedPlan(null)}>
-        <DialogContent className="max-w-sm rounded-2xl">
-          <DialogHeader>
-            <DialogTitle>Request to Join</DialogTitle>
-            <DialogDescription>
-              Send a request to join "{selectedPlan?.plan_name}"
-            </DialogDescription>
-          </DialogHeader>
-          <Textarea
-            value={joinMessage}
-            onChange={e => setJoinMessage(e.target.value)}
-            placeholder="Introduce yourself (optional)"
-            className="min-h-[80px]"
-          />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedPlan(null)}>Cancel</Button>
-            <Button onClick={handleJoinRequest} disabled={isJoining} className="bg-gradient-primary">
-              {isJoining ? "Sending..." : "Send Request"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
 
 export default CompanionPage;
