@@ -232,6 +232,10 @@ const FloatingAIBot: React.FC<FloatingAIBotProps> = ({ currentCity, locationEnab
     "Local travel tips",
   ];
 
+  const handleEmergencyClick = () => {
+    setEmergencyDialogOpen(true);
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
