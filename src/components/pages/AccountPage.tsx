@@ -58,7 +58,7 @@ interface AccountPageProps {
   currentCity?: string | null;
 }
 
-const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [], onLocationToggle }) => {
+const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [], onLocationToggle, currentCity }) => {
   const accountType = "Free";
   
   // Dialog states
