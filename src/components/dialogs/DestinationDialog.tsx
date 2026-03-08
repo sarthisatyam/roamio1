@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Star, Shield, Clock, Utensils, Calendar, Plus, CloudSun } from "lucide-react";
+import { Star, Shield, Clock, Utensils, Calendar, Plus, CloudSun, BookOpen, CheckCircle, XCircle, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 import { useWeather } from "@/hooks/useWeather";
 
