@@ -31,6 +31,7 @@ import DestinationDialog from "@/components/dialogs/DestinationDialog";
 import { useAISearch, AIDestination } from "@/hooks/useAISearch";
 import AISearchResults from "@/components/AISearchResults";
 import { supabase } from "@/integrations/supabase/client";
+import { EmergencyDialog } from "@/components/dialogs/AccountSectionDialogs";
 import { usePlans, Plan } from "@/hooks/usePlans";
 import { format } from "date-fns";
 import {
