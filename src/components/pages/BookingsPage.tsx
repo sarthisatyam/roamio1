@@ -66,13 +66,13 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   const [aiHotels, setAiHotels] = useState<AIHotel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchDone, setSearchDone] = useState(false);
-  const [landmarkDistances, setLandmarkDistances] = useState<Record<string, Record<string, string>>>({});
+  const [cityLandmarks, setCityLandmarks] = useState<string[]>([]);
 
   const effectiveLocation = searchQuery.length >= 2
     ? searchQuery
     : (userData?.locationEnabled && userData?.currentCity ? userData.currentCity : null);
 
-  const landmarks = effectiveLocation ? getCityLandmarks(effectiveLocation) : [];
+  const landmarks = cityLandmarks;
 
   useEffect(() => {
     if (!effectiveLocation) {
