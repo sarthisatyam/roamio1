@@ -81,7 +81,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
             <Compass className="w-12 h-12 mx-auto text-primary mb-4" />
             <h2 className="font-semibold text-lg mb-2">Find Companions</h2>
             <p className="text-muted-foreground text-sm mb-4">
-              Sign in to discover travel companions, join groups, and plan trips together.
+              Sign in to discover travel companions, join communities, and plan trips together.
             </p>
             <Button onClick={onNavigateToAccount} className="bg-gradient-primary text-primary-foreground">
               Sign In / Sign Up
