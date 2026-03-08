@@ -28,6 +28,19 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+
+  // Fetch current user
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id || null;
+      setCurrentUserId(uid);
+      if (uid) {
+        supabase.from("profiles").select("gender").eq("user_id", uid).maybeSingle().then(({ data: p }) => {
+          setUserGender((p as any)?.gender || null);
+        });
+      }
+    });
+  }, []);
   
   // Location state with localStorage persistence
   const [locationEnabled, setLocationEnabled] = useState(() => {
