@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.chatbot]
 verify_jwt = false
+
+[functions.ai-hotel-search]
+verify_jwt = false
