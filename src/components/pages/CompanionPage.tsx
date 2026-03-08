@@ -1165,16 +1165,31 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
           supabase.from("user_presence").select("user_id, is_online").in("user_id", userIds),
         ]);
 
+        let roleMap = new Map<string, string>();
+        if (group.plan_id) {
+          const { data: planMembers } = await supabase
+            .from("plan_members")
+            .select("user_id, role")
+            .eq("plan_id", group.plan_id);
+          (planMembers || []).forEach((p: any) => roleMap.set(p.user_id, p.role));
+        }
+
         const profileMap = new Map((profilesRes.data || []).map(p => [p.user_id, p]));
         const presenceMap = new Map((presenceRes.data || []).map(p => [p.user_id, p.is_online]));
 
         setGroupMembers(
-          members.map(m => ({
-            user_id: m.user_id,
-            joined_at: m.joined_at,
-            ...profileMap.get(m.user_id),
-            is_online: presenceMap.get(m.user_id) || false,
-          }))
+          members.map(m => {
+            const profile = profileMap.get(m.user_id);
+            return {
+              user_id: m.user_id,
+              joined_at: m.joined_at,
+              display_name: profile?.display_name,
+              avatar_url: profile?.avatar_url,
+              is_verified: profile?.is_verified,
+              is_online: presenceMap.get(m.user_id) || false,
+              role: roleMap.get(m.user_id) || (group.created_by === m.user_id ? "owner" : "member"),
+            };
+          })
         );
       } else {
         setGroupMembers([]);
