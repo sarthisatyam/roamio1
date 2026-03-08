@@ -611,10 +611,6 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                             <h3 className="font-semibold text-sm truncate">{stay.name}</h3>
                             {stay.verified && <CheckCircle className="w-3.5 h-3.5 text-success flex-shrink-0" />}
                           </div>
-                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                            <Navigation className="w-3 h-3" />
-                            <span className="truncate">{stay.distance} km from {prominentPlace}</span>
-                          </div>
                         </div>
                         <div className="flex items-center gap-1 text-[10px] bg-warning/10 px-2 py-1 rounded-lg flex-shrink-0">
                           <Star className="w-3 h-3 fill-warning text-warning" />
