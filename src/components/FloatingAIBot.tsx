@@ -463,6 +463,14 @@ const FloatingAIBot: React.FC<FloatingAIBotProps> = ({ currentCity, locationEnab
             {/* Quick Actions */}
             <div className="px-4 pb-2">
               <div className="flex flex-wrap gap-2">
+                <Badge
+                  variant="destructive"
+                  className="cursor-pointer hover:bg-destructive/90 text-xs flex items-center gap-1"
+                  onClick={handleEmergencyClick}
+                >
+                  <AlertTriangle className="w-3 h-3" />
+                  Emergency Details
+                </Badge>
                 {quickActions.map((action) => (
                   <Badge
                     key={action}
