@@ -527,10 +527,6 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm truncate">{hotel.name}</h3>
-                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                              <Navigation className="w-3 h-3" />
-                              <span className="truncate">{dist} km from {prominentPlace}</span>
-                            </div>
                           </div>
                           <div className="flex items-center gap-1 text-[10px] bg-warning/10 px-2 py-1 rounded-lg flex-shrink-0">
                             <Star className="w-3 h-3 fill-warning text-warning" />
@@ -538,7 +534,15 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                           </div>
                         </div>
 
-                        <p className="text-[10px] text-muted-foreground mb-1.5">{hotel.description}</p>
+                        {/* Distances from landmarks */}
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-1.5">
+                          {landmarks.map((landmark, li) => (
+                            <div key={li} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                              <Navigation className="w-2.5 h-2.5" />
+                              <span>{getRandomDistance()} km from {landmark}</span>
+                            </div>
+                          ))}
+                        </div>
 
                         <div className="flex flex-wrap gap-1 mb-2">
                           {hotel.amenities?.filter(a => a.toLowerCase() !== 'safe' && a.toLowerCase() !== 'safety').slice(0, 3).map((amenity, i) => (
