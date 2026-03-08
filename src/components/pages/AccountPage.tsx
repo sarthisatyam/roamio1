@@ -585,7 +585,51 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         </DialogContent>
       </Dialog>
 
-      <MyCoCompanionDialog open={coCompanionDialogOpen} onOpenChange={setCoCompanionDialogOpen} companions={likedCompanionProfiles} />
+      {/* Manage Members Dialog */}
+      <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
+        <DialogContent className="max-w-md rounded-2xl max-h-[70vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Trip Members — {membersPlan?.plan_name}</DialogTitle>
+          </DialogHeader>
+          {loadingMembers ? (
+            <p className="text-center text-sm text-muted-foreground py-4">Loading...</p>
+          ) : planMembers.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-4">No members yet</p>
+          ) : (
+            <div className="space-y-3">
+              {planMembers.map(member => (
+                <Card key={member.user_id} className="p-3 rounded-2xl border-0 shadow-soft">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="w-8 h-8">
+                        {member.avatar_url && <AvatarImage src={member.avatar_url} />}
+                        <AvatarFallback className="text-xs">{(member.display_name || "T").charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-sm">{member.display_name}</p>
+                        <Badge className={cn("text-[9px] rounded-lg border-0", member.role === "owner" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+                          {member.role === "owner" ? "Admin" : "Member"}
+                        </Badge>
+                      </div>
+                    </div>
+                    {member.role !== "owner" && membersPlan && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-destructive hover:bg-destructive/10 rounded-xl text-xs h-8 px-2"
+                        onClick={() => handleRemoveMember(membersPlan.id, member.user_id)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Remove
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <MyInterestsDialog 
         open={interestsDialogOpen} 
         onOpenChange={setInterestsDialogOpen} 
