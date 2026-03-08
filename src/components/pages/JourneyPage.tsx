@@ -341,7 +341,15 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
             {/* Group: Members + Polls | Solo: Activities */}
             {travelMode === "group" ? (
               <>
-                <GroupMembersManager members={groupMembers} onMembersChange={setGroupMembers} />
+                <GroupMembersManager
+                  members={groupMembers}
+                  onMembersChange={setGroupMembers}
+                  onSearchUsers={searchUsers}
+                  onSendInvite={sendInvite}
+                  onRespondToInvite={respondToInvite}
+                  getInviteStatus={getInviteStatusForUser}
+                  pendingInvites={pendingReceived}
+                />
                 <ActivityPoll
                   polls={polls}
                   onPollsChange={setPolls}
