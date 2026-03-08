@@ -112,12 +112,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     if (type === "males_only") return { label: "Males Only", color: "bg-blue-500/10 text-blue-600" };
     return { label: "Everyone", color: "bg-green-500/10 text-green-600" };
   };
-  const openManageRequests = async (trip: Trip) => {
-    setManagingTrip(trip);
+  const openManageRequests = async (plan: Plan) => {
+    setManagingPlan(plan);
     setLoadingRequests(true);
     setRequestsDialogOpen(true);
     try {
-      const reqs = await getPendingRequests(trip.id);
+      const reqs = await getPendingRequests(plan.id);
       setPendingRequests(reqs);
     } catch {
       toast.error("Failed to load requests");
@@ -126,12 +126,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     }
   };
 
-  const handleReviewRequest = async (req: TripRequest, action: "accepted" | "declined") => {
+  const handleReviewRequest = async (req: JoinRequest, action: "approved" | "rejected") => {
     try {
-      await handleRequest(req.id, action, req.trip_id, req.user_id);
+      await handleJoinRequest(req.id, action, req.plan_id, req.user_id);
       setPendingRequests(prev => prev.filter(r => r.id !== req.id));
-      toast.success(action === "accepted" ? "Request accepted!" : "Request declined.");
-      await fetchMyTrips();
+      toast.success(action === "approved" ? "Request approved!" : "Request rejected.");
+      await fetchMyPlans();
     } catch {
       toast.error("Failed to process request");
     }
