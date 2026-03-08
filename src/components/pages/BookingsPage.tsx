@@ -153,9 +153,20 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
     return () => clearTimeout(timer);
   }, [effectiveLocation]);
 
-  const filteredHotels = activeType === "all"
-    ? aiHotels
-    : aiHotels.filter((h) => h.type?.toLowerCase() === activeType);
+  const filteredHotels = aiHotels.filter((h) => {
+    if (activeType !== "all" && h.type?.toLowerCase() !== activeType) return false;
+    if (priceFilter !== "all") {
+      const price = h.pricePerNight || 0;
+      if (priceFilter === "budget" && price > 1500) return false;
+      if (priceFilter === "mid" && (price <= 1500 || price > 4000)) return false;
+      if (priceFilter === "premium" && price <= 4000) return false;
+    }
+    if (ratingFilter !== "all") {
+      const minRating = parseFloat(ratingFilter);
+      if ((h.stars || 0) < minRating) return false;
+    }
+    return true;
+  });
 
   const getIcon = (type: string) => {
     switch (type?.toLowerCase()) {
