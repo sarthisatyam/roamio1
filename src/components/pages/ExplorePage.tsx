@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Search, MapPin, Users, Calendar, Eye, EyeOff, Loader2, ArrowRight,
-  User, Shield, Clock, Sparkles,
+  User, Shield, Clock, Sparkles, Plus,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
