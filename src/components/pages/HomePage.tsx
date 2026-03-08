@@ -76,6 +76,7 @@ const HomePage: React.FC<HomePageProps> = ({
   onToggleBookmark,
   onAddToPlanner,
   onLocationToggle,
+  onCreatePlan,
 }) => {
   const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -83,6 +84,45 @@ const HomePage: React.FC<HomePageProps> = ({
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
   const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
+
+  // Explore plans state
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [joinMessage, setJoinMessage] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
+  const { plans, isLoading: plansLoading, fetchPlans, requestToJoin } = usePlans(currentUserId);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setCurrentUserId(data.user?.id || null);
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
+
+  const handleJoinRequest = async () => {
+    if (!selectedPlan) return;
+    setIsJoining(true);
+    try {
+      await requestToJoin(selectedPlan.id, joinMessage || undefined);
+      setSelectedPlan(null);
+      setJoinMessage("");
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const getGroupBadge = (type: string) => {
+    switch (type) {
+      case "males_only": return { label: "Males Only", color: "bg-blue-500/10 text-blue-600" };
+      case "females_only": return { label: "Females Only", color: "bg-pink-500/10 text-pink-600" };
+      default: return { label: "Everyone", color: "bg-green-500/10 text-green-600" };
+    }
+  };
 
   // Fetch weather for user's current location
   const { weather: currentLocationWeather, loading: currentWeatherLoading } = useWeather(
