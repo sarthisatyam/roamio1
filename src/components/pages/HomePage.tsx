@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Search,
   User,
@@ -32,6 +33,11 @@ import {
   Zap,
   CloudSun,
   Loader2,
+  Users,
+  Eye,
+  EyeOff,
+  Sparkles,
+  Plus,
 } from "lucide-react";
 import { useWeather, useMultipleWeather } from "@/hooks/useWeather";
 import { cn } from "@/lib/utils";
@@ -39,6 +45,12 @@ import BookingDialog from "@/components/dialogs/BookingDialog";
 import DestinationDialog from "@/components/dialogs/DestinationDialog";
 import { useAISearch, AIDestination } from "@/hooks/useAISearch";
 import AISearchResults from "@/components/AISearchResults";
+import { supabase } from "@/integrations/supabase/client";
+import { usePlans, Plan } from "@/hooks/usePlans";
+import { format } from "date-fns";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
 
 interface HomePageProps {
   userData?: {
@@ -54,6 +66,7 @@ interface HomePageProps {
   onToggleBookmark?: (place: { id: number; name: string; image: string }) => void;
   onAddToPlanner?: (activity: { title: string; location: string; type: string }) => void;
   onLocationToggle?: (enabled: boolean) => void;
+  onCreatePlan?: () => void;
 }
 
 const HomePage: React.FC<HomePageProps> = ({
