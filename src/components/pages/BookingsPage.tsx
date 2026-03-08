@@ -85,6 +85,23 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   const [isLoadingHotels, setIsLoadingHotels] = useState(false);
   const [hotelError, setHotelError] = useState<string | null>(null);
 
+  // AI hotel search state
+  interface AIHotel {
+    name: string;
+    type: string;
+    stars: number;
+    pricePerNight: number;
+    distance: string;
+    address: string;
+    mapLink: string;
+    amenities: string[];
+    description: string;
+    safetyRating: string;
+  }
+  const [aiHotels, setAiHotels] = useState<AIHotel[]>([]);
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [aiSearchDone, setAiSearchDone] = useState(false);
+
   // Static fallback options (used when no search query)
   // const staticStayOptions = [
   //   {
