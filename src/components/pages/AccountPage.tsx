@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -22,7 +22,12 @@ import {
   Settings,
   CheckCircle,
   Calendar,
-  Languages
+  Languages,
+  MessageCircle,
+  Eye,
+  Clock,
+  TrendingUp,
+  UserCheck,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { 
@@ -30,13 +35,18 @@ import {
   ParentalControlDialog, 
   VerifyDialog, 
   SupportDialog, 
-  MyBookingsDialog,
   MyCoCompanionDialog,
   MyInterestsDialog,
   TravelListDialog
 } from "@/components/dialogs/AccountSectionDialogs";
 import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
 import { PrivacyPolicyDialog, TermsOfServiceDialog, ContactDialog } from "@/components/dialogs/LegalContactDialogs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useTrips, Trip, TripRequest } from "@/hooks/useTrips";
+import TripChatDialog from "@/components/dialogs/TripChatDialog";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface AccountPageProps {
   userData: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
@@ -55,7 +65,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [parentalDialogOpen, setParentalDialogOpen] = useState(false);
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [supportDialogOpen, setSupportDialogOpen] = useState(false);
-  const [bookingsDialogOpen, setBookingsDialogOpen] = useState(false);
+  const [myTripsDialogOpen, setMyTripsDialogOpen] = useState(false);
   const [travelGuideDialogOpen, setTravelGuideDialogOpen] = useState(false);
   const [coCompanionDialogOpen, setCoCompanionDialogOpen] = useState(false);
   const [interestsDialogOpen, setInterestsDialogOpen] = useState(false);
@@ -64,6 +74,65 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [termsDialogOpen, setTermsDialogOpen] = useState(false);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
 
+  // Trips state
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatTrip, setChatTrip] = useState<Trip | null>(null);
+  const [requestsDialogOpen, setRequestsDialogOpen] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState<TripRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [managingTrip, setManagingTrip] = useState<Trip | null>(null);
+
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setCurrentUserId(session?.user?.id || null);
+    };
+    getSession();
+  }, []);
+
+  const { myTrips, fetchMyTrips, handleRequest, getPendingRequests } = useTrips(currentUserId);
+
+  const GROUP_TYPES = [
+    { value: "women-only", label: "Women Only" },
+    { value: "mixed", label: "Mixed" },
+    { value: "family", label: "Family" },
+  ];
+  const TRIP_TYPES = [
+    { value: "darshan", label: "Darshan" },
+    { value: "trek", label: "Trek" },
+    { value: "relaxed", label: "Relaxed" },
+    { value: "adventure", label: "Adventure" },
+    { value: "spiritual", label: "Spiritual" },
+  ];
+
+  const getGroupTypeLabel = (type: string) => GROUP_TYPES.find(g => g.value === type)?.label || type;
+  const getTripTypeLabel = (type: string) => TRIP_TYPES.find(t => t.value === type)?.label || type;
+
+  const openManageRequests = async (trip: Trip) => {
+    setManagingTrip(trip);
+    setLoadingRequests(true);
+    setRequestsDialogOpen(true);
+    try {
+      const reqs = await getPendingRequests(trip.id);
+      setPendingRequests(reqs);
+    } catch {
+      toast.error("Failed to load requests");
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleReviewRequest = async (req: TripRequest, action: "accepted" | "declined") => {
+    try {
+      await handleRequest(req.id, action, req.trip_id, req.user_id);
+      setPendingRequests(prev => prev.filter(r => r.id !== req.id));
+      toast.success(action === "accepted" ? "Request accepted!" : "Request declined.");
+      await fetchMyTrips();
+    } catch {
+      toast.error("Failed to process request");
+    }
+  };
   // Mock companion data for displaying liked companions with detailed info
   const companions = [
     { 
