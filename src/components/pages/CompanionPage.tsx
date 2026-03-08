@@ -71,6 +71,7 @@ const INTEREST_LIST = [
 const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, userCity }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("discover");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Auth
   useEffect(() => {
