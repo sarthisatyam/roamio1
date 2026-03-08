@@ -168,15 +168,10 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
     <div className="h-screen flex flex-col bg-background">
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} />}
-        {activeTab === 1 && (
-          <div className="h-full relative">
-            <ExplorePage onNavigateToAccount={handleNavigateToAccount} onCreatePlan={() => setShowPlanBuilder(true)} />
-          </div>
-        )}
-        {activeTab === 2 && <BookingsPage />}
-        {activeTab === 3 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
-        {activeTab === 4 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
+        {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} onCreatePlan={() => setShowPlanBuilder(true)} />}
+        {activeTab === 1 && <BookingsPage />}
+        {activeTab === 2 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
+        {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
 
       {/* Footer Links */}
