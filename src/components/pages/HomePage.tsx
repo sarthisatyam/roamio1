@@ -252,7 +252,7 @@ const HomePage: React.FC<HomePageProps> = ({
       <div className="flex-1 overflow-y-auto">
         {/* Quick Access Categories */}
         <div className="px-4 py-3">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-5 gap-2">
             {quickAccessCategories.map((item) => {
               const Icon = item.icon;
               return (
@@ -260,9 +260,9 @@ const HomePage: React.FC<HomePageProps> = ({
                   key={item.label}
                   className={cn(
                     "p-3 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0",
-                    searchQuery === item.label && "ring-2 ring-primary"
+                    !item.isEmergency && searchQuery === item.label && "ring-2 ring-primary"
                   )}
-                  onClick={() => handleCategoryClick(item.label)}
+                  onClick={() => item.isEmergency ? setEmergencyDialogOpen(true) : handleCategoryClick(item.label)}
                 >
                   <div className={cn("w-10 h-10 rounded-xl mx-auto mb-1.5 flex items-center justify-center", item.color)}>
                     <Icon className="w-5 h-5" />
