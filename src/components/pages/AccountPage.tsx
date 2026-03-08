@@ -70,9 +70,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [coCompanionDialogOpen, setCoCompanionDialogOpen] = useState(false);
   const [interestsDialogOpen, setInterestsDialogOpen] = useState(false);
   const [travelListDialogOpen, setTravelListDialogOpen] = useState(false);
-  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
-  const [termsDialogOpen, setTermsDialogOpen] = useState(false);
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [helpLegalDialogOpen, setHelpLegalDialogOpen] = useState(false);
 
   // Trips state
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
