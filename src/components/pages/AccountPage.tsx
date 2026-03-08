@@ -82,12 +82,10 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
 
   // Trips state
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatTrip, setChatTrip] = useState<Trip | null>(null);
   const [requestsDialogOpen, setRequestsDialogOpen] = useState(false);
-  const [pendingRequests, setPendingRequests] = useState<TripRequest[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
-  const [managingTrip, setManagingTrip] = useState<Trip | null>(null);
+  const [managingPlan, setManagingPlan] = useState<Plan | null>(null);
 
   useEffect(() => {
     const getSession = async () => {
