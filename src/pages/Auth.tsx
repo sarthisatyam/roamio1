@@ -13,7 +13,7 @@ import { z } from "zod";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 digits");
-const phoneSchema = z.string().regex(/^\+?[1-9]\d{6,14}$/, "Please enter a valid phone number with country code");
+
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
