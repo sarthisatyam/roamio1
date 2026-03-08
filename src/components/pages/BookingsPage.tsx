@@ -42,53 +42,13 @@ interface AIHotel {
   mapLink: string;
   amenities: string[];
   imageSearchUrl?: string;
+  landmarkDistances?: Record<string, number>;
 }
 
-const CITY_LANDMARKS: Record<string, string[]> = {
-  hyderabad: ["Charminar", "Golconda Fort", "Hussain Sagar Lake"],
-  delhi: ["India Gate", "Red Fort", "Qutub Minar"],
-  mumbai: ["Gateway of India", "Marine Drive", "Elephanta Caves"],
-  bangalore: ["Lalbagh Garden", "Bangalore Palace", "Cubbon Park"],
-  bengaluru: ["Lalbagh Garden", "Bangalore Palace", "Cubbon Park"],
-  chennai: ["Marina Beach", "Kapaleeshwarar Temple", "Fort St. George"],
-  kolkata: ["Victoria Memorial", "Howrah Bridge", "Indian Museum"],
-  jaipur: ["Hawa Mahal", "Amber Fort", "City Palace"],
-  goa: ["Calangute Beach", "Basilica of Bom Jesus", "Fort Aguada"],
-  agra: ["Taj Mahal", "Agra Fort", "Fatehpur Sikri"],
-  varanasi: ["Kashi Vishwanath Temple", "Dashashwamedh Ghat", "Sarnath"],
-  udaipur: ["City Palace", "Lake Pichola", "Jag Mandir"],
-  shimla: ["Mall Road", "Jakhoo Temple", "Christ Church"],
-  manali: ["Hadimba Temple", "Solang Valley", "Old Manali"],
-  rishikesh: ["Laxman Jhula", "Ram Jhula", "Triveni Ghat"],
-  mysore: ["Mysore Palace", "Chamundi Hills", "Brindavan Gardens"],
-  ooty: ["Botanical Garden", "Ooty Lake", "Doddabetta Peak"],
-  munnar: ["Tea Gardens", "Eravikulam National Park", "Mattupetty Dam"],
-  pondicherry: ["Promenade Beach", "Auroville", "French Quarter"],
-  amritsar: ["Golden Temple", "Jallianwala Bagh", "Wagah Border"],
-  darjeeling: ["Tiger Hill", "Batasia Loop", "Peace Pagoda"],
-  leh: ["Leh Palace", "Pangong Lake", "Shanti Stupa"],
-  pune: ["Shaniwar Wada", "Aga Khan Palace", "Sinhagad Fort"],
-  ahmedabad: ["Sabarmati Ashram", "Adalaj Stepwell", "Kankaria Lake"],
-  lucknow: ["Bara Imambara", "Rumi Darwaza", "Hazratganj"],
-  kochi: ["Fort Kochi", "Chinese Fishing Nets", "Mattancherry Palace"],
-  jodhpur: ["Mehrangarh Fort", "Umaid Bhawan Palace", "Jaswant Thada"],
-  pushkar: ["Pushkar Lake", "Brahma Temple", "Savitri Temple"],
-  alleppey: ["Backwaters", "Alappuzha Beach", "Krishnapuram Palace"],
-  coorg: ["Abbey Falls", "Raja's Seat", "Dubare Elephant Camp"],
-};
-
-function getCityLandmarks(location: string): string[] {
-  const key = location.toLowerCase().trim();
-  for (const [city, landmarks] of Object.entries(CITY_LANDMARKS)) {
-    if (key.includes(city)) return landmarks;
-  }
-  return ["Main Market", "Railway Station", "Bus Stand"];
+interface AILandmark {
+  name: string;
 }
 
-function getRandomDistance(): string {
-  const distances = [0.5, 0.8, 1.2, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0];
-  return distances[Math.floor(Math.random() * distances.length)].toFixed(1);
-}
 
 const TYPE_TABS = [
   { key: "all", label: "All", icon: Home },
@@ -106,13 +66,13 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   const [aiHotels, setAiHotels] = useState<AIHotel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchDone, setSearchDone] = useState(false);
-  const [landmarkDistances, setLandmarkDistances] = useState<Record<string, Record<string, string>>>({});
+  const [cityLandmarks, setCityLandmarks] = useState<string[]>([]);
 
   const effectiveLocation = searchQuery.length >= 2
     ? searchQuery
     : (userData?.locationEnabled && userData?.currentCity ? userData.currentCity : null);
 
-  const landmarks = effectiveLocation ? getCityLandmarks(effectiveLocation) : [];
+  const landmarks = cityLandmarks;
 
   useEffect(() => {
     if (!effectiveLocation) {
@@ -131,16 +91,9 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
         });
         if (!error && data?.hotels) {
           setAiHotels(data.hotels);
-          // Generate stable landmark distances
-          const newDistances: Record<string, Record<string, string>> = {};
-          const cityLandmarks = getCityLandmarks(effectiveLocation);
-          data.hotels.forEach((_: AIHotel, i: number) => {
-            newDistances[`${i}`] = {};
-            cityLandmarks.forEach((l) => {
-              newDistances[`${i}`][l] = getRandomDistance();
-            });
-          });
-          setLandmarkDistances(newDistances);
+          if (data.landmarks && Array.isArray(data.landmarks)) {
+            setCityLandmarks(data.landmarks.map((l: AILandmark) => l.name));
+          }
         }
       } catch (e) {
         console.error("AI hotel search error:", e);
@@ -359,8 +312,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
               </div>
               {filteredHotels.map((hotel, idx) => {
                 const IconComponent = getIcon(hotel.type);
-                const originalIdx = aiHotels.indexOf(hotel);
-                const distances = landmarkDistances[`${originalIdx}`] || {};
+                const hotelLandmarkDistances = hotel.landmarkDistances || {};
                 return (
                   <Card key={idx} className="p-3 shadow-soft hover:shadow-medium transition-all rounded-2xl border-0">
                     <div className="flex gap-3">
@@ -378,12 +330,16 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
 
                         {/* Landmark distances */}
                         <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-1.5">
-                          {landmarks.map((landmark) => (
-                            <div key={landmark} className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                              <Navigation className="w-2.5 h-2.5" />
-                              <span>{distances[landmark] || getRandomDistance()} km from {landmark}</span>
-                            </div>
-                          ))}
+                          {landmarks.map((landmark) => {
+                            const dist = hotelLandmarkDistances[landmark];
+                            if (dist === undefined) return null;
+                            return (
+                              <div key={landmark} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <Navigation className="w-2.5 h-2.5" />
+                                <span>{dist} km from {landmark}</span>
+                              </div>
+                            );
+                          })}
                         </div>
 
                         <div className="flex flex-wrap gap-1 mb-2">
