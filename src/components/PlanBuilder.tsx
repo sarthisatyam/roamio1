@@ -3,14 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { Progress } from "@/components/ui/progress";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import {
-  ArrowLeft, ArrowRight, CalendarIcon, MapPin, Users, Shield, Upload,
+  ArrowLeft, CalendarIcon, MapPin, Users, Shield, Upload,
   Eye, EyeOff, Sparkles, Check, Mountain, Waves, Tent, Music, Sun,
   Compass, Car, PartyPopper, Droplets, Coffee, Zap, Calendar as CalIcon,
 } from "lucide-react";
@@ -40,10 +40,7 @@ const INTERESTS = [
   { label: "Events", icon: PartyPopper },
 ];
 
-const TOTAL_STEPS = 9;
-
 const PlanBuilder: React.FC<PlanBuilderProps> = ({ currentUserId, userGender, onComplete, onClose }) => {
-  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,22 +57,14 @@ const PlanBuilder: React.FC<PlanBuilderProps> = ({ currentUserId, userGender, on
   const [visibility, setVisibility] = useState("public");
   const [interests, setInterests] = useState<string[]>([]);
 
-  const progress = (step / TOTAL_STEPS) * 100;
-
-  const canProceed = () => {
-    switch (step) {
-      case 1: return planName.trim().length > 0;
-      case 2: return destination.trim().length > 0;
-      case 3: return startDate && endDate && endDate >= startDate;
-      case 4: return maxMembers >= 1;
-      case 5: return !!groupType;
-      case 6: return true; // description optional
-      case 7: return true; // photo optional
-      case 8: return !!visibility;
-      case 9: return true;
-      default: return false;
-    }
-  };
+  const canSubmit = 
+    planName.trim().length > 0 &&
+    destination.trim().length > 0 &&
+    startDate && endDate && endDate >= startDate &&
+    maxMembers >= 1 &&
+    !!groupType &&
+    !!visibility &&
+    interests.length >= 3;
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -91,18 +80,17 @@ const PlanBuilder: React.FC<PlanBuilderProps> = ({ currentUserId, userGender, on
   const toggleInterest = (label: string) => {
     setInterests(prev => {
       if (prev.includes(label)) return prev.filter(i => i !== label);
-      if (prev.length >= 2) { toast.error("Max 2 interests"); return prev; }
+      if (prev.length >= 5) { toast.error("Max 5 interests"); return prev; }
       return [...prev, label];
     });
   };
 
   const handleSubmit = async () => {
-    if (!startDate || !endDate) return;
+    if (!startDate || !endDate || !canSubmit) return;
     setIsSubmitting(true);
     try {
       let coverUrl: string | undefined;
 
-      // Upload cover if provided
       if (coverFile) {
         const ext = coverFile.name.split(".").pop();
         const fileName = `${currentUserId}-${Date.now()}.${ext}`;
@@ -134,12 +122,10 @@ const PlanBuilder: React.FC<PlanBuilderProps> = ({ currentUserId, userGender, on
 
       if (error) throw error;
 
-      // Add creator as owner
       await supabase
         .from("plan_members")
         .insert({ plan_id: (plan as any).id, user_id: currentUserId, role: "owner" } as any);
 
-      // Generate AI cover if no upload
       if (!coverUrl) {
         supabase.functions.invoke("generate-cover-image", {
           body: { destination_name: destination.trim(), plan_id: (plan as any).id },
@@ -168,301 +154,212 @@ const PlanBuilder: React.FC<PlanBuilderProps> = ({ currentUserId, userGender, on
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Header */}
-      <div className="px-4 pt-4 pb-2">
-        <div className="flex items-center justify-between mb-3">
-          <Button variant="ghost" size="icon" onClick={step > 1 ? () => setStep(s => s - 1) : onClose}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <span className="text-sm text-muted-foreground font-medium">Step {step} of {TOTAL_STEPS}</span>
-          <div className="w-10" />
-        </div>
-        <Progress value={progress} className="h-1.5" />
+      <div className="px-4 pt-4 pb-3 border-b border-border flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={onClose}>
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+        <h1 className="text-lg font-bold flex-1">Create Plan</h1>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        {step === 1 && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold">Name your plan</h2>
-              <p className="text-muted-foreground mt-1">Give your adventure a catchy name</p>
-            </div>
+      {/* Scrollable Form */}
+      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
+        {/* Plan Name */}
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">Plan Name *</Label>
+          <Input
+            value={planName}
+            onChange={e => setPlanName(e.target.value)}
+            placeholder="Give your adventure a catchy name"
+            className="h-12"
+            maxLength={100}
+          />
+        </div>
+
+        {/* Destination */}
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">Destination *</Label>
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              value={planName}
-              onChange={e => setPlanName(e.target.value)}
-              placeholder="Enter a name for your plan"
-              className="text-lg h-14"
-              maxLength={100}
+              value={destination}
+              onChange={e => setDestination(e.target.value)}
+              placeholder="Search destination..."
+              className="h-12 pl-10"
             />
           </div>
-        )}
+        </div>
 
-        {step === 2 && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold">Where's your next adventure?</h2>
-              <p className="text-muted-foreground mt-1">Search for your destination</p>
-            </div>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                value={destination}
-                onChange={e => setDestination(e.target.value)}
-                placeholder="Search destination..."
-                className="text-lg h-14 pl-11"
-              />
-            </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold">Travel dates</h2>
-              <p className="text-muted-foreground mt-1">When are you heading out?</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Start Date</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start h-12", !startDate && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "MMM dd") : "Pick date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={setStartDate}
-                      disabled={d => d < new Date()}
-                      className="p-3 pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">End Date</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start h-12", !endDate && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "MMM dd") : "Pick date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={endDate}
-                      onSelect={setEndDate}
-                      disabled={d => d < (startDate || new Date())}
-                      className="p-3 pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 4 && (
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-2xl font-bold">Group size</h2>
-              <p className="text-muted-foreground mt-1">How many people can join?</p>
-            </div>
-            <div className="text-center">
-              <div className="text-6xl font-bold text-primary mb-6">{maxMembers}</div>
-              <p className="text-muted-foreground mb-4">People</p>
-              <Slider
-                value={[maxMembers]}
-                onValueChange={v => setMaxMembers(v[0])}
-                min={1}
-                max={20}
-                step={1}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>1</span>
-                <span>20</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 5 && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold">Group type</h2>
-              <p className="text-muted-foreground mt-1">Who can join this plan?</p>
-            </div>
-            <div className="space-y-3">
-              {[
-                { value: "everyone", label: "Everyone", icon: Users, desc: "Open to all genders", enabled: true },
-                { value: "males_only", label: "Males Only", icon: Shield, desc: "Only male travelers", enabled: canMale },
-                { value: "females_only", label: "Females Only", icon: Shield, desc: "Only female travelers", enabled: canFemale },
-              ].map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => opt.enabled && setGroupType(opt.value)}
-                  disabled={!opt.enabled}
-                  className={cn(
-                    "w-full p-4 rounded-2xl border-2 flex items-center gap-4 transition-all text-left",
-                    groupType === opt.value ? "border-primary bg-primary/10" : "border-border hover:border-primary/30",
-                    !opt.enabled && "opacity-40 cursor-not-allowed"
-                  )}
-                >
-                  <div className={cn("w-12 h-12 rounded-full flex items-center justify-center", groupType === opt.value ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                    <opt.icon className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold">{opt.label}</div>
-                    <div className="text-sm text-muted-foreground">{opt.desc}</div>
-                  </div>
-                  {groupType === opt.value && <Check className="w-5 h-5 text-primary" />}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {step === 6 && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold">Describe your plan</h2>
-              <p className="text-muted-foreground mt-1">Share your itinerary and expectations</p>
-            </div>
-            <Textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Describe your itinerary, travel style, and expectations..."
-              className="min-h-[160px] text-base"
-              maxLength={1000}
-            />
-            <p className="text-xs text-muted-foreground text-right">{description.length}/1000</p>
-          </div>
-        )}
-
-        {step === 7 && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold">Cover photo</h2>
-              <p className="text-muted-foreground mt-1">Upload an image or we'll generate one with AI ✨</p>
-            </div>
-            <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleFileSelect} />
-            {coverPreview ? (
-              <div className="relative rounded-2xl overflow-hidden aspect-video">
-                <img src={coverPreview} alt="Cover" className="w-full h-full object-cover" />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="absolute bottom-3 right-3"
-                  onClick={() => { setCoverFile(null); setCoverPreview(null); }}
-                >
-                  Remove
+        {/* Dates */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">Start Date *</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("w-full justify-start h-12", !startDate && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {startDate ? format(startDate, "MMM dd") : "Pick"}
                 </Button>
-              </div>
-            ) : (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full aspect-video rounded-2xl border-2 border-dashed border-border hover:border-primary/50 flex flex-col items-center justify-center gap-3 transition-colors bg-muted/30"
-              >
-                <Upload className="w-10 h-10 text-muted-foreground" />
-                <div className="text-center">
-                  <p className="font-medium">Tap to upload</p>
-                  <p className="text-sm text-muted-foreground">or skip for AI-generated cover</p>
-                </div>
-              </button>
-            )}
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
-              <Sparkles className="w-4 h-4 text-primary shrink-0" />
-              <p className="text-xs text-muted-foreground">If you skip, we'll generate a beautiful cover image of {destination || "your destination"} using AI</p>
-            </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={startDate} onSelect={setStartDate} disabled={d => d < new Date()} className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
           </div>
-        )}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">End Date *</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className={cn("w-full justify-start h-12", !endDate && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {endDate ? format(endDate, "MMM dd") : "Pick"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar mode="single" selected={endDate} onSelect={setEndDate} disabled={d => d < (startDate || new Date())} className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
 
-        {step === 8 && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold">Plan visibility</h2>
-              <p className="text-muted-foreground mt-1">Who can see and join your plan?</p>
-            </div>
-            <div className="space-y-3">
-              {[
-                { value: "public", label: "Public Plan", icon: Eye, desc: "Visible to everyone in Explore. Anyone can request to join." },
-                { value: "private", label: "Private Plan", icon: EyeOff, desc: "Only visible to your travel companions. Only they can request to join." },
-              ].map(opt => (
+        {/* Group Size */}
+        <div className="space-y-3">
+          <Label className="text-sm font-semibold">Group Size: <span className="text-primary">{maxMembers}</span></Label>
+          <Slider value={[maxMembers]} onValueChange={v => setMaxMembers(v[0])} min={1} max={20} step={1} />
+          <div className="flex justify-between text-[10px] text-muted-foreground">
+            <span>1</span><span>20</span>
+          </div>
+        </div>
+
+        {/* Group Type */}
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">Group Type *</Label>
+          <div className="flex gap-2">
+            {[
+              { value: "everyone", label: "Everyone", icon: Users, enabled: true },
+              { value: "males_only", label: "Males Only", icon: Shield, enabled: canMale },
+              { value: "females_only", label: "Females Only", icon: Shield, enabled: canFemale },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => opt.enabled && setGroupType(opt.value)}
+                disabled={!opt.enabled}
+                className={cn(
+                  "flex-1 p-3 rounded-xl border-2 flex flex-col items-center gap-1.5 transition-all text-center",
+                  groupType === opt.value ? "border-primary bg-primary/10" : "border-border hover:border-primary/30",
+                  !opt.enabled && "opacity-40 cursor-not-allowed"
+                )}
+              >
+                <opt.icon className={cn("w-4 h-4", groupType === opt.value ? "text-primary" : "text-muted-foreground")} />
+                <span className="text-[10px] font-medium">{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Visibility */}
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">Visibility *</Label>
+          <div className="flex gap-2">
+            {[
+              { value: "public", label: "Public", icon: Eye, desc: "Visible to everyone" },
+              { value: "private", label: "Private", icon: EyeOff, desc: "Only companions" },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setVisibility(opt.value)}
+                className={cn(
+                  "flex-1 p-3 rounded-xl border-2 flex flex-col items-center gap-1.5 transition-all text-center",
+                  visibility === opt.value ? "border-primary bg-primary/10" : "border-border hover:border-primary/30",
+                )}
+              >
+                <opt.icon className={cn("w-4 h-4", visibility === opt.value ? "text-primary" : "text-muted-foreground")} />
+                <span className="text-xs font-medium">{opt.label}</span>
+                <span className="text-[10px] text-muted-foreground">{opt.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Interests / Badges */}
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">
+            Interests * <span className="text-muted-foreground font-normal">(select 3–5)</span>
+          </Label>
+          <div className="flex flex-wrap gap-2">
+            {INTERESTS.map(item => {
+              const selected = interests.includes(item.label);
+              return (
                 <button
-                  key={opt.value}
-                  onClick={() => setVisibility(opt.value)}
+                  key={item.label}
+                  onClick={() => toggleInterest(item.label)}
                   className={cn(
-                    "w-full p-4 rounded-2xl border-2 flex items-center gap-4 transition-all text-left",
-                    visibility === opt.value ? "border-primary bg-primary/10" : "border-border hover:border-primary/30",
+                    "flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 transition-all text-xs font-medium",
+                    selected ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/30",
                   )}
                 >
-                  <div className={cn("w-12 h-12 rounded-full flex items-center justify-center", visibility === opt.value ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                    <opt.icon className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold">{opt.label}</div>
-                    <div className="text-sm text-muted-foreground">{opt.desc}</div>
-                  </div>
-                  {visibility === opt.value && <Check className="w-5 h-5 text-primary" />}
+                  <item.icon className="w-3.5 h-3.5" />
+                  {item.label}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        )}
+          {interests.length > 0 && interests.length < 3 && (
+            <p className="text-[10px] text-destructive">Select at least {3 - interests.length} more</p>
+          )}
+        </div>
 
-        {step === 9 && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold">Select interests</h2>
-              <p className="text-muted-foreground mt-1">Choose up to 2 that best describe your plan</p>
+        {/* Description */}
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">Description <span className="text-muted-foreground font-normal">(optional)</span></Label>
+          <Textarea
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder="Describe your itinerary, travel style, and expectations..."
+            className="min-h-[100px]"
+            maxLength={1000}
+          />
+          <p className="text-[10px] text-muted-foreground text-right">{description.length}/1000</p>
+        </div>
+
+        {/* Cover Photo */}
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">Cover Photo <span className="text-muted-foreground font-normal">(optional)</span></Label>
+          <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleFileSelect} />
+          {coverPreview ? (
+            <div className="relative rounded-2xl overflow-hidden aspect-video">
+              <img src={coverPreview} alt="Cover" className="w-full h-full object-cover" />
+              <Button variant="secondary" size="sm" className="absolute bottom-2 right-2" onClick={() => { setCoverFile(null); setCoverPreview(null); }}>
+                Remove
+              </Button>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              {INTERESTS.map(item => {
-                const selected = interests.includes(item.label);
-                return (
-                  <button
-                    key={item.label}
-                    onClick={() => toggleInterest(item.label)}
-                    className={cn(
-                      "flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all",
-                      selected ? "border-primary bg-primary/10" : "border-border hover:border-primary/30",
-                    )}
-                  >
-                    <item.icon className={cn("w-6 h-6", selected ? "text-primary" : "text-muted-foreground")} />
-                    <span className={cn("text-xs font-medium text-center", selected ? "text-primary" : "text-muted-foreground")}>{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+          ) : (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full aspect-[3/1] rounded-2xl border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center gap-3 transition-colors bg-muted/30"
+            >
+              <Upload className="w-6 h-6 text-muted-foreground" />
+              <div className="text-left">
+                <p className="text-xs font-medium">Tap to upload</p>
+                <p className="text-[10px] text-muted-foreground">or skip for AI cover</p>
+              </div>
+            </button>
+          )}
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
+            <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+            <p className="text-[10px] text-muted-foreground">Skip to auto-generate a cover of {destination || "your destination"}</p>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Footer */}
-      <div className="px-6 pb-6 pt-3 border-t border-border">
-        {step < TOTAL_STEPS ? (
-          <Button
-            onClick={() => setStep(s => s + 1)}
-            disabled={!canProceed()}
-            className="w-full h-14 text-lg rounded-2xl bg-gradient-primary"
-          >
-            Continue
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-        ) : (
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="w-full h-14 text-lg rounded-2xl bg-gradient-primary"
-          >
-            {isSubmitting ? "Creating Plan..." : "Create Plan 🚀"}
-          </Button>
-        )}
+      <div className="px-5 pb-5 pt-3 border-t border-border">
+        <Button
+          onClick={handleSubmit}
+          disabled={!canSubmit || isSubmitting}
+          className="w-full h-14 text-lg rounded-2xl bg-gradient-primary"
+        >
+          {isSubmitting ? "Creating Plan..." : "Create Plan 🚀"}
+        </Button>
       </div>
     </div>
   );
