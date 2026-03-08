@@ -568,6 +568,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         open={interestsDialogOpen} 
         onOpenChange={setInterestsDialogOpen} 
         interests={userProfile?.interests || userData?.preferences || []}
+        avatarUrl={userProfile?.avatar_url}
         gender={userProfile?.gender || ''}
         age={userProfile?.age || null}
         about={userProfile?.bio || ""}
@@ -577,7 +578,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
           if (session?.user?.id) {
             const { data: profile } = await supabase
               .from('profiles')
-              .select('gender, age, bio, interests, display_name')
+              .select('gender, age, bio, interests, display_name, avatar_url')
               .eq('user_id', session.user.id)
               .single();
             if (profile) setUserProfile(profile);
