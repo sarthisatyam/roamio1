@@ -6,7 +6,7 @@ import HomePage from "./pages/HomePage";
 import BookingsPage from "./pages/BookingsPage";
 import CompanionPage from "./pages/CompanionPage";
 import JourneyPage from "./pages/JourneyPage";
-import ExplorePage from "./pages/ExplorePage";
+
 import PlanBuilder from "./PlanBuilder";
 import AccountPage from "./pages/AccountPage";
 import FloatingAIBot from "./FloatingAIBot";
