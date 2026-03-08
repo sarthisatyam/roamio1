@@ -208,14 +208,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       companions: likedCompanionProfiles
     },
     {
-      icon: Star,
-      title: "My Interests",
-      description: "Manage your travel preferences and interests",
-      color: "text-accent",
-      bgColor: "bg-accent/10",
-      action: () => setInterestsDialogOpen(true)
-    },
-    {
       icon: Bookmark,
       title: "Travel List",
       description: `${bookmarkedPlaces.length} saved destinations`,
