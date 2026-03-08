@@ -115,7 +115,7 @@ Make the content relevant to Indian solo women travelers with safety-focused rec
                           }
                         }
                       },
-                      required: ["id", "name", "image", "rating", "price", "safety", "tags", "itinerary", "eateries", "travelGuide"]
+                      required: ["id", "name", "image", "rating", "price", "safety", "tags", "recommendedDays", "itinerary", "eateries", "travelGuide"]
                     }
                   },
                   stays: {

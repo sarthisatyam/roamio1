@@ -356,7 +356,11 @@ const HomePage: React.FC<HomePageProps> = ({
                           }}
                         />
                         <p className="font-bold text-sm text-primary mt-1">{dest.price}</p>
-                      </div>
+                        {dest.recommendedDays && (
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            Best for {dest.recommendedDays} day{dest.recommendedDays > 1 ? "s" : ""} visit
+                          </p>
+                        )}
                     </div>
                   </Card>
                 ))}
