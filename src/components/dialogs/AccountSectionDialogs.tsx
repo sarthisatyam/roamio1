@@ -966,6 +966,29 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Avatar Upload */}
+          <div className="flex flex-col items-center gap-3">
+            <input type="file" accept="image/*" ref={avatarInputRef} className="hidden" onChange={handleAvatarSelect} />
+            <button
+              onClick={() => avatarInputRef.current?.click()}
+              className="relative group"
+              type="button"
+            >
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/30 bg-muted flex items-center justify-center">
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-2xl font-bold text-muted-foreground">
+                    {editName?.charAt(0)?.toUpperCase() || 'U'}
+                  </span>
+                )}
+              </div>
+              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Upload className="w-5 h-5 text-white" />
+              </div>
+            </button>
+            <p className="text-xs text-muted-foreground">Tap to change photo</p>
+          </div>
           <div className="space-y-1">
             <Label className="text-xs font-medium text-muted-foreground">Display Name</Label>
             <Input
