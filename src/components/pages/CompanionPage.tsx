@@ -383,7 +383,11 @@ const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({
             const liked = isLiked(companion.user_id);
 
             return (
-              <Card key={companion.id} className="p-3 rounded-2xl shadow-soft border-0 bg-card">
+              <Card 
+                key={companion.id} 
+                className="p-3 rounded-2xl shadow-soft border-0 bg-card cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => { setViewedCompanion(companion); setProfileViewOpen(true); }}
+              >
                 <div className="flex items-start gap-3">
                   <div className="relative">
                     <Avatar className="w-12 h-12">
