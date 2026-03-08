@@ -52,6 +52,11 @@ interface Eatery {
   specialty: string;
 }
 
+interface TravelTip {
+  tip: string;
+  category: 'general' | 'do' | 'dont';
+}
+
 interface Destination {
   id: number;
   name: string;
@@ -62,6 +67,7 @@ interface Destination {
   tags: string[];
   itinerary?: Itinerary[];
   eateries?: Eatery[];
+  travelGuide?: TravelTip[];
 }
 
 interface DestinationDialogProps {
