@@ -137,7 +137,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
           </TabsTrigger>
           <TabsTrigger value="groups" className="flex-1 rounded-lg text-xs gap-1.5 data-[state=active]:bg-background">
             <Users className="w-3.5 h-3.5" />
-            Groups
+            Community
           </TabsTrigger>
           <TabsTrigger value="trips" className="flex-1 rounded-lg text-xs gap-1.5 data-[state=active]:bg-background">
             <Mountain className="w-3.5 h-3.5" />
