@@ -975,7 +975,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
 };
 
 // ==================== TRIPS TAB ====================
-const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => void; searchQuery: string }> = ({ currentUserId, onNavigateToAccount, searchQuery }) => {
+const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => void; searchQuery: string; onCreatePlan?: () => void }> = ({ currentUserId, onNavigateToAccount, searchQuery, onCreatePlan }) => {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [joinMessage, setJoinMessage] = useState("");
   const [isJoining, setIsJoining] = useState(false);
