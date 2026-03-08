@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Users, Search, MapPin, Shield, CheckCircle, User, Compass,
-  Mountain, Plus, Loader2, Calendar, ArrowRight, Send, Clock,
+  Plus, Loader2, Calendar, ArrowRight, Send, Clock,
   MessageCircle, Eye, ChevronLeft, TrendingUp, UserCheck,
   Heart, Filter, X, RefreshCw,
 } from "lucide-react";
