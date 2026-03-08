@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -13,22 +15,22 @@ serve(async (req) => {
 
   try {
     const { destination_name, plan_id } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error("Supabase config missing");
 
-    // Generate image using AI
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Generate image using Gemini image model
+    const response = await fetch(GEMINI_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${GEMINI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "gemini-2.0-flash-exp-image-generation",
         messages: [
           {
             role: "user",
@@ -41,8 +43,8 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI image generation error:", response.status, errorText);
-      throw new Error(`AI image generation failed: ${response.status}`);
+      console.error("Gemini image generation error:", response.status, errorText);
+      throw new Error(`Image generation failed: ${response.status}`);
     }
 
     const data = await response.json();
@@ -52,7 +54,6 @@ serve(async (req) => {
       throw new Error("No image generated");
     }
 
-    // Extract base64 data and upload to storage
     const base64Data = imageData.replace(/^data:image\/\w+;base64,/, "");
     const imageBytes = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
 
@@ -72,7 +73,6 @@ serve(async (req) => {
       .from("trip-covers")
       .getPublicUrl(fileName);
 
-    // Update plan with cover image if plan_id provided
     if (plan_id) {
       await supabase
         .from("plans")

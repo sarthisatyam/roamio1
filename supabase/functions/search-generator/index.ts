@@ -5,6 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -12,10 +14,10 @@ serve(async (req) => {
 
   try {
     const { query, pageContext } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not configured");
     }
 
     console.log(`Generating search results for query: "${query}" on page: ${pageContext}`);
@@ -31,14 +33,14 @@ Generate the following in JSON format:
 
 Make the content relevant to Indian solo women travelers with safety-focused recommendations.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(GEMINI_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${GEMINI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Generate travel options for: "${query}"` }
@@ -63,8 +65,8 @@ Make the content relevant to Indian solo women travelers with safety-focused rec
                         rating: { type: "number" },
                         price: { type: "string", description: "Price per day like ₹1,500/day" },
                         safety: { type: "number", description: "Safety score 85-99" },
-                        tags: { type: "array", items: { type: "string" }, description: "At least 3 relevant tags like 'Heritage', 'Beach', 'Hill Station', 'Adventure', 'Spiritual', 'Nightlife', 'Nature', 'Culture'" },
-                        recommendedDays: { type: "number", description: "Recommended number of days to visit this destination based on typical tourist stays (e.g. 2, 3, 5)" },
+                        tags: { type: "array", items: { type: "string" }, description: "At least 3 relevant tags" },
+                        recommendedDays: { type: "number", description: "Recommended number of days to visit" },
                         itinerary: {
                           type: "array",
                           items: {
@@ -181,7 +183,7 @@ Make the content relevant to Indian solo women travelers with safety-focused rec
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
@@ -189,20 +191,13 @@ Make the content relevant to Indian solo women travelers with safety-focused rec
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required. Please add credits." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       
-      throw new Error(`AI gateway error: ${response.status}`);
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
     const data = await response.json();
     console.log("AI response received:", JSON.stringify(data).substring(0, 500));
 
-    // Extract the tool call result
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (toolCall?.function?.arguments) {
       const results = JSON.parse(toolCall.function.arguments);

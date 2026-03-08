@@ -5,6 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -12,10 +14,10 @@ serve(async (req) => {
 
   try {
     const { location, latitude, longitude, query } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not configured");
     }
 
     const locationContext = latitude && longitude
@@ -42,18 +44,18 @@ Return a JSON object with two keys:
    - mapLink: Google Maps search link (https://www.google.com/maps/search/HOTEL+NAME+CITY)
    - amenities: Array of 3-5 key amenities
    - description: One-line description (under 20 words)
-   - landmarkDistances: An object where keys are the landmark names (matching the landmarks array) and values are realistic distances in km as numbers (e.g. {"Charminar": 2.5, "Golconda Fort": 8.1, "Hussain Sagar Lake": 3.2}). These must be realistic approximate road distances from the hotel to each landmark.
+   - landmarkDistances: An object where keys are the landmark names and values are realistic distances in km as numbers.
 
-IMPORTANT: Use real hotel names that exist in the area. Provide realistic prices for the Indian market. The landmark distances must be realistic — use actual approximate distances. Sort by distance from user.`;
+IMPORTANT: Use real hotel names that exist in the area. Provide realistic prices for the Indian market. Sort by distance from user.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(GEMINI_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${GEMINI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gemini-2.5-flash",
         messages: [
           {
             role: "system",
@@ -71,14 +73,8 @@ IMPORTANT: Use real hotel names that exist in the area. Provide realistic prices
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required. Please add credits." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
       throw new Error("AI service error");
     }
 
@@ -90,7 +86,6 @@ IMPORTANT: Use real hotel names that exist in the area. Provide realistic prices
       const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       const parsed = JSON.parse(cleaned);
       if (Array.isArray(parsed)) {
-        // Fallback: if AI returned just an array of hotels
         result = { landmarks: [], hotels: parsed };
       } else {
         result = parsed;
