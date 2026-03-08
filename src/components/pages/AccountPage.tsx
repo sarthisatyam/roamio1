@@ -105,7 +105,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     getSession();
   }, []);
 
-  const { myTrips, fetchMyTrips, handleRequest, getPendingRequests } = useTrips(currentUserId);
+  const { myPlans, fetchMyPlans, handleJoinRequest, getPendingRequests } = usePlans(currentUserId);
 
   const GROUP_TYPES = [
     { value: "women-only", label: "Women Only" },
