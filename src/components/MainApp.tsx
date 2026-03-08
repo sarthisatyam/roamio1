@@ -33,6 +33,15 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [currentCity, setCurrentCity] = useState<string | null>(() => {
     return localStorage.getItem('currentCity');
   });
+  
+  const [userLat, setUserLat] = useState<number | null>(() => {
+    const saved = localStorage.getItem('userLat');
+    return saved ? parseFloat(saved) : null;
+  });
+  const [userLng, setUserLng] = useState<number | null>(() => {
+    const saved = localStorage.getItem('userLng');
+    return saved ? parseFloat(saved) : null;
+  });
 
   const handleLocationToggle = async (enabled: boolean) => {
     if (enabled) {
@@ -43,9 +52,14 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
             setLocationEnabled(true);
             localStorage.setItem('locationEnabled', 'true');
             
+            const { latitude, longitude } = position.coords;
+            setUserLat(latitude);
+            setUserLng(longitude);
+            localStorage.setItem('userLat', latitude.toString());
+            localStorage.setItem('userLng', longitude.toString());
+            
             // Reverse geocode to get city name
             try {
-              const { latitude, longitude } = position.coords;
               const response = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
               );
@@ -168,7 +182,7 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
       </nav>
 
       {/* Floating AI Bot */}
-      <FloatingAIBot />
+      <FloatingAIBot currentCity={currentCity} locationEnabled={locationEnabled} latitude={userLat} longitude={userLng} />
 
       {/* Legal & Contact Dialogs */}
       <PrivacyPolicyDialog open={privacyOpen} onOpenChange={setPrivacyOpen} />
