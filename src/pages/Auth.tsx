@@ -307,8 +307,7 @@ const Auth = () => {
                   "Create Account"
                 )}
               </Button>
-            </form>
-          </Tabs>
+          </form>
 
           <div className="text-center">
             <button
