@@ -80,7 +80,7 @@ const HomePage: React.FC<HomePageProps> = ({
   const [popularDestinations, setPopularDestinations] = useState<AIDestination[]>([]);
   const [popularLoading, setPopularLoading] = useState(true);
 
-  // Explore plans state
+  // Explore trips state
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [joinMessage, setJoinMessage] = useState("");

@@ -426,8 +426,8 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
             {myPlans.length === 0 ? (
               <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
                 <Calendar className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                <h3 className="font-semibold text-sm">No plans yet</h3>
-                <p className="text-xs text-muted-foreground mt-1">Create or join a plan from the Companion page</p>
+                <h3 className="font-semibold text-sm">No trips yet</h3>
+                <p className="text-xs text-muted-foreground mt-1">Create or join a trip from the Companion page</p>
               </Card>
             ) : (
               myPlans.map(plan => {

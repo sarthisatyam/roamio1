@@ -99,7 +99,7 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
         ) : plans.length === 0 ? (
           <div className="text-center py-20">
             <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-lg font-medium">No plans yet</p>
+            <p className="text-lg font-medium">No trips yet</p>
             <p className="text-sm text-muted-foreground">Be the first to create a trip!</p>
           </div>
         ) : (
