@@ -28,6 +28,9 @@ import {
   Clock,
   TrendingUp,
   UserCheck,
+  UserMinus,
+  DoorOpen,
+  Trash2,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { 
