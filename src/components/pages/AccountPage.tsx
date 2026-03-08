@@ -40,7 +40,7 @@ import {
   TravelListDialog
 } from "@/components/dialogs/AccountSectionDialogs";
 import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
-import { PrivacyPolicyDialog, TermsOfServiceDialog, ContactDialog } from "@/components/dialogs/LegalContactDialogs";
+import { HelpLegalDialog } from "@/components/dialogs/LegalContactDialogs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useTrips, Trip, TripRequest } from "@/hooks/useTrips";
