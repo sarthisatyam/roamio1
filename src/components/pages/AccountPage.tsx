@@ -107,22 +107,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
 
   const { myPlans, fetchMyPlans, handleJoinRequest, getPendingRequests } = usePlans(currentUserId);
 
-  const GROUP_TYPES = [
-    { value: "women-only", label: "Women Only" },
-    { value: "mixed", label: "Mixed" },
-    { value: "family", label: "Family" },
-  ];
-  const TRIP_TYPES = [
-    { value: "darshan", label: "Darshan" },
-    { value: "trek", label: "Trek" },
-    { value: "relaxed", label: "Relaxed" },
-    { value: "adventure", label: "Adventure" },
-    { value: "spiritual", label: "Spiritual" },
-  ];
-
-  const getGroupTypeLabel = (type: string) => GROUP_TYPES.find(g => g.value === type)?.label || type;
-  const getTripTypeLabel = (type: string) => TRIP_TYPES.find(t => t.value === type)?.label || type;
-
+  const getGroupBadge = (type: string) => {
+    if (type === "females_only") return { label: "Females Only", color: "bg-pink-500/10 text-pink-600" };
+    if (type === "males_only") return { label: "Males Only", color: "bg-blue-500/10 text-blue-600" };
+    return { label: "Everyone", color: "bg-green-500/10 text-green-600" };
+  };
   const openManageRequests = async (trip: Trip) => {
     setManagingTrip(trip);
     setLoadingRequests(true);
