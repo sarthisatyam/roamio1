@@ -166,15 +166,15 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
         </TabsList>
 
         <TabsContent value="discover" className="flex-1 overflow-y-auto mt-0 pb-24">
-          <DiscoverTab currentUserId={currentUserId} />
+          <DiscoverTab currentUserId={currentUserId} searchQuery={searchQuery} />
         </TabsContent>
 
         <TabsContent value="groups" className="flex-1 overflow-y-auto mt-0 pb-24">
-          <GroupsTab currentUserId={currentUserId} />
+          <GroupsTab currentUserId={currentUserId} searchQuery={searchQuery} />
         </TabsContent>
 
         <TabsContent value="trips" className="flex-1 overflow-y-auto mt-0 pb-24">
-          <TripsTab currentUserId={currentUserId} onNavigateToAccount={onNavigateToAccount} />
+          <TripsTab currentUserId={currentUserId} onNavigateToAccount={onNavigateToAccount} searchQuery={searchQuery} />
         </TabsContent>
       </Tabs>
     </div>
