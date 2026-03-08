@@ -133,7 +133,9 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [aiSearchDone, setAiSearchDone] = useState(false);
 
-  const [selectedStay, setSelectedStay] = useState<number | null>(null);
+  const [selectedStay, setSelectedStay] = useState<string | null>(null);
+  const [aiComparisons, setAiComparisons] = useState<Record<string, any[]>>({});
+  const [loadingCompareId, setLoadingCompareId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Stable distance map per hotel
