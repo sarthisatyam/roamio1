@@ -150,7 +150,7 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   };
 
   if (showAccount) {
-    return <AccountPage userData={mergedUserData} onNavigateBack={handleNavigateBack} onLogout={handleLogout} likedCompanions={likedCompanions} bookmarkedPlaces={bookmarkedPlaces} onLocationToggle={handleLocationToggle} />;
+    return <AccountPage userData={mergedUserData} onNavigateBack={handleNavigateBack} onLogout={handleLogout} likedCompanions={likedCompanions} bookmarkedPlaces={bookmarkedPlaces} onLocationToggle={handleLocationToggle} currentCity={currentCity} />;
   }
 
   if (showPlanBuilder && currentUserId) {
