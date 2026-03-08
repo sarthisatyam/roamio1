@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, Calendar, Users, Map, Compass, Plus } from "lucide-react";
+import { Home, Calendar, Users, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HomePage from "./pages/HomePage";
 import BookingsPage from "./pages/BookingsPage";
 import CompanionPage from "./pages/CompanionPage";
 import JourneyPage from "./pages/JourneyPage";
-import ExplorePage from "./pages/ExplorePage";
+
 import PlanBuilder from "./PlanBuilder";
 import AccountPage from "./pages/AccountPage";
 import FloatingAIBot from "./FloatingAIBot";
@@ -130,10 +130,9 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
 
   const tabs = [
     { id: 0, name: "Home", icon: Home },
-    { id: 1, name: "Explore", icon: Compass },
-    { id: 2, name: "Bookings", icon: Calendar },
-    { id: 3, name: "Companion", icon: Users },
-    { id: 4, name: "Journey", icon: Map },
+    { id: 1, name: "Bookings", icon: Calendar },
+    { id: 2, name: "Companion", icon: Users },
+    { id: 3, name: "Journey", icon: Map },
   ];
 
   const handleNavigateToAccount = () => {
@@ -159,7 +158,7 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
       <PlanBuilder
         currentUserId={currentUserId}
         userGender={userGender}
-        onComplete={() => { setShowPlanBuilder(false); setActiveTab(1); }}
+        onComplete={() => { setShowPlanBuilder(false); setActiveTab(0); }}
         onClose={() => setShowPlanBuilder(false)}
       />
     );
@@ -169,15 +168,10 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
     <div className="h-screen flex flex-col bg-background">
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} />}
-        {activeTab === 1 && (
-          <div className="h-full relative">
-            <ExplorePage onNavigateToAccount={handleNavigateToAccount} onCreatePlan={() => setShowPlanBuilder(true)} />
-          </div>
-        )}
-        {activeTab === 2 && <BookingsPage />}
-        {activeTab === 3 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
-        {activeTab === 4 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
+        {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} onCreatePlan={() => setShowPlanBuilder(true)} />}
+        {activeTab === 1 && <BookingsPage />}
+        {activeTab === 2 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
+        {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
 
       {/* Footer Links */}
