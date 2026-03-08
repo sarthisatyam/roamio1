@@ -154,61 +154,6 @@ const Auth = () => {
               description: "Welcome to Roamio! You can now start exploring.",
             });
           }
-        }
-      } else {
-        // Phone auth
-        if (isLogin) {
-          const { error } = await supabase.auth.signInWithPassword({
-            phone,
-            password,
-          });
-
-          if (error) {
-            toast({
-              title: "Login failed",
-              description: error.message.includes("Invalid login credentials")
-                ? "Invalid phone number or password. Please try again."
-                : error.message,
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Welcome back!",
-              description: "You've successfully logged in.",
-            });
-          }
-        } else {
-          const { error } = await supabase.auth.signUp({
-            phone,
-            password,
-            options: {
-              data: {
-                display_name: displayName,
-              },
-            },
-          });
-
-          if (error) {
-            if (error.message.includes("User already registered")) {
-              toast({
-                title: "Account exists",
-                description: "An account with this phone number already exists. Please login instead.",
-                variant: "destructive",
-              });
-            } else {
-              toast({
-                title: "Signup failed",
-                description: error.message,
-                variant: "destructive",
-              });
-            }
-          } else {
-            toast({
-              title: "Account created!",
-              description: "Welcome to Roamio! You can now start exploring.",
-            });
-          }
-        }
       }
     } catch (error) {
       toast({
