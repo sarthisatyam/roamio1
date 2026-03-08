@@ -329,26 +329,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
-        {/* User Info Card */}
+        {/* Quick Settings Card */}
         <Card className="mb-4 shadow-soft rounded-2xl border-0">
-          <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <User className="w-4 h-4 text-primary" />
-              Personal Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 pt-0 space-y-3">
+          <CardContent className="p-3 space-y-3">
             <div className="flex items-center gap-3">
-              {userData?.emailOrPhone?.includes('@') ? (
-                <Mail className="w-4 h-4 text-muted-foreground" />
-              ) : (
-                <Phone className="w-4 h-4 text-muted-foreground" />
-              )}
-              <span className="text-xs">{userData?.emailOrPhone || 'Not provided'}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Globe className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs">{userData?.language || 'Not specified'}</span>
+              <User className="w-4 h-4 text-muted-foreground" />
+              <span className="text-xs font-medium">{userData?.name || 'User'}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -362,18 +348,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
                 onCheckedChange={(checked) => onLocationToggle?.(checked)}
               />
             </div>
-            {userData?.preferences && userData.preferences.length > 0 && (
-              <div className="flex items-start gap-3">
-                <Heart className="w-4 h-4 text-muted-foreground mt-0.5" />
-                <div className="flex flex-wrap gap-1">
-                  {userData.preferences.map((pref) => (
-                    <Badge key={pref} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">
-                      {pref}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
 
