@@ -254,36 +254,39 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
     return <span className="text-lg">📦</span>;
   };
 
-  const stayComparisons: Record<number, Record<string, any>> = {
-    1: {
-      makemytrip: { price: "₹750/night", savings: "₹50" },
-      goibibo: { price: "₹780/night", savings: "₹20" },
-      agoda: { price: "₹800/night", savings: "₹0" },
-    },
-    2: {
-      makemytrip: { price: "₹1,100/night", savings: "₹100" },
-      goibibo: { price: "₹1,180/night", savings: "₹20" },
-      agoda: { price: "₹1,200/night", savings: "₹0" },
-    },
-    3: {
-      makemytrip: { price: "₹2,300/night", savings: "₹200" },
-      goibibo: { price: "₹2,400/night", savings: "₹100" },
-      agoda: { price: "₹2,500/night", savings: "₹0" },
-    },
+  const handleCompare = async (id: string, hotelName: string, location: string, stars: number, basePrice?: number) => {
+    if (selectedStay === id) {
+      setSelectedStay(null);
+      return;
+    }
+    setSelectedStay(id);
+    if (aiComparisons[id]) return; // cached
+
+    setLoadingCompareId(id);
+    try {
+      const { data, error } = await supabase.functions.invoke('compare-prices', {
+        body: { hotelName, location: location || effectiveLocation, stars, basePrice }
+      });
+      if (!error && data?.platforms) {
+        setAiComparisons(prev => ({ ...prev, [id]: data.platforms }));
+      }
+    } catch (e) {
+      console.error("Compare prices error:", e);
+    } finally {
+      setLoadingCompareId(null);
+    }
   };
 
-  const getBestPrice = (comparison: Record<string, any>) => {
+  const getBestFromPlatforms = (platforms: any[]) => {
     let minPrice = Infinity;
-    let bestPlatform = "";
-    Object.entries(comparison).forEach(([platform, data]) => {
-      if (platform === "features") return;
-      const priceNum = parseInt((data as any).price?.replace(/[₹,]/g, "") || "0");
-      if (priceNum < minPrice) {
-        minPrice = priceNum;
-        bestPlatform = platform;
+    let bestName = "";
+    platforms.forEach(p => {
+      if (p.priceNum < minPrice) {
+        minPrice = p.priceNum;
+        bestName = p.name;
       }
     });
-    return { minPrice, bestPlatform };
+    return { minPrice, bestName };
   };
 
   const { results: aiResults, isLoading: aiLoading, error: aiError } = useAISearch(searchQuery, { pageContext: "bookings" });
