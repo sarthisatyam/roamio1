@@ -127,6 +127,11 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
                           <MapPin className="w-3 h-3" /> {poll.location}
                         </div>
                       )}
+                      {poll.time && (
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
+                          <Clock className="w-3 h-3" /> {poll.time}
+                        </div>
+                      )}
                       <p className="text-[10px] text-muted-foreground mt-0.5">
                         Proposed by <span className="font-medium text-foreground">{poll.proposedBy}</span>
                       </p>
