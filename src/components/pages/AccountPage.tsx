@@ -90,6 +90,10 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [managingPlan, setManagingPlan] = useState<Plan | null>(null);
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [planMembers, setPlanMembers] = useState<any[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+  const [membersPlan, setMembersPlan] = useState<Plan | null>(null);
 
   useEffect(() => {
     const getSession = async () => {
