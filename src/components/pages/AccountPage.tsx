@@ -28,6 +28,9 @@ import {
   Clock,
   TrendingUp,
   UserCheck,
+  UserMinus,
+  DoorOpen,
+  Trash2,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { 
@@ -87,6 +90,10 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [managingPlan, setManagingPlan] = useState<Plan | null>(null);
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [planMembers, setPlanMembers] = useState<any[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+  const [membersPlan, setMembersPlan] = useState<Plan | null>(null);
 
   useEffect(() => {
     const getSession = async () => {
@@ -106,7 +113,42 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     getSession();
   }, []);
 
-  const { myPlans, fetchMyPlans, handleJoinRequest, getPendingRequests } = usePlans(currentUserId);
+  const { myPlans, fetchMyPlans, handleJoinRequest, getPendingRequests, leavePlan, removeMember, getPlanMembers } = usePlans(currentUserId);
+
+  const openManageMembers = async (plan: Plan) => {
+    setMembersPlan(plan);
+    setLoadingMembers(true);
+    setMembersDialogOpen(true);
+    try {
+      const members = await getPlanMembers(plan.id);
+      setPlanMembers(members);
+    } catch {
+      toast.error("Failed to load members");
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  const handleRemoveMember = async (planId: string, userId: string) => {
+    try {
+      await removeMember(planId, userId);
+      setPlanMembers(prev => prev.filter(m => m.user_id !== userId));
+      toast.success("Member removed from trip and group");
+      await fetchMyPlans();
+    } catch {
+      toast.error("Failed to remove member");
+    }
+  };
+
+  const handleLeavePlan = async (planId: string) => {
+    try {
+      await leavePlan(planId);
+      toast.success("You left the trip");
+      await fetchMyPlans();
+    } catch {
+      toast.error("Failed to leave trip");
+    }
+  };
 
   const getGroupBadge = (type: string) => {
     if (type === "females_only") return { label: "Females Only", color: "bg-pink-500/10 text-pink-600" };
@@ -467,7 +509,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
                         </p>
                         <div className="flex gap-1">
                           <Badge className={cn("text-[10px] rounded-lg border-0", groupBadge.color)}>{groupBadge.label}</Badge>
-                          {plan.is_owner && <Badge className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">Owner</Badge>}
+                          {plan.is_owner && <Badge className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">Admin</Badge>}
                           {isPending && <Badge className="text-[10px] rounded-lg bg-warning/10 text-warning border-0">Pending</Badge>}
                           {isRejected && <Badge variant="destructive" className="text-[10px] rounded-lg">Rejected</Badge>}
                           {isMember && !plan.is_owner && <Badge className="text-[10px] rounded-lg bg-success/10 text-success border-0">Joined</Badge>}
@@ -484,8 +526,17 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
                       </div>
 
                       {isMember && plan.is_owner ? (
-                        <Button size="sm" variant="outline" className="w-full rounded-xl text-xs h-9" onClick={() => openManageRequests(plan)}>
-                          <Eye className="w-3.5 h-3.5 mr-1.5" /> Manage Requests
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-9" onClick={() => openManageRequests(plan)}>
+                            <Eye className="w-3.5 h-3.5 mr-1.5" /> Requests
+                          </Button>
+                          <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-9" onClick={() => openManageMembers(plan)}>
+                            <Users className="w-3.5 h-3.5 mr-1.5" /> Members
+                          </Button>
+                        </div>
+                      ) : isMember && !plan.is_owner ? (
+                        <Button size="sm" variant="outline" className="w-full rounded-xl text-xs h-9 text-destructive hover:bg-destructive/10" onClick={() => handleLeavePlan(plan.id)}>
+                          <DoorOpen className="w-3.5 h-3.5 mr-1.5" /> Leave Trip
                         </Button>
                       ) : isPending ? (
                         <div className="flex items-center gap-2 text-xs text-warning bg-warning/5 rounded-xl px-3 py-2">
@@ -534,7 +585,51 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         </DialogContent>
       </Dialog>
 
-      <MyCoCompanionDialog open={coCompanionDialogOpen} onOpenChange={setCoCompanionDialogOpen} companions={likedCompanionProfiles} />
+      {/* Manage Members Dialog */}
+      <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
+        <DialogContent className="max-w-md rounded-2xl max-h-[70vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Trip Members — {membersPlan?.plan_name}</DialogTitle>
+          </DialogHeader>
+          {loadingMembers ? (
+            <p className="text-center text-sm text-muted-foreground py-4">Loading...</p>
+          ) : planMembers.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-4">No members yet</p>
+          ) : (
+            <div className="space-y-3">
+              {planMembers.map(member => (
+                <Card key={member.user_id} className="p-3 rounded-2xl border-0 shadow-soft">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="w-8 h-8">
+                        {member.avatar_url && <AvatarImage src={member.avatar_url} />}
+                        <AvatarFallback className="text-xs">{(member.display_name || "T").charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-sm">{member.display_name}</p>
+                        <Badge className={cn("text-[9px] rounded-lg border-0", member.role === "owner" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+                          {member.role === "owner" ? "Admin" : "Member"}
+                        </Badge>
+                      </div>
+                    </div>
+                    {member.role !== "owner" && membersPlan && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-destructive hover:bg-destructive/10 rounded-xl text-xs h-8 px-2"
+                        onClick={() => handleRemoveMember(membersPlan.id, member.user_id)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Remove
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <MyInterestsDialog 
         open={interestsDialogOpen} 
         onOpenChange={setInterestsDialogOpen} 

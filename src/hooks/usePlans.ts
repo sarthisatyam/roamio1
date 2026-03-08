@@ -361,6 +361,50 @@ export const usePlans = (currentUserId: string | null) => {
     };
   }, [currentUserId, fetchPlans, fetchMyPlans]);
 
+  const leavePlan = async (planId: string) => {
+    if (!currentUserId) throw new Error("Not authenticated");
+
+    // Use the SECURITY DEFINER function to remove from both plan and group
+    const { error } = await supabase.rpc("remove_plan_member", { p_plan_id: planId, p_user_id: currentUserId });
+    if (error) throw error;
+
+    await Promise.all([fetchPlans(), fetchMyPlans()]);
+  };
+
+  const removeMember = async (planId: string, userId: string) => {
+    if (!currentUserId) throw new Error("Not authenticated");
+
+    const { error } = await supabase.rpc("remove_plan_member", { p_plan_id: planId, p_user_id: userId });
+    if (error) throw error;
+
+    await Promise.all([fetchPlans(), fetchMyPlans()]);
+  };
+
+  const getPlanMembers = async (planId: string) => {
+    const { data: members, error } = await supabase
+      .from("plan_members")
+      .select("user_id, role, joined_at")
+      .eq("plan_id", planId);
+
+    if (error) throw error;
+
+    const userIds = (members || []).map((m: any) => m.user_id);
+    if (userIds.length === 0) return [];
+
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, display_name, avatar_url")
+      .in("user_id", userIds);
+
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+
+    return (members || []).map((m: any) => ({
+      ...m,
+      display_name: profileMap.get(m.user_id)?.display_name || "Traveler",
+      avatar_url: profileMap.get(m.user_id)?.avatar_url || null,
+    }));
+  };
+
   return {
     plans,
     myPlans,
@@ -371,5 +415,8 @@ export const usePlans = (currentUserId: string | null) => {
     requestToJoin,
     handleJoinRequest,
     getPendingRequests,
+    leavePlan,
+    removeMember,
+    getPlanMembers,
   };
 };
