@@ -55,13 +55,20 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
             // Reverse geocode to get city name
             try {
               const { latitude, longitude } = position.coords;
-              const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
-              );
-              const data = await response.json();
-              const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state_district || data.address?.county || data.address?.state || 'Unknown';
-              setCurrentCity(city);
-              localStorage.setItem('currentCity', city);
+              setUserLat(latitude);
+              setUserLng(longitude);
+              localStorage.setItem('userLat', latitude.toString());
+              localStorage.setItem('userLng', longitude.toString());
+              
+              // Reverse geocode to get city name
+              try {
+                const response = await fetch(
+                  `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+                );
+                const data = await response.json();
+                const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state_district || data.address?.county || data.address?.state || 'Unknown';
+                setCurrentCity(city);
+                localStorage.setItem('currentCity', city);
             } catch {
               setCurrentCity('Unknown');
             }
