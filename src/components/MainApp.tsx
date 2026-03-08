@@ -130,8 +130,8 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
 
   const tabs = [
     { id: 0, name: "Home", icon: Home },
-    { id: 1, name: "Bookings", icon: Calendar },
-    { id: 2, name: "Companion", icon: Users },
+    { id: 1, name: "Companion", icon: Users },
+    { id: 2, name: "Bookings", icon: Calendar },
     { id: 3, name: "Journey", icon: Map },
   ];
 
@@ -169,8 +169,8 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} onCreatePlan={() => setShowPlanBuilder(true)} />}
-        {activeTab === 1 && <BookingsPage />}
-        {activeTab === 2 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
+        {activeTab === 1 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
+        {activeTab === 2 && <BookingsPage />}
         {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
 
