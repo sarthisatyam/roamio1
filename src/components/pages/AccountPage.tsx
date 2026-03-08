@@ -60,6 +60,13 @@ interface AccountPageProps {
 
 const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [], onLocationToggle, currentCity }) => {
   const accountType = "Free";
+  const [userProfile, setUserProfile] = useState<{
+    gender?: string | null;
+    age?: number | null;
+    bio?: string | null;
+    interests?: string[] | null;
+    display_name?: string | null;
+  } | null>(null);
   
   // Dialog states
   const [emergencyDialogOpen, setEmergencyDialogOpen] = useState(false);
