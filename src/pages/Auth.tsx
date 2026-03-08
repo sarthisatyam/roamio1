@@ -237,76 +237,40 @@ const Auth = () => {
             </div>
           </div>
 
-          {/* Auth Method Tabs */}
-          <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as "email" | "phone")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="email" className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
+          <form onSubmit={handleAuth} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="displayName" className="text-foreground">
+                  Display Name
+                </Label>
+                <Input
+                  id="displayName"
+                  type="text"
+                  placeholder="Your name"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="bg-background border-border focus:border-primary"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-foreground">
                 Email
-              </TabsTrigger>
-              <TabsTrigger value="phone" className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                Phone
-              </TabsTrigger>
-            </TabsList>
-
-            <form onSubmit={handleAuth} className="space-y-4">
-              {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="displayName" className="text-foreground">
-                    Display Name
-                  </Label>
-                  <Input
-                    id="displayName"
-                    type="text"
-                    placeholder="Your name"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    className="bg-background border-border focus:border-primary"
-                  />
-                </div>
-              )}
-
-              <TabsContent value="email" className="mt-0 space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setErrors((prev) => ({ ...prev, email: undefined }));
-                    }}
-                    className={`bg-background border-border focus:border-primary ${errors.email ? "border-destructive" : ""}`}
-                  />
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="phone" className="mt-0 space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-foreground">
-                    Phone Number
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+1234567890"
-                    value={phone}
-                    onChange={(e) => {
-                      setPhone(e.target.value);
-                      setErrors((prev) => ({ ...prev, phone: undefined }));
-                    }}
-                    className={`bg-background border-border focus:border-primary ${errors.phone ? "border-destructive" : ""}`}
-                  />
-                  {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-                  <p className="text-xs text-muted-foreground">Include country code (e.g., +1 for US)</p>
-                </div>
-              </TabsContent>
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setErrors((prev) => ({ ...prev, email: undefined }));
+                }}
+                className={`bg-background border-border focus:border-primary ${errors.email ? "border-destructive" : ""}`}
+              />
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+            </div>
 
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-foreground">
