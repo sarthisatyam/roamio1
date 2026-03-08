@@ -71,12 +71,15 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
     return saved ? parseFloat(saved) : null;
   });
 
+  const [locationLoading, setLocationLoading] = useState(false);
+
   const handleLocationToggle = async (enabled: boolean) => {
-    if (enabled) {
-      try {
+    if (locationLoading) return;
+    setLocationLoading(true);
+    try {
+      if (enabled) {
         const isNative = Capacitor.isNativePlatform();
 
-        // Request permission - use Capacitor on native, browser API on web
         if (isNative) {
           const permStatus = await Geolocation.requestPermissions();
           if (permStatus.location === 'denied') {
@@ -88,7 +91,6 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
           }
         }
 
-        // Get position
         let latitude: number;
         let longitude: number;
 
@@ -100,7 +102,6 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
           latitude = position.coords.latitude;
           longitude = position.coords.longitude;
         } else {
-          // Fallback to browser geolocation API on web
           const position = await new Promise<GeolocationPosition>((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, {
               enableHighAccuracy: true,
@@ -118,7 +119,6 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
         localStorage.setItem('userLat', latitude.toString());
         localStorage.setItem('userLng', longitude.toString());
 
-        // Reverse geocode to get city name
         try {
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
@@ -130,18 +130,20 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
         } catch {
           setCurrentCity('Unknown');
         }
-      } catch (err) {
-        console.error("Geolocation error:", err);
+      } else {
         setLocationEnabled(false);
         localStorage.setItem('locationEnabled', 'false');
         setCurrentCity(null);
         localStorage.removeItem('currentCity');
       }
-    } else {
+    } catch (err) {
+      console.error("Geolocation error:", err);
       setLocationEnabled(false);
       localStorage.setItem('locationEnabled', 'false');
       setCurrentCity(null);
       localStorage.removeItem('currentCity');
+    } finally {
+      setLocationLoading(false);
     }
   };
 
