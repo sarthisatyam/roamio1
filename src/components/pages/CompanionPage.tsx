@@ -71,6 +71,7 @@ const INTEREST_LIST = [
 const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, userCity }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("discover");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Auth
   useEffect(() => {
@@ -134,6 +135,19 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
         </div>
       </div>
 
+      {/* Common Search Bar */}
+      <div className="px-4 pt-2 pb-1">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search companions, groups, or destinations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 text-xs bg-card border shadow-soft h-10 rounded-xl"
+          />
+        </div>
+      </div>
+
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
         <TabsList className="mx-4 mt-2 mb-0 h-10 bg-muted rounded-xl p-1">
@@ -152,15 +166,15 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
         </TabsList>
 
         <TabsContent value="discover" className="flex-1 overflow-y-auto mt-0 pb-24">
-          <DiscoverTab currentUserId={currentUserId} />
+          <DiscoverTab currentUserId={currentUserId} searchQuery={searchQuery} />
         </TabsContent>
 
         <TabsContent value="groups" className="flex-1 overflow-y-auto mt-0 pb-24">
-          <GroupsTab currentUserId={currentUserId} />
+          <GroupsTab currentUserId={currentUserId} searchQuery={searchQuery} />
         </TabsContent>
 
         <TabsContent value="trips" className="flex-1 overflow-y-auto mt-0 pb-24">
-          <TripsTab currentUserId={currentUserId} onNavigateToAccount={onNavigateToAccount} />
+          <TripsTab currentUserId={currentUserId} onNavigateToAccount={onNavigateToAccount} searchQuery={searchQuery} />
         </TabsContent>
       </Tabs>
     </div>
@@ -168,8 +182,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
 };
 
 // ==================== DISCOVER TAB ====================
-const DiscoverTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ currentUserId, searchQuery }) => {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [genderFilter, setGenderFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -262,16 +275,6 @@ const DiscoverTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => 
 
   return (
     <div className="px-4 pt-3 space-y-3">
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Search by name, bio, or interests..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 text-xs bg-card border shadow-soft h-10 rounded-xl"
-        />
-      </div>
 
       {/* Filter bar */}
       <div className="flex items-center gap-2 flex-wrap">
@@ -582,7 +585,7 @@ const DiscoverTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => 
 };
 
 // ==================== GROUPS TAB ====================
-const GroupsTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => {
+const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ currentUserId, searchQuery }) => {
   const { groups, isLoading, createGroup, joinGroup, leaveGroup, refetch } = useGroups(currentUserId);
 
   // Create group
@@ -731,6 +734,16 @@ const GroupsTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => {
     }
   };
 
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery.trim()) return groups;
+    const q = searchQuery.toLowerCase();
+    return groups.filter(g =>
+      g.name.toLowerCase().includes(q) ||
+      g.category.toLowerCase().includes(q) ||
+      g.description?.toLowerCase().includes(q)
+    );
+  }, [groups, searchQuery]);
+
   return (
     <div className="px-4 pt-3 space-y-3">
       {/* Create Group Button */}
@@ -747,15 +760,15 @@ const GroupsTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => {
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
-      ) : groups.length === 0 ? (
+      ) : filteredGroups.length === 0 ? (
         <Card className="p-6 text-center rounded-2xl">
           <Users className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
-          <h3 className="font-semibold text-sm">No groups yet</h3>
-          <p className="text-xs text-muted-foreground mt-1">Be the first to create a travel community!</p>
+          <h3 className="font-semibold text-sm">{searchQuery ? "No groups match your search" : "No groups yet"}</h3>
+          <p className="text-xs text-muted-foreground mt-1">{searchQuery ? "Try a different search term." : "Be the first to create a travel community!"}</p>
         </Card>
       ) : (
         <div className="space-y-3">
-          {groups.map(group => (
+          {filteredGroups.map(group => (
             <Card key={group.id} className="p-3 rounded-2xl shadow-soft border-0 bg-card">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center text-lg flex-shrink-0">
@@ -976,8 +989,7 @@ const GroupsTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => {
 };
 
 // ==================== TRIPS TAB ====================
-const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => void }> = ({ currentUserId, onNavigateToAccount }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => void; searchQuery: string }> = ({ currentUserId, onNavigateToAccount, searchQuery }) => {
   const [stage, setStage] = useState<"explore" | "intent" | "discover" | "my-trips">("explore");
 
   // Intent form
@@ -1178,16 +1190,6 @@ const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => vo
 
       {stage === "explore" && (
         <div className="px-4 pt-3 space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search a destination..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleExploreSearch()}
-              className="pl-10 text-xs bg-card border shadow-soft h-10 rounded-xl"
-            />
-          </div>
 
           <Card className="p-4 bg-primary/5 border-primary/20 rounded-2xl">
             <div className="flex items-start gap-3">
@@ -1213,7 +1215,6 @@ const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => vo
                   variant="secondary"
                   className="text-xs py-1.5 px-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
                   onClick={() => {
-                    setSearchQuery(dest);
                     setDestination(dest);
                     fetchTrips(dest);
                     setStage("discover");
