@@ -312,8 +312,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
               </div>
               {filteredHotels.map((hotel, idx) => {
                 const IconComponent = getIcon(hotel.type);
-                const originalIdx = aiHotels.indexOf(hotel);
-                const distances = landmarkDistances[`${originalIdx}`] || {};
+                const hotelLandmarkDistances = hotel.landmarkDistances || {};
                 return (
                   <Card key={idx} className="p-3 shadow-soft hover:shadow-medium transition-all rounded-2xl border-0">
                     <div className="flex gap-3">
@@ -331,12 +330,16 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
 
                         {/* Landmark distances */}
                         <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-1.5">
-                          {landmarks.map((landmark) => (
-                            <div key={landmark} className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                              <Navigation className="w-2.5 h-2.5" />
-                              <span>{distances[landmark] || getRandomDistance()} km from {landmark}</span>
-                            </div>
-                          ))}
+                          {landmarks.map((landmark) => {
+                            const dist = hotelLandmarkDistances[landmark];
+                            if (dist === undefined) return null;
+                            return (
+                              <div key={landmark} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <Navigation className="w-2.5 h-2.5" />
+                                <span>{dist} km from {landmark}</span>
+                              </div>
+                            );
+                          })}
                         </div>
 
                         <div className="flex flex-wrap gap-1 mb-2">
