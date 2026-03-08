@@ -61,7 +61,7 @@ const PlanBuilder: React.FC<PlanBuilderProps> = ({ currentUserId, userGender, on
     planName.trim().length > 0 &&
     destination.trim().length > 0 &&
     startDate && endDate && endDate >= startDate &&
-    maxMembers >= 1 &&
+    maxMembers >= 2 &&
     !!groupType &&
     !!visibility &&
     interests.length >= 3;
@@ -224,9 +224,9 @@ const PlanBuilder: React.FC<PlanBuilderProps> = ({ currentUserId, userGender, on
         {/* Group Size */}
         <div className="space-y-3">
           <Label className="text-sm font-semibold">Group Size: <span className="text-primary">{maxMembers}</span></Label>
-          <Slider value={[maxMembers]} onValueChange={v => setMaxMembers(v[0])} min={1} max={20} step={1} />
+          <Slider value={[maxMembers]} onValueChange={v => setMaxMembers(v[0])} min={2} max={20} step={1} />
           <div className="flex justify-between text-[10px] text-muted-foreground">
-            <span>1</span><span>20</span>
+            <span>2</span><span>20</span>
           </div>
         </div>
 
