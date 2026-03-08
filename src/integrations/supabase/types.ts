@@ -752,6 +752,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      remove_plan_member: {
+        Args: { p_plan_id: string; p_user_id: string }
+        Returns: undefined
+      }
       sync_plan_group_members: {
         Args: { p_plan_id: string }
         Returns: undefined
