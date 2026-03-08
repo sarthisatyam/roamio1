@@ -22,7 +22,7 @@ interface ExplorePageProps {
   onCreatePlan?: () => void;
 }
 
-const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount }) => {
+const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreatePlan }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
