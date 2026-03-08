@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, Calendar, Users, Map, Compass, Plus } from "lucide-react";
+import { Home, Calendar, Users, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HomePage from "./pages/HomePage";
 import BookingsPage from "./pages/BookingsPage";
