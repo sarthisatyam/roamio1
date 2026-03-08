@@ -299,7 +299,7 @@ const HomePage: React.FC<HomePageProps> = ({
 
             {popularLoading ? (
               <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
+                {[1, 2, 3, 4, 5].map((i) => (
                   <Card key={i} className="p-3 rounded-2xl border-0 shadow-soft">
                     <div className="flex items-start gap-2.5">
                       <Skeleton className="w-10 h-10 rounded-xl" />
