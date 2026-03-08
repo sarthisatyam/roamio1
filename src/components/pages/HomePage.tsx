@@ -362,6 +362,7 @@ const HomePage: React.FC<HomePageProps> = ({
                           </p>
                         )}
                       </div>
+                    </div>
                   </Card>
                 ))}
               </div>
