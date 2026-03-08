@@ -117,16 +117,22 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
 
   const { myPlans, fetchMyPlans, handleJoinRequest, getPendingRequests, leavePlan, removeMember, getPlanMembers } = usePlans(currentUserId);
 
-  const openManageMembers = async (plan: Plan) => {
-    setMembersPlan(plan);
+  const openManageDialog = async (plan: Plan) => {
+    setManagingPlan(plan);
+    setManageDialogOpen(true);
+    setLoadingRequests(true);
     setLoadingMembers(true);
-    setMembersDialogOpen(true);
     try {
-      const members = await getPlanMembers(plan.id);
+      const [reqs, members] = await Promise.all([
+        getPendingRequests(plan.id),
+        getPlanMembers(plan.id),
+      ]);
+      setPendingRequests(reqs);
       setPlanMembers(members);
     } catch {
-      toast.error("Failed to load members");
+      toast.error("Failed to load data");
     } finally {
+      setLoadingRequests(false);
       setLoadingMembers(false);
     }
   };
@@ -152,22 +158,27 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     }
   };
 
+  const openTripChat = async (plan: Plan) => {
+    // Find the group linked to this plan
+    const { data: group } = await supabase
+      .from("groups")
+      .select("id, name")
+      .eq("plan_id", plan.id)
+      .maybeSingle();
+    
+    if (group) {
+      setChatPlan({ groupId: group.id, groupName: group.name });
+      setTripChatOpen(true);
+    } else {
+      toast.info("Group chat will be available once the group is created");
+    }
+  };
+
   const getGroupBadge = (type: string) => {
     if (type === "females_only") return { label: "Females Only", color: "bg-pink-500/10 text-pink-600" };
     if (type === "males_only") return { label: "Males Only", color: "bg-blue-500/10 text-blue-600" };
     return { label: "Everyone", color: "bg-green-500/10 text-green-600" };
   };
-  const openManageRequests = async (plan: Plan) => {
-    setManagingPlan(plan);
-    setLoadingRequests(true);
-    setRequestsDialogOpen(true);
-    try {
-      const reqs = await getPendingRequests(plan.id);
-      setPendingRequests(reqs);
-    } catch {
-      toast.error("Failed to load requests");
-    } finally {
-      setLoadingRequests(false);
     }
   };
 
