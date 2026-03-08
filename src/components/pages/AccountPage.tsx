@@ -55,6 +55,7 @@ interface AccountPageProps {
   likedCompanions?: number[];
   bookmarkedPlaces?: { id: number; name: string; image: string }[];
   onLocationToggle?: (enabled: boolean) => void;
+  currentCity?: string | null;
 }
 
 const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [], onLocationToggle }) => {
