@@ -3,18 +3,53 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Send, Bot, X, Sparkles, Loader2 } from "lucide-react";
+import { MessageCircle, Send, Bot, X, Sparkles, Loader2, MapPin, Star, Shield, ExternalLink, Building2, Bed, Home, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ChatMessage {
   id: number;
   role: "user" | "assistant";
   content: string;
   time: string;
+  hotelResults?: HotelResult[];
+}
+
+interface HotelResult {
+  name: string;
+  type: string;
+  stars: number;
+  pricePerNight: number;
+  distance: string;
+  address: string;
+  mapLink: string;
+  amenities: string[];
+  description: string;
+  safetyRating: string;
+  imageSearchUrl: string;
+}
+
+interface FloatingAIBotProps {
+  currentCity?: string | null;
+  locationEnabled?: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chatbot`;
+
+const ACCOMMODATION_KEYWORDS = [
+  "hotel", "hostel", "stay", "accommodation", "room", "lodge", "resort",
+  "guesthouse", "guest house", "nearby hotel", "cheap hotel", "budget stay",
+  "where to stay", "find hotel", "book hotel", "place to stay", "oyo",
+  "pg", "paying guest", "dharamshala", "inn", "motel"
+];
+
+function isAccommodationQuery(text: string): boolean {
+  const lower = text.toLowerCase();
+  return ACCOMMODATION_KEYWORDS.some(kw => lower.includes(kw));
+}
 
 async function streamChat({
   messages,
@@ -83,7 +118,6 @@ async function streamChat({
     }
   }
 
-  // Final flush
   if (textBuffer.trim()) {
     for (let raw of textBuffer.split("\n")) {
       if (!raw) continue;
@@ -103,13 +137,84 @@ async function streamChat({
   onDone();
 }
 
-const FloatingAIBot: React.FC = () => {
+const HotelCard: React.FC<{ hotel: HotelResult }> = ({ hotel }) => {
+  const IconComponent = hotel.type === "hotel" ? Building2 : hotel.type === "hostel" ? Bed : Home;
+  
+  return (
+    <div className="bg-card border border-border rounded-xl p-3 space-y-2 shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <IconComponent className="w-4 h-4 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-sm text-foreground truncate">{hotel.name}</p>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="w-3 h-3" />
+              <span className="truncate">{hotel.distance}</span>
+            </div>
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="font-bold text-sm text-primary">₹{hotel.pricePerNight?.toLocaleString("en-IN")}</p>
+          <p className="text-[10px] text-muted-foreground">/night</p>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-0.5">
+          {Array.from({ length: hotel.stars || 0 }).map((_, i) => (
+            <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+          ))}
+        </div>
+        <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", 
+          hotel.safetyRating === "High" ? "border-green-500/50 text-green-600" : "border-yellow-500/50 text-yellow-600"
+        )}>
+          <Shield className="w-2.5 h-2.5 mr-0.5" />
+          {hotel.safetyRating} Safety
+        </Badge>
+        <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize">
+          {hotel.type}
+        </Badge>
+      </div>
+      
+      <p className="text-xs text-muted-foreground">{hotel.description}</p>
+      
+      <div className="flex flex-wrap gap-1">
+        {hotel.amenities?.slice(0, 4).map((amenity, i) => (
+          <span key={i} className="text-[10px] bg-muted px-1.5 py-0.5 rounded-full text-muted-foreground">
+            {amenity}
+          </span>
+        ))}
+      </div>
+      
+      <div className="flex items-center gap-2 pt-1">
+        <p className="text-[10px] text-muted-foreground flex-1 truncate">
+          <MapPin className="w-2.5 h-2.5 inline mr-0.5" />
+          {hotel.address}
+        </p>
+        {hotel.mapLink && (
+          <a
+            href={hotel.mapLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-primary flex items-center gap-0.5 hover:underline shrink-0"
+          >
+            Map <ExternalLink className="w-2.5 h-2.5" />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const FloatingAIBot: React.FC<FloatingAIBotProps> = ({ currentCity, locationEnabled, latitude, longitude }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
       role: "assistant",
-      content: "Hi! I'm Roamio AI, your travel companion. How can I help you today? 🌍",
+      content: "Hi! I'm Roamio AI, your travel companion. Ask me anything about travel, or search for nearby hotels & hostels! 🌍🏨",
       time: "now",
     },
   ]);
@@ -119,15 +224,68 @@ const FloatingAIBot: React.FC = () => {
   const nextIdRef = useRef(2);
 
   const quickActions = [
-    "Find safe hostels",
-    "Emergency contacts",
-    "Local customs",
-    "Transportation tips",
+    "Find nearby hotels",
+    "Budget hostels near me",
+    "Safe stays for solo women",
+    "Local travel tips",
   ];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const handleAccommodationSearch = async (query: string) => {
+    const assistantId = nextIdRef.current++;
+    
+    // Add a loading message
+    setMessages(prev => [...prev, {
+      id: assistantId,
+      role: "assistant",
+      content: `🔍 Searching for accommodation near ${currentCity || "your location"}...`,
+      time: "now",
+    }]);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-hotel-search', {
+        body: {
+          location: currentCity || "India",
+          latitude: latitude || null,
+          longitude: longitude || null,
+          query,
+        }
+      });
+
+      if (error) throw new Error(error.message);
+
+      const hotels: HotelResult[] = data?.hotels || [];
+      const locationName = data?.location || currentCity || "your area";
+
+      if (hotels.length > 0) {
+        setMessages(prev => prev.map(m =>
+          m.id === assistantId
+            ? {
+                ...m,
+                content: `🏨 Found ${hotels.length} places to stay near **${locationName}**. Here are the best options sorted by distance:`,
+                hotelResults: hotels,
+              }
+            : m
+        ));
+      } else {
+        setMessages(prev => prev.map(m =>
+          m.id === assistantId
+            ? { ...m, content: `Sorry, I couldn't find specific accommodation near ${locationName}. Try searching with a different city name or ask me about popular destinations!` }
+            : m
+        ));
+      }
+    } catch (e) {
+      console.error("Hotel search error:", e);
+      setMessages(prev => prev.map(m =>
+        m.id === assistantId
+          ? { ...m, content: "Sorry, I had trouble searching for hotels. Please try again in a moment." }
+          : m
+      ));
+    }
+  };
 
   const handleSendMessage = async (text?: string) => {
     const msg = (text || inputMessage).trim();
@@ -144,7 +302,14 @@ const FloatingAIBot: React.FC = () => {
     setInputMessage("");
     setIsLoading(true);
 
-    // Build history for context (skip the initial greeting for cleaner context)
+    // Check if this is an accommodation query
+    if (isAccommodationQuery(msg)) {
+      await handleAccommodationSearch(msg);
+      setIsLoading(false);
+      return;
+    }
+
+    // Regular chat flow
     const history = [...messages.slice(1), userMsg].map((m) => ({
       role: m.role,
       content: m.content,
@@ -213,7 +378,7 @@ const FloatingAIBot: React.FC = () => {
       {/* Chat Window */}
       {isOpen && (
         <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-end justify-center p-4">
-          <Card className="w-full max-w-md h-96 flex flex-col shadow-strong">
+          <Card className="w-full max-w-md h-[80vh] max-h-[600px] flex flex-col shadow-strong">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b bg-gradient-primary text-white rounded-t-lg">
               <div className="flex items-center gap-3">
@@ -224,7 +389,9 @@ const FloatingAIBot: React.FC = () => {
                   <p className="font-medium">Roamio AI</p>
                   <div className="flex items-center gap-1">
                     <div className="w-2 h-2 bg-success rounded-full" />
-                    <p className="text-xs text-white/80">Online</p>
+                    <p className="text-xs text-white/80">
+                      {currentCity ? `📍 ${currentCity}` : "Online"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -241,35 +408,46 @@ const FloatingAIBot: React.FC = () => {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "flex",
-                    message.role === "assistant" ? "justify-start" : "justify-end"
-                  )}
-                >
+                <div key={message.id}>
                   <div
                     className={cn(
-                      "max-w-[80%] p-3 rounded-2xl text-sm",
-                      message.role === "assistant"
-                        ? "bg-muted text-foreground"
-                        : "bg-gradient-primary text-white"
+                      "flex",
+                      message.role === "assistant" ? "justify-start" : "justify-end"
                     )}
                   >
-                    {message.role === "assistant" && (
-                      <div className="flex items-center gap-2 mb-1">
-                        <Sparkles className="w-3 h-3" />
-                        <span className="text-xs font-medium">Roamio AI</span>
-                      </div>
-                    )}
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                    <div
+                      className={cn(
+                        "max-w-[90%] p-3 rounded-2xl text-sm",
+                        message.role === "assistant"
+                          ? "bg-muted text-foreground"
+                          : "bg-gradient-primary text-white"
+                      )}
+                    >
+                      {message.role === "assistant" && (
+                        <div className="flex items-center gap-2 mb-1">
+                          <Sparkles className="w-3 h-3" />
+                          <span className="text-xs font-medium">Roamio AI</span>
+                        </div>
+                      )}
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                    </div>
                   </div>
+                  
+                  {/* Hotel Results Cards */}
+                  {message.hotelResults && message.hotelResults.length > 0 && (
+                    <div className="mt-3 space-y-2 pl-2">
+                      {message.hotelResults.map((hotel, idx) => (
+                        <HotelCard key={idx} hotel={hotel} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
               {isLoading && messages[messages.length - 1]?.role === "user" && (
                 <div className="flex justify-start">
-                  <div className="bg-muted p-3 rounded-2xl text-sm">
+                  <div className="bg-muted p-3 rounded-2xl text-sm flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-xs text-muted-foreground">Searching...</span>
                   </div>
                 </div>
               )}
@@ -298,7 +476,7 @@ const FloatingAIBot: React.FC = () => {
                 <Input
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Ask me anything..."
+                  placeholder="Search hotels or ask anything..."
                   onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   className="flex-1"
                   disabled={isLoading}
