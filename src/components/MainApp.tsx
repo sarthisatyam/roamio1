@@ -130,8 +130,8 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
 
   const tabs = [
     { id: 0, name: "Home", icon: Home },
-    { id: 1, name: "Bookings", icon: Calendar },
-    { id: 2, name: "Companion", icon: Users },
+    { id: 1, name: "Companion", icon: Users },
+    { id: 2, name: "Bookings", icon: Calendar },
     { id: 3, name: "Journey", icon: Map },
   ];
 
