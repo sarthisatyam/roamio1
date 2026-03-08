@@ -55,9 +55,10 @@ interface AccountPageProps {
   likedCompanions?: number[];
   bookmarkedPlaces?: { id: number; name: string; image: string }[];
   onLocationToggle?: (enabled: boolean) => void;
+  currentCity?: string | null;
 }
 
-const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [], onLocationToggle }) => {
+const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onLogout, likedCompanions = [], bookmarkedPlaces = [], onLocationToggle, currentCity }) => {
   const accountType = "Free";
   
   // Dialog states
@@ -563,7 +564,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <ParentalControlDialog open={parentalDialogOpen} onOpenChange={setParentalDialogOpen} />
       <VerifyDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen} />
       <SupportDialog open={supportDialogOpen} onOpenChange={setSupportDialogOpen} />
-      <TravelGuideDialog open={travelGuideDialogOpen} onOpenChange={setTravelGuideDialogOpen} />
+      <TravelGuideDialog open={travelGuideDialogOpen} onOpenChange={setTravelGuideDialogOpen} currentCity={currentCity} />
       <HelpLegalDialog open={helpLegalDialogOpen} onOpenChange={setHelpLegalDialogOpen} />
     </div>
   );

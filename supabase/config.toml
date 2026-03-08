@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.generate-cover-image]
 verify_jwt = false
+
+[functions.travel-guide]
+verify_jwt = false
