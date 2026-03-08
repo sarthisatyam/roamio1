@@ -752,7 +752,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      sync_plan_group_members: {
+        Args: { p_plan_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
