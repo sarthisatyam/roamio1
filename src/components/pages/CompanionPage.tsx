@@ -368,81 +368,45 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
               </div>
             </Card>
 
-            {/* Tabs: Explore / My Trips */}
-            <Tabs defaultValue="explore-dest" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 h-10 rounded-xl bg-muted">
-                <TabsTrigger value="explore-dest" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                  <Compass className="w-3.5 h-3.5 mr-1.5" />
-                  Explore
-                </TabsTrigger>
-                <TabsTrigger value="my-trips-tab" className="text-xs rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm" onClick={() => fetchMyTrips()}>
-                  <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                  My Trips
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="explore-dest" className="mt-3 space-y-3">
-                {/* Quick destination suggestions */}
-                <div>
-                  <h4 className="text-xs font-medium text-muted-foreground mb-2">Popular Destinations</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {["Girnar", "Manali", "Rishikesh", "Goa", "Varanasi", "Ladakh"].map(dest => (
-                      <Badge
-                        key={dest}
-                        variant="secondary"
-                        className="text-xs py-1.5 px-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
-                        onClick={() => {
-                          setSearchQuery(dest);
-                          setDestination(dest);
-                          fetchTrips(dest);
-                          setStage("discover");
-                        }}
-                      >
-                        <MapPin className="w-3 h-3 mr-1" />
-                        {dest}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Intent declaration CTA */}
-                <Card className="p-4 rounded-2xl border-dashed border-2 border-primary/30 bg-primary/5">
-                  <div className="text-center">
-                    <Mountain className="w-8 h-8 mx-auto text-primary mb-2" />
-                    <h3 className="font-semibold text-sm">Plan a Trip</h3>
-                    <p className="text-xs text-muted-foreground mt-1">Declare your travel intent to find or create a group</p>
-                    <Button
-                      className="mt-3 bg-gradient-primary text-white rounded-xl text-xs h-9"
-                      onClick={() => setStage("intent")}
+            {/* Explore */}
+            <div className="space-y-3">
+              <div>
+                <h4 className="text-xs font-medium text-muted-foreground mb-2">Popular Destinations</h4>
+                <div className="flex flex-wrap gap-2">
+                  {["Girnar", "Manali", "Rishikesh", "Goa", "Varanasi", "Ladakh"].map(dest => (
+                    <Badge
+                      key={dest}
+                      variant="secondary"
+                      className="text-xs py-1.5 px-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
+                      onClick={() => {
+                        setSearchQuery(dest);
+                        setDestination(dest);
+                        fetchTrips(dest);
+                        setStage("discover");
+                      }}
                     >
-                      Declare Intent
-                      <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                    </Button>
-                  </div>
-                </Card>
-              </TabsContent>
+                      <MapPin className="w-3 h-3 mr-1" />
+                      {dest}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
 
-              <TabsContent value="my-trips-tab" className="mt-3 space-y-3">
-                {myTrips.length === 0 ? (
-                  <Card className="p-6 text-center rounded-2xl">
-                    <Calendar className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                    <h3 className="font-semibold text-sm">No trips yet</h3>
-                    <p className="text-xs text-muted-foreground mt-1">Create or join a trip to get started</p>
-                  </Card>
-                ) : (
-                  myTrips.map(trip => (
-                    <MyTripCard
-                      key={trip.id}
-                      trip={trip}
-                      onChat={() => { setChatTrip(trip); setChatOpen(true); }}
-                      onManageRequests={() => openManageRequests(trip)}
-                      getGroupTypeLabel={getGroupTypeLabel}
-                      getTripTypeLabel={getTripTypeLabel}
-                    />
-                  ))
-                )}
-              </TabsContent>
-            </Tabs>
+              <Card className="p-4 rounded-2xl border-dashed border-2 border-primary/30 bg-primary/5">
+                <div className="text-center">
+                  <Mountain className="w-8 h-8 mx-auto text-primary mb-2" />
+                  <h3 className="font-semibold text-sm">Plan a Trip</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Declare your travel intent to find or create a group</p>
+                  <Button
+                    className="mt-3 bg-gradient-primary text-white rounded-xl text-xs h-9"
+                    onClick={() => setStage("intent")}
+                  >
+                    Declare Intent
+                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                  </Button>
+                </div>
+              </Card>
+            </div>
           </div>
         )}
 
