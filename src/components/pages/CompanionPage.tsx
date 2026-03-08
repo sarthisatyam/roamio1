@@ -35,6 +35,7 @@ import { useLikedCompanions } from "@/hooks/useLikedCompanions";
 interface CompanionPageProps {
   onNavigateToAccount?: () => void;
   userCity?: string | null;
+  onCreatePlan?: () => void;
 }
 
 const GROUP_CATEGORIES = [
@@ -47,7 +48,7 @@ const INTEREST_LIST = [
   "History", "Nature", "Adventure", "Spiritual", "Beach", "Mountains",
 ];
 
-const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, userCity }) => {
+const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, userCity, onCreatePlan }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("discover");
   const [searchQuery, setSearchQuery] = useState("");
@@ -152,8 +153,8 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
           <GroupsTab currentUserId={currentUserId} searchQuery={searchQuery} />
         </TabsContent>
 
-        <TabsContent value="trips" className="flex-1 overflow-y-auto mt-0 pb-24">
-          <TripsTab currentUserId={currentUserId} onNavigateToAccount={onNavigateToAccount} searchQuery={searchQuery} />
+        <TabsContent value="trips" className="flex-1 overflow-y-auto mt-0 pb-24 relative">
+          <TripsTab currentUserId={currentUserId} onNavigateToAccount={onNavigateToAccount} searchQuery={searchQuery} onCreatePlan={onCreatePlan} />
         </TabsContent>
       </Tabs>
     </div>
@@ -974,7 +975,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
 };
 
 // ==================== TRIPS TAB ====================
-const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => void; searchQuery: string }> = ({ currentUserId, onNavigateToAccount, searchQuery }) => {
+const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => void; searchQuery: string; onCreatePlan?: () => void }> = ({ currentUserId, onNavigateToAccount, searchQuery, onCreatePlan }) => {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [joinMessage, setJoinMessage] = useState("");
   const [isJoining, setIsJoining] = useState(false);
@@ -1105,6 +1106,16 @@ const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => vo
             </Card>
           );
         })
+      )}
+
+      {/* Create Plan FAB */}
+      {onCreatePlan && (
+        <button
+          onClick={onCreatePlan}
+          className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-gradient-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform z-10"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
       )}
 
       {/* Join Request Dialog */}
