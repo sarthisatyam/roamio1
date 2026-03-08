@@ -211,6 +211,7 @@ const HotelCard: React.FC<{ hotel: HotelResult }> = ({ hotel }) => {
 
 const FloatingAIBot: React.FC<FloatingAIBotProps> = ({ currentCity, locationEnabled, latitude, longitude }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [emergencyDialogOpen, setEmergencyDialogOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
