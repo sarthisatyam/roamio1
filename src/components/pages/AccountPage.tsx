@@ -66,6 +66,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     bio?: string | null;
     interests?: string[] | null;
     display_name?: string | null;
+    avatar_url?: string | null;
   } | null>(null);
   
   // Dialog states
