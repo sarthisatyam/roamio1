@@ -135,6 +135,19 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
         </div>
       </div>
 
+      {/* Common Search Bar */}
+      <div className="px-4 pt-2 pb-1">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search companions, groups, or destinations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 text-xs bg-card border shadow-soft h-10 rounded-xl"
+          />
+        </div>
+      </div>
+
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
         <TabsList className="mx-4 mt-2 mb-0 h-10 bg-muted rounded-xl p-1">
