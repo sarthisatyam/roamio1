@@ -564,7 +564,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
                           <Shield className="w-3.5 h-3.5" />
                           <span>Your request was rejected</span>
                         </div>
-                        </div>
                       ) : null}
                     </div>
                   </Card>
@@ -575,77 +574,94 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         </DialogContent>
       </Dialog>
 
-      {/* Manage Requests Dialog */}
-      <Dialog open={requestsDialogOpen} onOpenChange={setRequestsDialogOpen}>
-        <DialogContent className="max-w-md rounded-2xl max-h-[70vh] overflow-y-auto">
+      {/* Merged Manage Dialog (Requests + Members) */}
+      <Dialog open={manageDialogOpen} onOpenChange={setManageDialogOpen}>
+        <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>Join Requests — {managingPlan?.destination_name}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-primary" />
+              Manage — {managingPlan?.plan_name}
+            </DialogTitle>
           </DialogHeader>
-          {loadingRequests ? (
-            <p className="text-center text-sm text-muted-foreground py-4">Loading...</p>
-          ) : pendingRequests.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-4">No pending requests</p>
-          ) : (
-            <div className="space-y-3">
-              {pendingRequests.map(req => (
-                <Card key={req.id} className="p-3 rounded-2xl border-0 shadow-soft">
-                  <p className="font-medium text-sm mb-1">{req.sender_name}</p>
-                  <p className="text-xs text-muted-foreground mb-2">{req.message || "No message"}</p>
-                  <div className="flex gap-2">
-                    <Button size="sm" className="flex-1 bg-success text-white rounded-xl text-xs h-8" onClick={() => handleReviewRequest(req, "approved")}>Approve</Button>
-                    <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-8 text-destructive" onClick={() => handleReviewRequest(req, "rejected")}>Reject</Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
+          <Tabs defaultValue="members" className="flex-1 overflow-hidden flex flex-col">
+            <TabsList className="grid w-full grid-cols-2 rounded-xl">
+              <TabsTrigger value="members" className="rounded-lg text-xs">
+                Members {planMembers.length > 0 && `(${planMembers.length})`}
+              </TabsTrigger>
+              <TabsTrigger value="requests" className="rounded-lg text-xs">
+                Requests {pendingRequests.length > 0 && `(${pendingRequests.length})`}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="members" className="flex-1 overflow-y-auto mt-3">
+              {loadingMembers ? (
+                <p className="text-center text-sm text-muted-foreground py-4">Loading...</p>
+              ) : planMembers.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-4">No members yet</p>
+              ) : (
+                <div className="space-y-2">
+                  {planMembers.map(member => (
+                    <Card key={member.user_id} className="p-3 rounded-2xl border-0 shadow-soft">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="w-8 h-8">
+                            {member.avatar_url && <AvatarImage src={member.avatar_url} />}
+                            <AvatarFallback className="text-xs">{(member.display_name || "T").charAt(0).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">{member.display_name}</p>
+                            <Badge className={cn("text-[9px] rounded-lg border-0", member.role === "owner" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+                              {member.role === "owner" ? "Admin" : "Member"}
+                            </Badge>
+                          </div>
+                        </div>
+                        {member.role !== "owner" && managingPlan && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:bg-destructive/10 rounded-xl text-xs h-8 px-2"
+                            onClick={() => handleRemoveMember(managingPlan.id, member.user_id)}
+                          >
+                            <Trash2 className="w-3.5 h-3.5 mr-1" /> Remove
+                          </Button>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+            <TabsContent value="requests" className="flex-1 overflow-y-auto mt-3">
+              {loadingRequests ? (
+                <p className="text-center text-sm text-muted-foreground py-4">Loading...</p>
+              ) : pendingRequests.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-4">No pending requests</p>
+              ) : (
+                <div className="space-y-2">
+                  {pendingRequests.map(req => (
+                    <Card key={req.id} className="p-3 rounded-2xl border-0 shadow-soft">
+                      <p className="font-medium text-sm mb-1">{req.sender_name}</p>
+                      <p className="text-xs text-muted-foreground mb-2">{req.message || "No message"}</p>
+                      <div className="flex gap-2">
+                        <Button size="sm" className="flex-1 bg-success text-white rounded-xl text-xs h-8" onClick={() => handleReviewRequest(req, "approved")}>Approve</Button>
+                        <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-8 text-destructive" onClick={() => handleReviewRequest(req, "rejected")}>Reject</Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
 
-      {/* Manage Members Dialog */}
-      <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
-        <DialogContent className="max-w-md rounded-2xl max-h-[70vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Trip Members — {membersPlan?.plan_name}</DialogTitle>
-          </DialogHeader>
-          {loadingMembers ? (
-            <p className="text-center text-sm text-muted-foreground py-4">Loading...</p>
-          ) : planMembers.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-4">No members yet</p>
-          ) : (
-            <div className="space-y-3">
-              {planMembers.map(member => (
-                <Card key={member.user_id} className="p-3 rounded-2xl border-0 shadow-soft">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="w-8 h-8">
-                        {member.avatar_url && <AvatarImage src={member.avatar_url} />}
-                        <AvatarFallback className="text-xs">{(member.display_name || "T").charAt(0).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-sm">{member.display_name}</p>
-                        <Badge className={cn("text-[9px] rounded-lg border-0", member.role === "owner" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-                          {member.role === "owner" ? "Admin" : "Member"}
-                        </Badge>
-                      </div>
-                    </div>
-                    {member.role !== "owner" && membersPlan && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-destructive hover:bg-destructive/10 rounded-xl text-xs h-8 px-2"
-                        onClick={() => handleRemoveMember(membersPlan.id, member.user_id)}
-                      >
-                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Remove
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Trip Group Chat */}
+      <GroupChatDialog
+        open={tripChatOpen}
+        onOpenChange={setTripChatOpen}
+        groupId={chatPlan?.groupId || null}
+        groupName={chatPlan?.groupName || ""}
+        currentUserId={currentUserId}
+      />
 
       <MyInterestsDialog 
         open={interestsDialogOpen} 
