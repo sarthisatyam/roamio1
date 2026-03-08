@@ -12,6 +12,7 @@ import {
   Shield,
   ArrowRight,
   Compass,
+  Wallet,
   Bookmark,
   Calendar,
   Clock,
