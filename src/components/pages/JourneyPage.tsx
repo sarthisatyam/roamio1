@@ -64,10 +64,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
   };
 
   // Solo activities
-  const [activities, setActivities] = useState<Activity[]>([
-    { id: 1, title: "Morning Walk at Lodhi Gardens", time: "07:00 AM", location: "Lodhi Road, Delhi", type: "Exercise", duration: "1 hour", status: "completed", date: "Yesterday" },
-    { id: 2, title: "Visit Red Fort", time: "09:00 AM", location: "Chandni Chowk, Delhi", type: "Heritage", duration: "2 hours", status: "planned", date: "Today" },
-  ]);
+  const [activities, setActivities] = useState<Activity[]>([]);
 
   useEffect(() => {
     if (externalActivities.length > addedExternalCount) {
