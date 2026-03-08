@@ -182,8 +182,7 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
 };
 
 // ==================== DISCOVER TAB ====================
-const DiscoverTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ currentUserId, searchQuery }) => {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [genderFilter, setGenderFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
