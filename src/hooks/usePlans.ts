@@ -286,22 +286,8 @@ export const usePlans = (currentUserId: string | null) => {
         .from("plan_members")
         .insert({ plan_id: planId, user_id: requestUserId, role: "member" } as any);
 
-      // Auto-create group when 2+ members
-      await autoCreateGroup(planId);
-
-      // Also add new member to existing group if it exists
-      const { data: existingGroup } = await supabase
-        .from("groups")
-        .select("id")
-        .eq("plan_id", planId)
-        .maybeSingle();
-
-      if (existingGroup) {
-        await supabase.from("group_members").insert({
-          group_id: existingGroup.id,
-          user_id: requestUserId,
-        });
-      }
+      // Sync all plan members to group (creates group if needed, adds all members)
+      await syncPlanGroup(planId);
     }
 
     await Promise.all([fetchPlans(), fetchMyPlans()]);

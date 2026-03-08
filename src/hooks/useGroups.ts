@@ -33,7 +33,7 @@ export const useGroups = (currentUserId: string | null) => {
   const ensurePlanGroups = async () => {
     if (!currentUserId) return;
 
-    // Fetch plans where user is an approved member
+    // Fetch plans where user is a member
     const { data: myMemberships } = await supabase
       .from("plan_members")
       .select("plan_id")
@@ -43,56 +43,11 @@ export const useGroups = (currentUserId: string | null) => {
 
     const planIds = myMemberships.map(m => m.plan_id);
 
-    // Fetch plan details
-    const { data: plans } = await supabase
-      .from("plans")
-      .select("id, plan_name, destination_name, group_type")
-      .in("id", planIds);
-
-    if (!plans || plans.length === 0) return;
-
-    // Check which plans already have groups
-    const { data: existingGroups } = await supabase
-      .from("groups")
-      .select("plan_id")
-      .in("plan_id", planIds);
-
-    const existingPlanIds = new Set(existingGroups?.map(g => g.plan_id) || []);
-
-    // Create groups for plans that don't have one yet
-    for (const plan of plans) {
-      if (existingPlanIds.has(plan.id)) continue;
-
-      const { data: newGroup, error: createErr } = await supabase
-        .from("groups")
-        .insert({
-          name: plan.plan_name,
-          description: `Plan community for ${plan.destination_name}`,
-          category: "Plan",
-          icon: "MapPin",
-          created_by: currentUserId,
-          plan_id: plan.id
-        })
-        .select()
-        .single();
-
-      if (createErr) {
-        console.error("Failed to create plan group:", createErr);
-        continue;
-      }
-
-      // Add all plan members to the group
-      const { data: planMembers } = await supabase
-        .from("plan_members")
-        .select("user_id")
-        .eq("plan_id", plan.id);
-
-      if (planMembers && newGroup) {
-        const inserts = planMembers.map(m => ({
-          group_id: newGroup.id,
-          user_id: m.user_id
-        }));
-        await supabase.from("group_members").insert(inserts);
+    // Use SECURITY DEFINER function to sync each plan's members to its group
+    for (const planId of planIds) {
+      const { error } = await supabase.rpc("sync_plan_group_members", { p_plan_id: planId });
+      if (error) {
+        console.error("Failed to sync plan group members:", error);
       }
     }
   };
