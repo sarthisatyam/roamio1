@@ -251,7 +251,7 @@ const HomePage: React.FC<HomePageProps> = ({
       <div className="flex-1 overflow-y-auto">
         {/* Quick Access Categories */}
         <div className="px-4 py-3">
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {quickAccessCategories.map((item) => {
               const Icon = item.icon;
               return (
