@@ -1256,15 +1256,7 @@ const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => vo
         })
       )}
 
-      {/* Create Plan FAB */}
-      {onCreatePlan && (
-        <button
-          onClick={onCreatePlan}
-          className="fixed bottom-24 left-6 w-14 h-14 rounded-full bg-gradient-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform z-10"
-        >
-          <Plus className="w-6 h-6" />
-        </button>
-      )}
+
 
       {/* Join Request Dialog */}
       <Dialog open={!!selectedPlan} onOpenChange={() => setSelectedPlan(null)}>
