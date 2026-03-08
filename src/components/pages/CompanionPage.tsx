@@ -258,7 +258,7 @@ const DiscoverTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => 
     }
   };
 
-  const isLiked = (userId: string) => likedCompanions.some(l => l.liked_user_id === userId);
+  const isLiked = (userId: string) => isCompanionLiked(userId);
 
   return (
     <div className="px-4 pt-3 space-y-3">
