@@ -190,7 +190,11 @@ const HomePage: React.FC<HomePageProps> = ({
         <div className="flex items-center justify-between mb-3">
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-bold text-white mb-0.5 truncate">
-              Good morning{userData?.name ? `, ${userData.name}` : ""}! 👋
+              {(() => {
+                const hour = new Date().getHours();
+                const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+                return `${greeting}${userData?.name ? `, ${userData.name}` : ""}! 👋`;
+              })()}
             </h1>
             <div className="flex items-center gap-2">
               <p

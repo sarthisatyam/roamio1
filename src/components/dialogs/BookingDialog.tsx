@@ -120,15 +120,6 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
                 )}
               >
                 <div className="flex items-center gap-3">
-                  {logoUrl ? (
-                    <img 
-                      src={logoUrl} 
-                      alt={platform.name} 
-                      className="h-6 w-auto max-w-[80px] object-contain"
-                    />
-                  ) : (
-                    <span className="text-xl">{platform.icon}</span>
-                  )}
                   <div>
                     <p className="font-medium text-sm capitalize">{platform.name}</p>
                     {isBest && (
