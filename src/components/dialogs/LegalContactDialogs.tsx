@@ -90,8 +90,8 @@ export const HelpLegalDialog: React.FC<DialogProps> = ({ open, onOpenChange }) =
 
             <div className="bg-muted rounded-xl p-3 mt-3 space-y-1 text-xs text-muted-foreground">
               <p><span className="font-medium text-foreground">Email:</span> info.roamio@gmail.com</p>
-              <p><span className="font-medium text-foreground">Phone:</span> +91 1800-ROAMIO (762646)</p>
-              <p><span className="font-medium text-foreground">Hours:</span> Mon–Sat, 9 AM – 6 PM IST</p>
+              <p><span className="font-medium text-foreground">Phone:</span> +91 7781043277</p>
+              <p><span className="font-medium text-foreground">Hours:</span> Mon–Fri: 2 PM – 8 PM | Sat–Sun: 8 AM – 8 PM</p>
             </div>
           </div>
         )}
