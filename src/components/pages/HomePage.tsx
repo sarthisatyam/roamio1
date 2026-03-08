@@ -23,6 +23,7 @@ import {
   EyeOff,
   Sparkles,
   Plus,
+  AlertTriangle,
 } from "lucide-react";
 import { useWeather } from "@/hooks/useWeather";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ import DestinationDialog from "@/components/dialogs/DestinationDialog";
 import { useAISearch, AIDestination } from "@/hooks/useAISearch";
 import AISearchResults from "@/components/AISearchResults";
 import { supabase } from "@/integrations/supabase/client";
+import { EmergencyDialog } from "@/components/dialogs/AccountSectionDialogs";
 import { usePlans, Plan } from "@/hooks/usePlans";
 import { format } from "date-fns";
 import {
@@ -54,10 +56,11 @@ interface HomePageProps {
 }
 
 const quickAccessCategories = [
-  { icon: Shield, label: "Safe Places", color: "bg-emerald-500/10 text-emerald-600" },
-  { icon: Compass, label: "Solo-Friendly", color: "bg-blue-500/10 text-blue-600" },
-  { icon: Users, label: "Women-Safe", color: "bg-pink-500/10 text-pink-600" },
-  { icon: Wallet, label: "Budget Friendly", color: "bg-amber-500/10 text-amber-600" },
+  { icon: Shield, label: "Safe Places", color: "bg-emerald-500/10 text-emerald-600", isEmergency: false },
+  { icon: Compass, label: "Solo-Friendly", color: "bg-blue-500/10 text-blue-600", isEmergency: false },
+  { icon: Users, label: "Women-Safe", color: "bg-pink-500/10 text-pink-600", isEmergency: false },
+  { icon: Wallet, label: "Budget Friendly", color: "bg-amber-500/10 text-amber-600", isEmergency: false },
+  { icon: AlertTriangle, label: "Emergency", color: "bg-destructive/10 text-destructive", isEmergency: true },
 ];
 
 const HomePage: React.FC<HomePageProps> = ({
@@ -72,6 +75,7 @@ const HomePage: React.FC<HomePageProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
   const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
+  const [emergencyDialogOpen, setEmergencyDialogOpen] = useState(false);
 
   // Popular destinations state
   const [popularDestinations, setPopularDestinations] = useState<AIDestination[]>([]);
@@ -248,7 +252,7 @@ const HomePage: React.FC<HomePageProps> = ({
       <div className="flex-1 overflow-y-auto">
         {/* Quick Access Categories */}
         <div className="px-4 py-3">
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-5 gap-2">
             {quickAccessCategories.map((item) => {
               const Icon = item.icon;
               return (
@@ -256,9 +260,9 @@ const HomePage: React.FC<HomePageProps> = ({
                   key={item.label}
                   className={cn(
                     "p-3 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0",
-                    searchQuery === item.label && "ring-2 ring-primary"
+                    !item.isEmergency && searchQuery === item.label && "ring-2 ring-primary"
                   )}
-                  onClick={() => handleCategoryClick(item.label)}
+                  onClick={() => item.isEmergency ? setEmergencyDialogOpen(true) : handleCategoryClick(item.label)}
                 >
                   <div className={cn("w-10 h-10 rounded-xl mx-auto mb-1.5 flex items-center justify-center", item.color)}>
                     <Icon className="w-5 h-5" />
@@ -513,6 +517,9 @@ const HomePage: React.FC<HomePageProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Emergency Dialog */}
+      <EmergencyDialog open={emergencyDialogOpen} onOpenChange={setEmergencyDialogOpen} />
     </div>
   );
 };
