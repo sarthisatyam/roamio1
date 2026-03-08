@@ -92,7 +92,17 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   useEffect(() => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setCurrentUserId(session?.user?.id || null);
+      const userId = session?.user?.id || null;
+      setCurrentUserId(userId);
+      if (userId) {
+        // Fetch user profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('gender, age, bio, interests, display_name')
+          .eq('user_id', userId)
+          .single();
+        if (profile) setUserProfile(profile);
+      }
     };
     getSession();
   }, []);
