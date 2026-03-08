@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -840,6 +840,7 @@ interface MyInterestsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   interests?: string[];
+  avatarUrl?: string | null;
   gender?: string;
   age?: number | null;
   about?: string;
@@ -863,6 +864,7 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
   open, 
   onOpenChange, 
   interests = [], 
+  avatarUrl,
   gender = "",
   age,
   about = "",
@@ -875,6 +877,9 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
   const [editBio, setEditBio] = useState(about);
   const [editInterests, setEditInterests] = useState<string[]>(interests);
   const [saving, setSaving] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(avatarUrl || null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -883,8 +888,10 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
       setEditAge(age?.toString() || "");
       setEditBio(about);
       setEditInterests(interests);
+      setAvatarPreview(avatarUrl || null);
+      setAvatarFile(null);
     }
-  }, [open, displayName, gender, age, about, interests]);
+  }, [open, displayName, gender, age, about, interests, avatarUrl]);
 
   const toggleInterest = (interest: string) => {
     setEditInterests(prev =>
@@ -892,11 +899,36 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
     );
   };
 
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Image must be under 3MB");
+      return;
+    }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast.error("Not logged in"); return; }
+
+      let newAvatarUrl = avatarUrl;
+
+      // Upload avatar if changed
+      if (avatarFile) {
+        const ext = avatarFile.name.split(".").pop();
+        const filePath = `${user.id}/avatar.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, avatarFile, { upsert: true });
+        if (uploadErr) throw uploadErr;
+        const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+        newAvatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      }
 
       const { error } = await supabase
         .from("profiles")
@@ -906,6 +938,7 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
           age: editAge ? parseInt(editAge) : null,
           bio: editBio.trim() || null,
           interests: editInterests.length > 0 ? editInterests : null,
+          avatar_url: newAvatarUrl || null,
         })
         .eq("user_id", user.id);
 
@@ -933,6 +966,29 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Avatar Upload */}
+          <div className="flex flex-col items-center gap-3">
+            <input type="file" accept="image/*" ref={avatarInputRef} className="hidden" onChange={handleAvatarSelect} />
+            <button
+              onClick={() => avatarInputRef.current?.click()}
+              className="relative group"
+              type="button"
+            >
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/30 bg-muted flex items-center justify-center">
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-2xl font-bold text-muted-foreground">
+                    {editName?.charAt(0)?.toUpperCase() || 'U'}
+                  </span>
+                )}
+              </div>
+              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Upload className="w-5 h-5 text-white" />
+              </div>
+            </button>
+            <p className="text-xs text-muted-foreground">Tap to change photo</p>
+          </div>
           <div className="space-y-1">
             <Label className="text-xs font-medium text-muted-foreground">Display Name</Label>
             <Input

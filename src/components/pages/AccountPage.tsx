@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { 
   ArrowLeft, 
@@ -66,6 +66,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     bio?: string | null;
     interests?: string[] | null;
     display_name?: string | null;
+    avatar_url?: string | null;
   } | null>(null);
   
   // Dialog states
@@ -96,7 +97,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         // Fetch user profile
         const { data: profile } = await supabase
           .from('profiles')
-          .select('gender, age, bio, interests, display_name')
+          .select('gender, age, bio, interests, display_name, avatar_url')
           .eq('user_id', userId)
           .single();
         if (profile) setUserProfile(profile);
@@ -308,6 +309,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         {/* Profile Section */}
         <div className="flex items-center gap-3">
           <Avatar className="w-14 h-14">
+            {userProfile?.avatar_url && (
+              <AvatarImage src={userProfile.avatar_url} alt="Profile" />
+            )}
             <AvatarFallback className="bg-white/20 text-white text-lg font-bold">
               {userData?.name?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
@@ -564,6 +568,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         open={interestsDialogOpen} 
         onOpenChange={setInterestsDialogOpen} 
         interests={userProfile?.interests || userData?.preferences || []}
+        avatarUrl={userProfile?.avatar_url}
         gender={userProfile?.gender || ''}
         age={userProfile?.age || null}
         about={userProfile?.bio || ""}
@@ -573,7 +578,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
           if (session?.user?.id) {
             const { data: profile } = await supabase
               .from('profiles')
-              .select('gender, age, bio, interests, display_name')
+              .select('gender, age, bio, interests, display_name, avatar_url')
               .eq('user_id', session.user.id)
               .single();
             if (profile) setUserProfile(profile);
