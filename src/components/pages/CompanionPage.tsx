@@ -769,13 +769,21 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
 
       if (members && members.length > 0) {
         const userIds = members.map(m => m.user_id);
-        const [profilesRes, presenceRes] = await Promise.all([
+        const fetchPromises: Promise<any>[] = [
           supabase.from("profiles").select("user_id, display_name, avatar_url, is_verified").in("user_id", userIds),
           supabase.from("user_presence").select("user_id, is_online").in("user_id", userIds),
-        ]);
+        ];
+        // If plan-linked group, fetch plan member roles
+        if (group.plan_id) {
+          fetchPromises.push(
+            supabase.from("plan_members").select("user_id, role").eq("plan_id", group.plan_id)
+          );
+        }
 
-        const profileMap = new Map((profilesRes.data || []).map(p => [p.user_id, p]));
-        const presenceMap = new Map((presenceRes.data || []).map(p => [p.user_id, p.is_online]));
+        const results = await Promise.all(fetchPromises);
+        const profileMap = new Map((results[0].data || []).map((p: any) => [p.user_id, p]));
+        const presenceMap = new Map((results[1].data || []).map((p: any) => [p.user_id, p.is_online]));
+        const roleMap = new Map((results[2]?.data || []).map((p: any) => [p.user_id, p.role]));
 
         setGroupMembers(
           members.map(m => ({
@@ -783,6 +791,7 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
             joined_at: m.joined_at,
             ...profileMap.get(m.user_id),
             is_online: presenceMap.get(m.user_id) || false,
+            role: roleMap.get(m.user_id) || (group.created_by === m.user_id ? "owner" : "member"),
           }))
         );
       } else {
