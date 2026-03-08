@@ -177,59 +177,19 @@ export const usePlans = (currentUserId: string | null) => {
     }
   }, [currentUserId]);
 
-  const autoCreateGroup = async (planId: string) => {
-    // Check if plan already has a group
-    const { data: existingGroup } = await supabase
-      .from("groups")
-      .select("id")
-      .eq("plan_id", planId)
-      .maybeSingle();
-
-    if (existingGroup) return; // Group already exists
-
-    // Check member count
+  const syncPlanGroup = async (planId: string) => {
+    // Check member count - need at least 2 members to create group
     const { data: members } = await supabase
       .from("plan_members")
       .select("user_id")
       .eq("plan_id", planId);
 
-    if (!members || members.length < 2) return; // Need at least 2 members
+    if (!members || members.length < 2) return;
 
-    // Get plan details
-    const { data: plan } = await supabase
-      .from("plans")
-      .select("plan_name, destination_name, creator_id")
-      .eq("id", planId)
-      .single();
-
-    if (!plan) return;
-
-    // Create the group
-    const { data: newGroup, error: createErr } = await supabase
-      .from("groups")
-      .insert({
-        name: (plan as any).plan_name,
-        description: `Trip group for ${(plan as any).destination_name}`,
-        category: "Plan",
-        icon: "MapPin",
-        created_by: (plan as any).creator_id,
-        plan_id: planId,
-      })
-      .select()
-      .single();
-
-    if (createErr) {
-      console.error("Failed to auto-create group:", createErr);
-      return;
-    }
-
-    // Add all plan members to the group
-    if (newGroup) {
-      const inserts = members.map((m: any) => ({
-        group_id: newGroup.id,
-        user_id: m.user_id,
-      }));
-      await supabase.from("group_members").insert(inserts);
+    // Use SECURITY DEFINER function to sync all plan members to the group
+    const { error } = await supabase.rpc("sync_plan_group_members", { p_plan_id: planId });
+    if (error) {
+      console.error("Failed to sync plan group members:", error);
     }
   };
 
