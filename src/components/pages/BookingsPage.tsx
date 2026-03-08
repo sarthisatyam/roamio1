@@ -618,6 +618,16 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                         </div>
                       </div>
 
+                      {/* Distances from landmarks */}
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-1.5">
+                        {landmarks.map((landmark, li) => (
+                          <div key={li} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <Navigation className="w-2.5 h-2.5" />
+                            <span>{getRandomDistance()} km from {landmark}</span>
+                          </div>
+                        ))}
+                      </div>
+
                       <div className="flex flex-wrap gap-1 my-2">
                         {stay.amenities.slice(0, 3).map((amenity) => (
                           <Badge key={amenity} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">
