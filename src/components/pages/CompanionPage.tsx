@@ -1205,7 +1205,6 @@ const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => vo
                   variant="secondary"
                   className="text-xs py-1.5 px-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
                   onClick={() => {
-                    setSearchQuery(dest);
                     setDestination(dest);
                     fetchTrips(dest);
                     setStage("discover");
