@@ -12,6 +12,7 @@ import {
   Shield,
   ArrowRight,
   Compass,
+  Wallet,
   Bookmark,
   Calendar,
   Clock,
@@ -56,6 +57,7 @@ const quickAccessCategories = [
   { icon: Shield, label: "Safe Places", color: "bg-emerald-500/10 text-emerald-600" },
   { icon: Compass, label: "Solo-Friendly", color: "bg-blue-500/10 text-blue-600" },
   { icon: Users, label: "Women-Safe", color: "bg-pink-500/10 text-pink-600" },
+  { icon: Wallet, label: "Budget Friendly", color: "bg-amber-500/10 text-amber-600" },
 ];
 
 const HomePage: React.FC<HomePageProps> = ({
@@ -223,7 +225,7 @@ const HomePage: React.FC<HomePageProps> = ({
       <div className="flex-1 overflow-y-auto">
         {/* Quick Access Categories */}
         <div className="px-4 py-3">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {quickAccessCategories.map((item) => {
               const Icon = item.icon;
               return (

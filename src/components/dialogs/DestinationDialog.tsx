@@ -141,82 +141,82 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
           <Separator />
 
           {/* Itinerary */}
-          {destination.itinerary && destination.itinerary.length > 0 && (
-            <div>
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary" />
-                Suggested Itinerary
-              </h3>
-              <div className="space-y-4">
-                {destination.itinerary.map((day) => {
-                  const timeSlots = [
-                    { label: "Morning", icon: "🌅", range: [5, 12] },
-                    { label: "Daytime", icon: "☀️", range: [12, 17] },
-                    { label: "Evening", icon: "🌇", range: [17, 21] },
-                    { label: "Night", icon: "🌙", range: [21, 29] },
-                  ];
+          {destination.itinerary && destination.itinerary.length > 0 && (() => {
+            // Flatten all activities across all days
+            const allActivities = destination.itinerary.flatMap((day) =>
+              day.activities.map((a) => ({ ...a, day: day.day }))
+            );
 
-                  const parseHour = (time: string): number => {
-                    const match = time.match(/(\d{1,2}):?\d{0,2}\s*(AM|PM)?/i);
-                    if (!match) return 12;
-                    let hour = parseInt(match[1]);
-                    const period = match[2]?.toUpperCase();
-                    if (period === "PM" && hour !== 12) hour += 12;
-                    if (period === "AM" && hour === 12) hour = 0;
-                    return hour;
-                  };
+            const timeSlots = [
+              { label: "Morning", icon: "🌅", range: [5, 12] },
+              { label: "Daytime", icon: "☀️", range: [12, 17] },
+              { label: "Evening", icon: "🌇", range: [17, 21] },
+              { label: "Night", icon: "🌙", range: [21, 29] },
+            ];
 
-                  const grouped = timeSlots
-                    .map((slot) => ({
-                      ...slot,
-                      activities: day.activities.filter((a) => {
-                        const h = parseHour(a.time);
-                        return h >= slot.range[0] && h < slot.range[1];
-                      }),
-                    }))
-                    .filter((slot) => slot.activities.length > 0);
+            const parseHour = (time: string): number => {
+              const match = time.match(/(\d{1,2}):?\d{0,2}\s*(AM|PM)?/i);
+              if (!match) return 12;
+              let hour = parseInt(match[1]);
+              const period = match[2]?.toUpperCase();
+              if (period === "PM" && hour !== 12) hour += 12;
+              if (period === "AM" && hour === 12) hour = 0;
+              return hour;
+            };
 
-                  return (
-                    <Card key={day.day} className="p-3">
-                      <h4 className="font-medium text-sm mb-2 text-primary">Day {day.day}: {day.title}</h4>
-                      <div className="space-y-3">
-                        {grouped.map((slot) => (
-                          <div key={slot.label}>
-                            <div className="flex items-center gap-1.5 mb-1.5">
-                              <span className="text-sm">{slot.icon}</span>
-                              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{slot.label}</span>
+            const grouped = timeSlots
+              .map((slot) => ({
+                ...slot,
+                activities: allActivities.filter((a) => {
+                  const h = parseHour(a.time);
+                  return h >= slot.range[0] && h < slot.range[1];
+                }),
+              }))
+              .filter((slot) => slot.activities.length > 0);
+
+            return (
+              <div>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary" />
+                  Suggested Itinerary
+                </h3>
+                <Card className="p-3">
+                  <div className="space-y-3">
+                    {grouped.map((slot) => (
+                      <div key={slot.label}>
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <span className="text-sm">{slot.icon}</span>
+                          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{slot.label}</span>
+                        </div>
+                        <div className="space-y-1 pl-6">
+                          {slot.activities.map((activity, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center justify-between gap-2 py-1 border-b border-border/30 last:border-0"
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                                <span className="text-xs text-muted-foreground whitespace-nowrap">{activity.time}</span>
+                                <span className="text-sm truncate">{activity.activity}</span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 flex-shrink-0"
+                                onClick={() => handleAddToPlanner(activity, activity.day)}
+                              >
+                                <Plus className="w-4 h-4 text-primary" />
+                              </Button>
                             </div>
-                            <div className="space-y-1 pl-6">
-                              {slot.activities.map((activity, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-center justify-between gap-2 py-1 border-b border-border/30 last:border-0"
-                                >
-                                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                                    <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                                    <span className="text-xs text-muted-foreground whitespace-nowrap">{activity.time}</span>
-                                    <span className="text-sm truncate">{activity.activity}</span>
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 flex-shrink-0"
-                                    onClick={() => handleAddToPlanner(activity, day.day)}
-                                  >
-                                    <Plus className="w-4 h-4 text-primary" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </Card>
-                  );
-                })}
+                    ))}
+                  </div>
+                </Card>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           <Separator />
 
