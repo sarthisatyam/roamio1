@@ -46,6 +46,7 @@ export const useJourneyInvites = (currentUserId: string | null) => {
       const received = allInvites.filter(i => i.to_user_id === currentUserId);
 
       // Enrich received invites with sender profiles
+      const enrichedReceived: JourneyInvite[] = [];
       if (received.length > 0) {
         const senderIds = received.map(i => i.from_user_id);
         const { data: profiles } = await supabase
@@ -56,7 +57,10 @@ export const useJourneyInvites = (currentUserId: string | null) => {
         const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
         received.forEach(inv => {
           const p = profileMap.get(inv.from_user_id);
-          if (p) inv.from_profile = { display_name: p.display_name, avatar_url: p.avatar_url, city: p.city };
+          enrichedReceived.push({
+            ...inv,
+            from_profile: p ? { display_name: p.display_name, avatar_url: p.avatar_url, city: p.city } : undefined,
+          });
         });
       }
 
