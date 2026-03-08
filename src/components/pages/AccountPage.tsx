@@ -97,7 +97,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         // Fetch user profile
         const { data: profile } = await supabase
           .from('profiles')
-          .select('gender, age, bio, interests, display_name')
+          .select('gender, age, bio, interests, display_name, avatar_url')
           .eq('user_id', userId)
           .single();
         if (profile) setUserProfile(profile);
