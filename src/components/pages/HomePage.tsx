@@ -259,9 +259,9 @@ const HomePage: React.FC<HomePageProps> = ({
                   key={item.label}
                   className={cn(
                     "p-3 text-center shadow-soft hover:shadow-medium transition-shadow cursor-pointer rounded-2xl border-0",
-                    !item.isEmergency && searchQuery === item.label && "ring-2 ring-primary"
+                    searchQuery === item.label && "ring-2 ring-primary"
                   )}
-                  onClick={() => item.isEmergency ? setEmergencyDialogOpen(true) : handleCategoryClick(item.label)}
+                  onClick={() => handleCategoryClick(item.label)}
                 >
                   <div className={cn("w-10 h-10 rounded-xl mx-auto mb-1.5 flex items-center justify-center", item.color)}>
                     <Icon className="w-5 h-5" />
