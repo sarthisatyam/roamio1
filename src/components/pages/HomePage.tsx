@@ -361,7 +361,7 @@ const HomePage: React.FC<HomePageProps> = ({
                             Best for {dest.recommendedDays} day{dest.recommendedDays > 1 ? "s" : ""} visit
                           </p>
                         )}
-                    </div>
+                      </div>
                   </Card>
                 ))}
               </div>
