@@ -438,7 +438,7 @@ const HomePage: React.FC<HomePageProps> = ({
                         <MapPin className="w-3 h-3" />
                         <span>{plan.destination_name}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           <span>{format(new Date(plan.start_date), "MMM dd")} – {format(new Date(plan.end_date), "MMM dd")}</span>
@@ -446,6 +446,13 @@ const HomePage: React.FC<HomePageProps> = ({
                         <div className="flex items-center gap-1">
                           <Users className="w-3 h-3" />
                           <span>{plan.member_count || 1}/{plan.max_members}</span>
+                        </div>
+                        {(plan.request_count ?? 0) > 0 && (
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{plan.request_count} pending</span>
+                          </div>
+                        )}
                         </div>
                       </div>
 
