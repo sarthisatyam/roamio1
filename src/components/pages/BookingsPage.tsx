@@ -573,16 +573,71 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                             <Button
                               size="sm"
                               className="text-xs h-7 rounded-lg px-3 bg-gradient-primary text-white"
-                              onClick={() => {
-                                const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(hotel.name + ' ' + (hotel.address || effectiveLocation) + ' book hotel')}`;
-                                window.open(searchUrl, '_blank');
-                              }}
+                              onClick={() => handleCompare(`ai-hotel-${idx}`, hotel.name, hotel.address || effectiveLocation || '', hotel.stars, hotel.pricePerNight)}
                             >
-                              <ExternalLink className="w-3 h-3 mr-1" />
-                              Book
+                              {loadingCompareId === `ai-hotel-${idx}` ? (
+                                <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                              ) : (
+                                <Zap className="w-3 h-3 mr-1" />
+                              )}
+                              Compare
                             </Button>
                           </div>
                         </div>
+
+                        {selectedStay === `ai-hotel-${idx}` && aiComparisons[`ai-hotel-${idx}`] && (() => {
+                          const comp = aiComparisons[`ai-hotel-${idx}`];
+                          const best = getBestFromPlatforms(comp);
+                          return (
+                            <div className="mt-3 p-3 bg-muted/50 rounded-xl">
+                              <div className="flex items-center gap-2 mb-3">
+                                <TrendingDown className="w-4 h-4 text-success" />
+                                <h4 className="font-semibold text-sm">Best Prices</h4>
+                              </div>
+                              <div className="space-y-2 mb-3">
+                                {comp.map((platform: any) => {
+                                  const isBest = platform.name === best.bestName;
+                                  return (
+                                    <div
+                                      key={platform.name}
+                                      className={cn(
+                                        "flex items-center justify-between p-2.5 rounded-xl transition-all",
+                                        isBest ? "bg-success/10 border border-success/30" : "bg-background",
+                                      )}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        {renderPlatformLogo(platform.name)}
+                                        <span className="font-medium text-sm">{platform.name}</span>
+                                        {isBest && (
+                                          <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
+                                            <Award className="w-2.5 h-2.5 mr-0.5" />
+                                            Best
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <div className="text-right">
+                                        <div className="font-bold text-primary text-sm">{platform.price}/night</div>
+                                        {platform.savings !== "₹0" && (
+                                          <div className="text-[10px] text-success">Save {platform.savings}</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              <Button
+                                className="w-full bg-gradient-primary text-white h-10 rounded-xl text-sm"
+                                onClick={() => {
+                                  const bestP = comp.find((p: any) => p.name === best.bestName);
+                                  if (bestP?.url) window.open(bestP.url, '_blank');
+                                }}
+                              >
+                                Book via {best.bestName} • ₹{best.minPrice?.toLocaleString("en-IN")}
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                              </Button>
+                            </div>
+                          );
+                        })()}
 
                         <p className="text-[9px] text-muted-foreground mt-1.5 truncate">
                           📍 {hotel.address}
@@ -593,7 +648,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                 );
               })}
             </>
-          )}
+          )
 
           {/* API Hotel Results */}
           {!isLoadingHotels && !hotelError && filteredStayOptions.length > 0 ? (
