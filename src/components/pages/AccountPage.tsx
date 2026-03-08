@@ -40,7 +40,7 @@ import {
   TravelListDialog
 } from "@/components/dialogs/AccountSectionDialogs";
 import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
-import { PrivacyPolicyDialog, TermsOfServiceDialog, ContactDialog } from "@/components/dialogs/LegalContactDialogs";
+import { HelpLegalDialog } from "@/components/dialogs/LegalContactDialogs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useTrips, Trip, TripRequest } from "@/hooks/useTrips";
@@ -70,9 +70,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [coCompanionDialogOpen, setCoCompanionDialogOpen] = useState(false);
   const [interestsDialogOpen, setInterestsDialogOpen] = useState(false);
   const [travelListDialogOpen, setTravelListDialogOpen] = useState(false);
-  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
-  const [termsDialogOpen, setTermsDialogOpen] = useState(false);
-  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [helpLegalDialogOpen, setHelpLegalDialogOpen] = useState(false);
 
   // Trips state
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -260,36 +258,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     },
     {
       icon: Headphones,
-      title: "Customer Support",
-      description: "Get help and support",
+      title: "Help & Support",
+      description: "Support, contact, privacy & terms",
       color: "text-success",
       bgColor: "bg-success/10",
-      action: () => setSupportDialogOpen(true)
+      action: () => setHelpLegalDialogOpen(true)
     },
-    {
-      icon: Shield,
-      title: "Privacy Policy",
-      description: "How we handle your data",
-      color: "text-muted-foreground",
-      bgColor: "bg-muted",
-      action: () => setPrivacyDialogOpen(true)
-    },
-    {
-      icon: CheckCircle,
-      title: "Terms of Service",
-      description: "Usage terms and conditions",
-      color: "text-muted-foreground",
-      bgColor: "bg-muted",
-      action: () => setTermsDialogOpen(true)
-    },
-    {
-      icon: Mail,
-      title: "Contact Us",
-      description: "Get in touch with our team",
-      color: "text-primary",
-      bgColor: "bg-primary/10",
-      action: () => setContactDialogOpen(true)
-    }
   ];
 
   const getAccountTypeIcon = () => {
@@ -598,9 +572,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <VerifyDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen} />
       <SupportDialog open={supportDialogOpen} onOpenChange={setSupportDialogOpen} />
       <TravelGuideDialog open={travelGuideDialogOpen} onOpenChange={setTravelGuideDialogOpen} />
-      <PrivacyPolicyDialog open={privacyDialogOpen} onOpenChange={setPrivacyDialogOpen} />
-      <TermsOfServiceDialog open={termsDialogOpen} onOpenChange={setTermsDialogOpen} />
-      <ContactDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} />
+      <HelpLegalDialog open={helpLegalDialogOpen} onOpenChange={setHelpLegalDialogOpen} />
     </div>
   );
 };

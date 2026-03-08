@@ -910,6 +910,14 @@ interface Place {
   image: string;
 }
 
+interface ManualPlace {
+  id: number;
+  name: string;
+  timing: string;
+}
+
+const SEASONS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Winter", "Summer", "Monsoon", "Spring", "Autumn"];
+
 interface TravelListDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -917,6 +925,26 @@ interface TravelListDialogProps {
 }
 
 export const TravelListDialog: React.FC<TravelListDialogProps> = ({ open, onOpenChange, places = [] }) => {
+  const [manualPlaces, setManualPlaces] = useState<ManualPlace[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newTiming, setNewTiming] = useState("");
+
+  const handleAdd = () => {
+    if (!newName.trim()) { toast.error("Enter a destination name"); return; }
+    if (!newTiming) { toast.error("Select a month or season"); return; }
+    setManualPlaces(prev => [...prev, { id: Date.now(), name: newName.trim(), timing: newTiming }]);
+    setNewName("");
+    setNewTiming("");
+    setShowAddForm(false);
+    toast.success("Added to travel list!");
+  };
+
+  const handleRemoveManual = (id: number) => {
+    setManualPlaces(prev => prev.filter(p => p.id !== id));
+    toast.info("Removed from travel list");
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
@@ -925,26 +953,96 @@ export const TravelListDialog: React.FC<TravelListDialogProps> = ({ open, onOpen
             <Bookmark className="w-5 h-5 text-success" />
             Travel List
           </DialogTitle>
-          <DialogDescription>Your saved destinations</DialogDescription>
+          <DialogDescription>Your saved and planned destinations</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          {places.length === 0 ? (
-            <div className="text-center py-8">
-              <Bookmark className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">No destinations saved yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Bookmark places to add them here</p>
+          {/* Add button */}
+          {!showAddForm && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full rounded-xl text-xs h-9 border-dashed"
+              onClick={() => setShowAddForm(true)}
+            >
+              <MapPin className="w-3.5 h-3.5 mr-1.5" />
+              Add destination manually
+            </Button>
+          )}
+
+          {/* Add Form */}
+          {showAddForm && (
+            <Card className="p-3 rounded-2xl border-0 shadow-soft space-y-2.5">
+              <Input
+                placeholder="Destination name (e.g., Manali)"
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                className="text-xs h-9 rounded-xl"
+              />
+              <select
+                value={newTiming}
+                onChange={e => setNewTiming(e.target.value)}
+                className="w-full h-9 rounded-xl border border-input bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Select month or season</option>
+                <optgroup label="Months">
+                  {SEASONS.slice(0, 12).map(m => <option key={m} value={m}>{m}</option>)}
+                </optgroup>
+                <optgroup label="Seasons">
+                  {SEASONS.slice(12).map(s => <option key={s} value={s}>{s}</option>)}
+                </optgroup>
+              </select>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" className="flex-1 h-8 text-xs rounded-xl" onClick={() => { setShowAddForm(false); setNewName(""); setNewTiming(""); }}>
+                  Cancel
+                </Button>
+                <Button size="sm" className="flex-1 h-8 text-xs rounded-xl bg-gradient-primary text-white" onClick={handleAdd}>
+                  Add
+                </Button>
+              </div>
+            </Card>
+          )}
+
+          {/* Manually added places */}
+          {manualPlaces.map((place) => (
+            <Card key={place.id} className="p-3 rounded-2xl border-0 shadow-soft">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                    <MapPin className="w-4 h-4 text-success" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm">{place.name}</h4>
+                    <Badge variant="secondary" className="text-[10px] py-0 px-1.5 rounded-md mt-0.5">
+                      <Calendar className="w-2.5 h-2.5 mr-0.5" />
+                      {place.timing}
+                    </Badge>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" className="w-7 h-7 rounded-lg text-destructive hover:bg-destructive/10" onClick={() => handleRemoveManual(place.id)}>
+                  ✕
+                </Button>
+              </div>
+            </Card>
+          ))}
+
+          {/* Bookmarked places */}
+          {places.length === 0 && manualPlaces.length === 0 ? (
+            <div className="text-center py-6">
+              <Bookmark className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No destinations yet</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Add destinations or bookmark places from Explore</p>
             </div>
           ) : (
             places.map((place) => (
-              <Card key={place.id} className="p-4">
+              <Card key={place.id} className="p-3 rounded-2xl border-0 shadow-soft">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 text-2xl flex items-center justify-center bg-muted rounded-full">
+                  <div className="w-10 h-10 text-xl flex items-center justify-center bg-muted rounded-xl">
                     {place.image}
                   </div>
                   <div>
-                    <h4 className="font-semibold">{place.name}</h4>
-                    <p className="text-sm text-muted-foreground">Saved destination</p>
+                    <h4 className="font-semibold text-sm">{place.name}</h4>
+                    <p className="text-[10px] text-muted-foreground">Bookmarked</p>
                   </div>
                 </div>
               </Card>
