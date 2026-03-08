@@ -143,7 +143,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
     ? searchQuery
     : (userData?.locationEnabled && userData?.currentCity ? userData.currentCity : null);
 
-  const prominentPlace = effectiveLocation ? getProminentPlace(effectiveLocation) : "City Center";
+  const landmarks = effectiveLocation ? getCityLandmarks(effectiveLocation) : [];
 
   useEffect(() => {
     const fetchHotels = async () => {
