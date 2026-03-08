@@ -332,11 +332,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {/* Quick Settings Card */}
         <Card className="mb-4 shadow-soft rounded-2xl border-0">
-          <CardContent className="p-3 space-y-3">
-            <div className="flex items-center gap-3">
-              <User className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs font-medium">{userData?.name || 'User'}</span>
-            </div>
+          <CardContent className="p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <MapPin className="w-4 h-4 text-muted-foreground" />
