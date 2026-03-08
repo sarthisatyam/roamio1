@@ -1153,6 +1153,17 @@ const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => vo
 
   return (
     <div className="px-4 pt-3 space-y-4">
+      {/* Create Plan Button */}
+      {onCreatePlan && (
+        <Button
+          onClick={onCreatePlan}
+          className="w-full bg-gradient-primary text-primary-foreground rounded-xl h-10 text-xs gap-1.5"
+        >
+          <Plus className="w-4 h-4" />
+          Create New Plan
+        </Button>
+      )}
+
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -1245,15 +1256,7 @@ const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => vo
         })
       )}
 
-      {/* Create Plan FAB */}
-      {onCreatePlan && (
-        <button
-          onClick={onCreatePlan}
-          className="fixed bottom-24 left-6 w-14 h-14 rounded-full bg-gradient-primary text-primary-foreground shadow-lg flex items-center justify-center hover:scale-105 transition-transform z-10"
-        >
-          <Plus className="w-6 h-6" />
-        </button>
-      )}
+
 
       {/* Join Request Dialog */}
       <Dialog open={!!selectedPlan} onOpenChange={() => setSelectedPlan(null)}>
