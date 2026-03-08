@@ -28,18 +28,27 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [plannerActivities, setPlannerActivities] = useState<{ title: string; location: string; type: string }[]>([]);
   const [helpLegalOpen, setHelpLegalOpen] = useState(false);
 
+  const fetchUserGender = React.useCallback((uid: string) => {
+    supabase.from("profiles").select("gender").eq("user_id", uid).maybeSingle().then(({ data: p }) => {
+      setUserGender((p as any)?.gender || null);
+    });
+  }, []);
+
   // Fetch current user
   React.useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       const uid = data.user?.id || null;
       setCurrentUserId(uid);
-      if (uid) {
-        supabase.from("profiles").select("gender").eq("user_id", uid).maybeSingle().then(({ data: p }) => {
-          setUserGender((p as any)?.gender || null);
-        });
-      }
+      if (uid) fetchUserGender(uid);
     });
-  }, []);
+  }, [fetchUserGender]);
+
+  // Re-fetch gender when returning from account page or opening plan builder
+  React.useEffect(() => {
+    if (!showAccount && currentUserId) {
+      fetchUserGender(currentUserId);
+    }
+  }, [showAccount, currentUserId, fetchUserGender]);
   
   // Location state with localStorage persistence
   const [locationEnabled, setLocationEnabled] = useState(() => {
