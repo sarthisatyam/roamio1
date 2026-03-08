@@ -648,7 +648,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                 );
               })}
             </>
-          )
+          )}
 
           {/* API Hotel Results */}
           {!isLoadingHotels && !hotelError && filteredStayOptions.length > 0 ? (
