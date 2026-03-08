@@ -437,7 +437,7 @@ const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center gap-2 mt-2" onClick={e => e.stopPropagation()}>
                       {isConnected ? (
                         <>
                           <Badge variant="secondary" className="text-[10px] gap-1 bg-success/10 text-success border-0 rounded-lg">
