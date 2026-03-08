@@ -61,7 +61,7 @@ const PlanBuilder: React.FC<PlanBuilderProps> = ({ currentUserId, userGender, on
     planName.trim().length > 0 &&
     destination.trim().length > 0 &&
     startDate && endDate && endDate >= startDate &&
-    maxMembers >= 1 &&
+    maxMembers >= 2 &&
     !!groupType &&
     !!visibility &&
     interests.length >= 3;
