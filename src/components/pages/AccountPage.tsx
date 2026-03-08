@@ -149,63 +149,59 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       toast.error("Failed to process request");
     }
   };
-  // Mock companion data for displaying liked companions with detailed info
-  const companions = [
-    { 
-      id: 1, 
-      name: "Priya Sharma", 
-      profileImage: "👩‍💻", 
-      age: 28, 
-      location: "Mumbai, India",
-      bio: "Tech enthusiast and travel lover",
-      interests: ["Technology", "Photography", "Hiking"],
-      gender: "Female",
-      status: "online"
-    },
-    { 
-      id: 2, 
-      name: "Ananya Patel", 
-      profileImage: "👩‍🎨", 
-      age: 25, 
-      location: "Delhi, India",
-      bio: "Artist exploring the world",
-      interests: ["Art", "Culture", "Museums"],
-      gender: "Female",
-      status: "offline"
-    },
-    { 
-      id: 3, 
-      name: "Arjun Singh", 
-      profileImage: "👨‍🦱", 
-      age: 30, 
-      location: "Bangalore, India",
-      bio: "Adventure seeker and foodie",
-      interests: ["Adventure", "Food", "Sports"],
-      gender: "Male",
-      status: "online"
-    },
-    { 
-      id: 4, 
-      name: "Meera Reddy", 
-      profileImage: "👩‍🍳", 
-      age: 26, 
-      location: "Chennai, India",
-      bio: "Chef who loves exploring cuisines",
-      interests: ["Cooking", "Culture", "Food"],
-      gender: "Female",
-      status: "offline"
-    }
-  ];
+  // Dynamic liked companions from database
+  const [dynamicCompanions, setDynamicCompanions] = useState<{
+    id: string;
+    name: string;
+    profileImage: string;
+    age: number | null;
+    location: string;
+    bio: string;
+    interests: string[];
+    gender: string;
+    status: string;
+  }[]>([]);
 
-  // Mock user interests data
-  const userInterests = {
-    gender: userData?.preferences?.includes('Male') ? 'Male' : userData?.preferences?.includes('Female') ? 'Female' : 'Not specified',
-    age: 25, // This could be from userData
-    interests: userData?.preferences || ["Adventure", "Culture", "Food"],
-    about: "Passionate traveler looking for authentic experiences and meaningful connections."
-  };
+  useEffect(() => {
+    if (!currentUserId) return;
+    const fetchLikedCompanions = async () => {
+      const { data: liked } = await supabase
+        .from('liked_companions')
+        .select('liked_user_id')
+        .eq('user_id', currentUserId);
+      if (!liked || liked.length === 0) { setDynamicCompanions([]); return; }
+      
+      const likedIds = liked.map(l => l.liked_user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, age, city, bio, interests, gender')
+        .in('user_id', likedIds);
+      
+      if (profiles) {
+        // Check presence
+        const { data: presenceData } = await supabase
+          .from('user_presence')
+          .select('user_id, is_online')
+          .in('user_id', likedIds);
+        const presenceMap = new Map(presenceData?.map(p => [p.user_id, p.is_online]) || []);
 
-  const likedCompanionProfiles = companions.filter(c => likedCompanions.includes(c.id));
+        setDynamicCompanions(profiles.map(p => ({
+          id: p.user_id,
+          name: p.display_name || 'Traveler',
+          profileImage: (p.display_name || 'T').charAt(0).toUpperCase(),
+          age: p.age,
+          location: p.city || 'India',
+          bio: p.bio || 'Fellow traveler',
+          interests: p.interests || [],
+          gender: p.gender || 'Not specified',
+          status: presenceMap.get(p.user_id) ? 'online' : 'offline',
+        })));
+      }
+    };
+    fetchLikedCompanions();
+  }, [currentUserId]);
+
+  const likedCompanionProfiles = dynamicCompanions;
 
   const menuItems = [
     {
