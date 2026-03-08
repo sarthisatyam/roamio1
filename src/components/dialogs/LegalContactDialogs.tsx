@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Send, CheckCircle, Shield, FileText, Headphones, Mail, ChevronRight, ArrowLeft } from "lucide-react";
+import { Send, CheckCircle, Shield, FileText, Headphones, Mail, ChevronRight, ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface DialogProps {
