@@ -979,8 +979,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
 };
 
 // ==================== TRIPS TAB ====================
-const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => void }> = ({ currentUserId, onNavigateToAccount }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => void; searchQuery: string }> = ({ currentUserId, onNavigateToAccount, searchQuery }) => {
   const [stage, setStage] = useState<"explore" | "intent" | "discover" | "my-trips">("explore");
 
   // Intent form
