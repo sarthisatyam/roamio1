@@ -72,40 +72,49 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
 
   const handleLocationToggle = async (enabled: boolean) => {
     if (enabled) {
-      // Request browser geolocation permission
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            setLocationEnabled(true);
-            localStorage.setItem('locationEnabled', 'true');
-            
-            const { latitude, longitude } = position.coords;
-            setUserLat(latitude);
-            setUserLng(longitude);
-            localStorage.setItem('userLat', latitude.toString());
-            localStorage.setItem('userLng', longitude.toString());
-            
-            // Reverse geocode to get city name
-            try {
-              const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
-              );
-              const data = await response.json();
-              const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state_district || data.address?.county || data.address?.state || 'Unknown';
-              setCurrentCity(city);
-              localStorage.setItem('currentCity', city);
-            } catch {
-              setCurrentCity('Unknown');
-            }
-          },
-          () => {
-            // Permission denied or error
-            setLocationEnabled(false);
-            localStorage.setItem('locationEnabled', 'false');
-            setCurrentCity(null);
-            localStorage.removeItem('currentCity');
-          }
-        );
+      try {
+        // Request permission first
+        const permStatus = await Geolocation.requestPermissions();
+        if (permStatus.location === 'denied') {
+          setLocationEnabled(false);
+          localStorage.setItem('locationEnabled', 'false');
+          setCurrentCity(null);
+          localStorage.removeItem('currentCity');
+          return;
+        }
+
+        // Get current position with high accuracy
+        const position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 15000,
+        });
+
+        const { latitude, longitude } = position.coords;
+        setLocationEnabled(true);
+        localStorage.setItem('locationEnabled', 'true');
+        setUserLat(latitude);
+        setUserLng(longitude);
+        localStorage.setItem('userLat', latitude.toString());
+        localStorage.setItem('userLng', longitude.toString());
+
+        // Reverse geocode to get city name
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+          );
+          const data = await response.json();
+          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.state_district || data.address?.county || data.address?.state || 'Unknown';
+          setCurrentCity(city);
+          localStorage.setItem('currentCity', city);
+        } catch {
+          setCurrentCity('Unknown');
+        }
+      } catch (err) {
+        console.error("Geolocation error:", err);
+        setLocationEnabled(false);
+        localStorage.setItem('locationEnabled', 'false');
+        setCurrentCity(null);
+        localStorage.removeItem('currentCity');
       }
     } else {
       setLocationEnabled(false);
