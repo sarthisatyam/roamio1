@@ -10,7 +10,7 @@ import ExplorePage from "./pages/ExplorePage";
 import PlanBuilder from "./PlanBuilder";
 import AccountPage from "./pages/AccountPage";
 import FloatingAIBot from "./FloatingAIBot";
-import { PrivacyPolicyDialog, TermsOfServiceDialog, ContactDialog } from "./dialogs/LegalContactDialogs";
+import { HelpLegalDialog } from "./dialogs/LegalContactDialogs";
 
 interface MainAppProps {
   userData: { name: string; emailOrPhone: string; preferences: string[]; language: string; locationEnabled: boolean } | null;
