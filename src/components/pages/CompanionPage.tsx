@@ -839,6 +839,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
 
   const getCategoryIcon = (category: string) => {
     switch (category.toLowerCase()) {
+      case "plan": return "📋";
       case "backpacking": return "🎒";
       case "road trips": return "🚗";
       case "weekend trips": return "🏕️";
