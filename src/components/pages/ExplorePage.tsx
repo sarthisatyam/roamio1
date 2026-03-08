@@ -74,7 +74,7 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
       {/* Header */}
       <div className="px-4 pt-4 pb-3 bg-card border-b border-border">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold">Explore Plans</h1>
+          <h1 className="text-xl font-bold">Explore Trips</h1>
           <Button variant="ghost" size="icon" onClick={onNavigateToAccount}>
             <User className="w-5 h-5" />
           </Button>
