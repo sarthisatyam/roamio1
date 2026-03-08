@@ -33,6 +33,15 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [currentCity, setCurrentCity] = useState<string | null>(() => {
     return localStorage.getItem('currentCity');
   });
+  
+  const [userLat, setUserLat] = useState<number | null>(() => {
+    const saved = localStorage.getItem('userLat');
+    return saved ? parseFloat(saved) : null;
+  });
+  const [userLng, setUserLng] = useState<number | null>(() => {
+    const saved = localStorage.getItem('userLng');
+    return saved ? parseFloat(saved) : null;
+  });
 
   const handleLocationToggle = async (enabled: boolean) => {
     if (enabled) {
