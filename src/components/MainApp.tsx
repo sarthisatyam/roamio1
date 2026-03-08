@@ -156,14 +156,25 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
     return <AccountPage userData={mergedUserData} onNavigateBack={handleNavigateBack} onLogout={handleLogout} likedCompanions={likedCompanions} bookmarkedPlaces={bookmarkedPlaces} onLocationToggle={handleLocationToggle} />;
   }
 
+  if (showPlanBuilder && currentUserId) {
+    return (
+      <PlanBuilder
+        currentUserId={currentUserId}
+        userGender={userGender}
+        onComplete={() => { setShowPlanBuilder(false); setActiveTab(1); }}
+        onClose={() => setShowPlanBuilder(false)}
+      />
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} />}
-        {activeTab === 1 && <BookingsPage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} />}
-        {activeTab === 2 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
-        {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
+        {activeTab === 1 && <ExplorePage onNavigateToAccount={handleNavigateToAccount} />}
+        {activeTab === 3 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
+        {activeTab === 4 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
 
       {/* Footer Links */}
@@ -181,20 +192,29 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+            const isCreate = (tab as any).isCreate;
             
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  if (isCreate) {
+                    setShowPlanBuilder(true);
+                  } else {
+                    setActiveTab(tab.id);
+                  }
+                }}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200",
-                  isActive
-                    ? "bg-gradient-primary text-white shadow-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200",
+                  isCreate
+                    ? "bg-gradient-primary text-white shadow-medium scale-105 -mt-2"
+                    : isActive
+                      ? "bg-gradient-primary text-white shadow-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
               >
-                <Icon className={cn("w-5 h-5", isActive && "scale-110")} />
-                <span className="text-xs font-medium">{tab.name}</span>
+                <Icon className={cn("w-5 h-5", (isActive || isCreate) && "scale-110")} />
+                <span className="text-[10px] font-medium">{tab.name}</span>
               </button>
             );
           })}
