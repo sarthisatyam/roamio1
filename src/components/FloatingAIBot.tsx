@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Send, Bot, X, Sparkles, Loader2, MapPin, Star, Shield, ExternalLink, Building2, Bed, Home, Search } from "lucide-react";
+import { MessageCircle, Send, Bot, X, Sparkles, Loader2, MapPin, Star, Shield, ExternalLink, Building2, Bed, Home, Search, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { EmergencyDialog } from "@/components/dialogs/AccountSectionDialogs";
 
 interface ChatMessage {
   id: number;
