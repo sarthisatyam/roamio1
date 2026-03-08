@@ -74,7 +74,7 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
       {/* Header */}
       <div className="px-4 pt-4 pb-3 bg-card border-b border-border">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold">Explore Plans</h1>
+          <h1 className="text-xl font-bold">Explore Trips</h1>
           <Button variant="ghost" size="icon" onClick={onNavigateToAccount}>
             <User className="w-5 h-5" />
           </Button>
@@ -100,7 +100,7 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
           <div className="text-center py-20">
             <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
             <p className="text-lg font-medium">No plans yet</p>
-            <p className="text-sm text-muted-foreground">Be the first to create a plan!</p>
+            <p className="text-sm text-muted-foreground">Be the first to create a trip!</p>
           </div>
         ) : (
           plans.map(plan => {
