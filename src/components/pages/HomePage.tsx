@@ -291,14 +291,7 @@ const HomePage: React.FC<HomePageProps> = ({
         {!showAIResults && (
           <section className="px-4 mb-4">
             <div className="flex items-center justify-between mb-3">
-              <div>
-                <h2 className="text-sm font-semibold">Popular Destinations</h2>
-                <p className="text-[10px] text-muted-foreground">
-                  {userData?.locationEnabled && userData?.currentCity
-                    ? `3 nearby ${userData.currentCity} + 2 must-visit across India`
-                    : "3 nearby + 2 must-visit across India"}
-                </p>
-              </div>
+              <h2 className="text-sm font-semibold">Popular Destinations</h2>
             </div>
 
             {popularLoading ? (
