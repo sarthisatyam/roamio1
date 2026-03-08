@@ -446,12 +446,18 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
           </Popover>
         </div>
 
-        {/* Prominent Place Indicator */}
-        {effectiveLocation && (
-          <div className="flex items-center gap-1.5 mb-3 px-1">
-            <Navigation className="w-3 h-3 text-primary" />
+        {/* Landmarks Indicator */}
+        {effectiveLocation && landmarks.length > 0 && (
+          <div className="flex items-center gap-1.5 mb-3 px-1 flex-wrap">
+            <Navigation className="w-3 h-3 text-primary flex-shrink-0" />
             <span className="text-[11px] text-muted-foreground">
-              Distance from <span className="font-medium text-foreground">{prominentPlace}</span>
+              Distances from{" "}
+              {landmarks.map((l, i) => (
+                <span key={l}>
+                  <span className="font-medium text-foreground">{l}</span>
+                  {i < landmarks.length - 1 && ", "}
+                </span>
+              ))}
             </span>
           </div>
         )}
