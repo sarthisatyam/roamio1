@@ -693,6 +693,30 @@ const HomePage: React.FC<HomePageProps> = ({
         destination={selectedDestination}
         onAddToPlanner={onAddToPlanner}
       />
+
+      {/* Join Request Dialog */}
+      <Dialog open={!!selectedPlan} onOpenChange={() => setSelectedPlan(null)}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Request to Join</DialogTitle>
+            <DialogDescription>
+              Send a request to join "{selectedPlan?.plan_name}"
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={joinMessage}
+            onChange={e => setJoinMessage(e.target.value)}
+            placeholder="Introduce yourself (optional)"
+            className="min-h-[80px]"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedPlan(null)}>Cancel</Button>
+            <Button onClick={handleJoinRequest} disabled={isJoining} className="bg-gradient-primary">
+              {isJoining ? "Sending..." : "Send Request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
