@@ -13,7 +13,7 @@ import {
   Users, Search, MapPin, Shield, CheckCircle, User, Compass,
   Plus, Loader2, Calendar, ArrowRight, Send, Clock,
   MessageCircle, Eye, ChevronLeft, TrendingUp, UserCheck,
-  Heart, Filter, X, RefreshCw,
+  Heart, Filter, X, RefreshCw, UsersRound, Vote,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
