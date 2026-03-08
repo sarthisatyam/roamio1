@@ -3,33 +3,19 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
 import {
   Home,
   Star,
   MapPin,
   Search,
-  Wifi,
-  CheckCircle,
-  User,
-  Calendar as CalendarIcon,
   Building2,
   Bed,
-  Utensils,
-  Zap,
-  TrendingDown,
-  ExternalLink,
   Sparkles,
-  Award,
-  ArrowRight,
+  ExternalLink,
   Loader2,
   Navigation,
+  User,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useAISearch } from "@/hooks/useAISearch";
-import AISearchResults from "@/components/AISearchResults";
 import { supabase } from "@/integrations/supabase/client";
 
 interface BookingsPageProps {
@@ -44,20 +30,18 @@ interface BookingsPageProps {
   onNavigateToAccount?: () => void;
 }
 
-interface HotelResult {
-  hotelId: number;
-  hotelName: string;
-  location: {
-    name: string;
-    country: string;
-    geo?: { lat: number; lon: number };
-  };
+interface AIHotel {
+  name: string;
+  type: string;
   stars: number;
-  priceFrom: number;
-  pricePercentile?: Record<string, number>;
+  pricePerNight: number;
+  distance: string;
+  address: string;
+  mapLink: string;
+  amenities: string[];
+  imageSearchUrl?: string;
 }
 
-// Famous landmarks by city (max 3 per city)
 const CITY_LANDMARKS: Record<string, string[]> = {
   hyderabad: ["Charminar", "Golconda Fort", "Hussain Sagar Lake"],
   delhi: ["India Gate", "Red Fort", "Qutub Minar"],
@@ -104,40 +88,21 @@ function getRandomDistance(): string {
   return distances[Math.floor(Math.random() * distances.length)].toFixed(1);
 }
 
+const TYPE_TABS = [
+  { key: "all", label: "All", icon: Home },
+  { key: "hotel", label: "Hotels", icon: Building2 },
+  { key: "hostel", label: "Hostels", icon: Bed },
+  { key: "guesthouse", label: "Guesthouses", icon: Home },
+  { key: "resort", label: "Resorts", icon: Building2 },
+];
+
 const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccount }) => {
-  const [checkInDate, setCheckInDate] = useState<Date>();
-  const [checkOutDate, setCheckOutDate] = useState<Date>();
-  const [stayFilters, setStayFilters] = useState({
-    type: "all",
-    priceRange: "all",
-    rating: "all",
-  });
-
-  const [hotelResults, setHotelResults] = useState<HotelResult[]>([]);
-  const [isLoadingHotels, setIsLoadingHotels] = useState(false);
-  const [hotelError, setHotelError] = useState<string | null>(null);
-
-  interface AIHotel {
-    name: string;
-    type: string;
-    stars: number;
-    pricePerNight: number;
-    distance: string;
-    address: string;
-    mapLink: string;
-    amenities: string[];
-    description: string;
-    safetyRating: string;
-  }
-  const [aiHotels, setAiHotels] = useState<AIHotel[]>([]);
-  const [isLoadingAI, setIsLoadingAI] = useState(false);
-  const [aiSearchDone, setAiSearchDone] = useState(false);
-
-  const [selectedStay, setSelectedStay] = useState<number | null>(null);
+  const [activeType, setActiveType] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Stable distance map per hotel
-  const [distanceMap, setDistanceMap] = useState<Record<string, string>>({});
+  const [aiHotels, setAiHotels] = useState<AIHotel[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchDone, setSearchDone] = useState(false);
+  const [landmarkDistances, setLandmarkDistances] = useState<Record<string, Record<string, string>>>({});
 
   const effectiveLocation = searchQuery.length >= 2
     ? searchQuery
@@ -146,146 +111,56 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
   const landmarks = effectiveLocation ? getCityLandmarks(effectiveLocation) : [];
 
   useEffect(() => {
-    const fetchHotels = async () => {
-      if (!effectiveLocation) {
-        setHotelResults([]);
-        setAiHotels([]);
-        setHotelError(null);
-        setAiSearchDone(false);
-        return;
-      }
+    if (!effectiveLocation) {
+      setAiHotels([]);
+      setSearchDone(false);
+      return;
+    }
 
-      setIsLoadingHotels(true);
-      setHotelError(null);
-      setAiSearchDone(false);
+    setIsLoading(true);
+    setSearchDone(false);
 
-      try {
-        const { data, error } = await supabase.functions.invoke('hotels-search', {
-          body: { location: effectiveLocation, currency: 'inr', limit: 10 }
-        });
-
-        if (error) throw new Error(error.message || "Failed to fetch hotels");
-
-        setHotelResults(data || []);
-
-        const isMockData = Array.isArray(data) && data.length > 0 &&
-          data.every((h: HotelResult, i: number) => h.hotelId === i + 1);
-
-        if (isMockData || !data || data.length === 0) {
-          fetchAIHotels(effectiveLocation);
-        }
-      } catch (error) {
-        console.error("Error fetching hotels:", error);
-        setHotelError(null);
-        fetchAIHotels(effectiveLocation);
-      } finally {
-        setIsLoadingHotels(false);
-      }
-    };
-
-    const fetchAIHotels = async (location: string) => {
-      setIsLoadingAI(true);
+    const timer = setTimeout(async () => {
       try {
         const { data, error } = await supabase.functions.invoke('ai-hotel-search', {
-          body: { location, query: `hotels and hostels in ${location}` }
+          body: { location: effectiveLocation, query: `hotels, hostels, guesthouses and resorts in ${effectiveLocation}` }
         });
         if (!error && data?.hotels) {
           setAiHotels(data.hotels);
-          setHotelResults([]);
+          // Generate stable landmark distances
+          const newDistances: Record<string, Record<string, string>> = {};
+          const cityLandmarks = getCityLandmarks(effectiveLocation);
+          data.hotels.forEach((_: AIHotel, i: number) => {
+            newDistances[`${i}`] = {};
+            cityLandmarks.forEach((l) => {
+              newDistances[`${i}`][l] = getRandomDistance();
+            });
+          });
+          setLandmarkDistances(newDistances);
         }
       } catch (e) {
         console.error("AI hotel search error:", e);
       } finally {
-        setIsLoadingAI(false);
-        setAiSearchDone(true);
+        setIsLoading(false);
+        setSearchDone(true);
       }
-    };
+    }, 600);
 
-    const debounceTimer = setTimeout(fetchHotels, 500);
-    return () => clearTimeout(debounceTimer);
+    return () => clearTimeout(timer);
   }, [effectiveLocation]);
 
-  // Generate stable distances when results change
-  useEffect(() => {
-    const newMap: Record<string, string> = {};
-    hotelResults.forEach(h => {
-      const key = `api-${h.hotelId}`;
-      newMap[key] = distanceMap[key] || getRandomDistance();
-    });
-    aiHotels.forEach((h, i) => {
-      const key = `ai-${i}`;
-      newMap[key] = distanceMap[key] || (h.distance?.replace(/[^0-9.]/g, '') || getRandomDistance());
-    });
-    setDistanceMap(newMap);
-  }, [hotelResults, aiHotels]);
+  const filteredHotels = activeType === "all"
+    ? aiHotels
+    : aiHotels.filter((h) => h.type?.toLowerCase() === activeType);
 
-  const stayOptions = effectiveLocation
-    ? hotelResults.map((hotel) => ({
-        id: hotel.hotelId,
-        name: hotel.hotelName,
-        location: hotel.location?.name
-          ? `${hotel.location.name}${hotel.location.country ? `, ${hotel.location.country}` : ""}`
-          : "Location available on booking",
-        price: `₹${hotel.priceFrom?.toLocaleString("en-IN") || "N/A"}/night`,
-        rating: hotel.stars || 0,
-        icon: hotel.stars >= 4 ? Building2 : hotel.stars >= 3 ? Home : Bed,
-        amenities: ["Hotel", `${hotel.stars || 0} Star${hotel.stars !== 1 ? "s" : ""}`],
-        verified: hotel.stars >= 4,
-        category: hotel.stars >= 4 ? "hotel" : hotel.stars >= 3 ? "coliving" : "hostel",
-        distance: distanceMap[`api-${hotel.hotelId}`] || getRandomDistance(),
-      }))
-    : [];
-
-  const filteredStayOptions = stayOptions;
-
-  const PLATFORM_LOGOS: Record<string, string> = {
-    makemytrip: "https://imgak.mmtcdn.com/pwa_v3/pwa_header_assets/logo.png",
-    goibibo: "https://gos3.ibcdn.com/goibiboLogoVIP-1540542890.png",
-    agoda: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Agoda_transparent_logo.png"
-  };
-
-  const renderPlatformLogo = (platform: string) => {
-    const logoUrl = PLATFORM_LOGOS[platform.toLowerCase()];
-    if (logoUrl) {
-      return <img src={logoUrl} alt={platform} className="h-5 w-auto max-w-[70px] object-contain" />;
+  const getIcon = (type: string) => {
+    switch (type?.toLowerCase()) {
+      case "hotel": return Building2;
+      case "hostel": return Bed;
+      case "resort": return Building2;
+      default: return Home;
     }
-    return <span className="text-lg">📦</span>;
   };
-
-  const stayComparisons: Record<number, Record<string, any>> = {
-    1: {
-      makemytrip: { price: "₹750/night", savings: "₹50" },
-      goibibo: { price: "₹780/night", savings: "₹20" },
-      agoda: { price: "₹800/night", savings: "₹0" },
-    },
-    2: {
-      makemytrip: { price: "₹1,100/night", savings: "₹100" },
-      goibibo: { price: "₹1,180/night", savings: "₹20" },
-      agoda: { price: "₹1,200/night", savings: "₹0" },
-    },
-    3: {
-      makemytrip: { price: "₹2,300/night", savings: "₹200" },
-      goibibo: { price: "₹2,400/night", savings: "₹100" },
-      agoda: { price: "₹2,500/night", savings: "₹0" },
-    },
-  };
-
-  const getBestPrice = (comparison: Record<string, any>) => {
-    let minPrice = Infinity;
-    let bestPlatform = "";
-    Object.entries(comparison).forEach(([platform, data]) => {
-      if (platform === "features") return;
-      const priceNum = parseInt((data as any).price?.replace(/[₹,]/g, "") || "0");
-      if (priceNum < minPrice) {
-        minPrice = priceNum;
-        bestPlatform = platform;
-      }
-    });
-    return { minPrice, bestPlatform };
-  };
-
-  const { results: aiResults, isLoading: aiLoading, error: aiError } = useAISearch(searchQuery, { pageContext: "bookings" });
-  const showAIStayResults = searchQuery.length >= 2 && filteredStayOptions.length === 0;
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -298,7 +173,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
               Find Stays
             </h1>
             <p className="text-white/80 text-[10px]">
-              Stays in {searchQuery || userData?.currentCity || "your area"}
+              AI finds the best stays in {searchQuery || userData?.currentCity || "your area"}
             </p>
           </div>
           <Button
@@ -311,141 +186,39 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
           </Button>
         </div>
 
-        {/* Search */}
-        <div className="space-y-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search destination..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 text-xs bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
-            />
-          </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search destination..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 text-xs bg-white/95 backdrop-blur border-0 shadow-medium h-10 rounded-xl"
+          />
+        </div>
+      </div>
 
-          {/* Date Selection */}
-          <div className="flex gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex-1 justify-start text-left font-normal bg-white/95 backdrop-blur border-0 shadow-medium h-10 text-xs rounded-xl"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                  {checkInDate ? format(checkInDate, "MMM dd") : "Check-in"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={checkInDate} onSelect={setCheckInDate} initialFocus className="p-3 pointer-events-auto" />
-              </PopoverContent>
-            </Popover>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex-1 justify-start text-left font-normal bg-white/95 backdrop-blur border-0 shadow-medium h-10 text-xs rounded-xl"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
-                  {checkOutDate ? format(checkOutDate, "MMM dd") : "Check-out"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={checkOutDate} onSelect={setCheckOutDate} initialFocus className="p-3 pointer-events-auto" />
-              </PopoverContent>
-            </Popover>
-          </div>
+      {/* Type Tabs */}
+      <div className="px-4 pt-3 pb-1">
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+          {TYPE_TABS.map(({ key, label, icon: Icon }) => (
+            <Button
+              key={key}
+              variant={activeType === key ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveType(key)}
+              className={`text-xs h-8 rounded-xl px-3 flex items-center gap-1.5 flex-shrink-0 ${
+                activeType === key ? "bg-primary text-primary-foreground" : ""
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {label}
+            </Button>
+          ))}
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
-        {/* Filter Bar */}
-        <div className="flex items-center gap-2 mb-3">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg px-3 flex items-center gap-1.5">
-                <Home className="w-3.5 h-3.5" />
-                Type
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-40 p-1 bg-popover" align="start">
-              <div className="space-y-0.5">
-                {[
-                  { key: "all", label: "All", icon: Home },
-                  { key: "hostel", label: "Hostels", icon: Bed },
-                  { key: "hotel", label: "Hotels", icon: Building2 },
-                  { key: "coliving", label: "Co-living", icon: Building2 },
-                ].map(({ key, label, icon: Icon }) => (
-                  <Button
-                    key={key}
-                    variant={stayFilters.type === key ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => setStayFilters({ ...stayFilters, type: key })}
-                    className="w-full justify-start text-xs h-8 rounded-lg px-2 flex items-center gap-1.5"
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {label}
-                  </Button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg px-3 flex items-center gap-1.5">
-                <TrendingDown className="w-3.5 h-3.5" />
-                Price
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-36 p-1 bg-popover" align="start">
-              <div className="space-y-0.5">
-                {[
-                  { key: "all", label: "Any" },
-                  { key: "budget", label: "Budget" },
-                  { key: "mid", label: "Mid-range" },
-                  { key: "premium", label: "Premium" },
-                ].map(({ key, label }) => (
-                  <Button
-                    key={key}
-                    variant={stayFilters.priceRange === key ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => setStayFilters({ ...stayFilters, priceRange: key })}
-                    className="w-full justify-start text-xs h-8 rounded-lg px-2"
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 text-xs rounded-lg px-3 flex items-center gap-1.5">
-                <Star className="w-3.5 h-3.5" />
-                Rating
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-28 p-1 bg-popover" align="start">
-              <div className="space-y-0.5">
-                {["all", "4.5", "4.0", "3.5"].map((rating) => (
-                  <Button
-                    key={rating}
-                    variant={stayFilters.rating === rating ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => setStayFilters({ ...stayFilters, rating })}
-                    className="w-full justify-start text-xs h-8 rounded-lg px-2"
-                  >
-                    {rating === "all" ? "Any" : `${rating}+`}
-                  </Button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-
+      <div className="flex-1 overflow-y-auto px-4 pt-2 pb-20">
         {/* Landmarks Indicator */}
         {effectiveLocation && landmarks.length > 0 && (
           <div className="flex items-center gap-1.5 mb-3 px-1 flex-wrap">
@@ -463,42 +236,19 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
         )}
 
         <div className="space-y-3">
-          {/* Loading State */}
-          {(isLoadingHotels || isLoadingAI) && (
+          {/* Loading */}
+          {isLoading && (
             <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary mb-3" />
-              <p className="text-sm text-muted-foreground">
-                {isLoadingAI ? (
-                  <span className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    AI is finding real hotels near "{effectiveLocation}"...
-                  </span>
-                ) : (
-                  <>Searching hotels in "{effectiveLocation}"...</>
-                )}
+              <p className="text-sm text-muted-foreground flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                AI is finding stays near "{effectiveLocation}"...
               </p>
             </div>
           )}
 
-          {/* Error State */}
-          {hotelError && !isLoadingHotels && !isLoadingAI && (
-            <Card className="p-6 text-center">
-              <Search className="w-8 h-8 mx-auto text-destructive mb-2" />
-              <p className="text-sm text-destructive">{hotelError}</p>
-            </Card>
-          )}
-
-          {/* No Results State */}
-          {!isLoadingHotels && !isLoadingAI && !hotelError && effectiveLocation && filteredStayOptions.length === 0 && aiHotels.length === 0 && aiSearchDone && (
-            <Card className="p-6 text-center">
-              <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">No hotels found for "{effectiveLocation}"</p>
-              <p className="text-xs text-muted-foreground mt-1">Try searching for a different destination</p>
-            </Card>
-          )}
-
-          {/* Enable Location Prompt */}
-          {!isLoadingHotels && !isLoadingAI && !effectiveLocation && (
+          {/* No location */}
+          {!isLoading && !effectiveLocation && (
             <Card className="p-6 text-center">
               <MapPin className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">Search for a destination or enable location</p>
@@ -506,17 +256,30 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
             </Card>
           )}
 
-          {/* AI-Powered Hotel Results */}
-          {!isLoadingHotels && !isLoadingAI && aiHotels.length > 0 && (
+          {/* No results */}
+          {!isLoading && searchDone && effectiveLocation && filteredHotels.length === 0 && (
+            <Card className="p-6 text-center">
+              <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">
+                {aiHotels.length > 0
+                  ? `No ${activeType}s found — try "All"`
+                  : `No stays found for "${effectiveLocation}"`}
+              </p>
+            </Card>
+          )}
+
+          {/* AI Results */}
+          {!isLoading && filteredHotels.length > 0 && (
             <>
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <span className="text-xs font-medium text-primary">AI-Powered Results</span>
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">Real Hotels</Badge>
               </div>
-              {aiHotels.map((hotel, idx) => {
-                const IconComponent = hotel.type === "hotel" ? Building2 : hotel.type === "hostel" ? Bed : Home;
-                const dist = distanceMap[`ai-${idx}`] || hotel.distance;
+              {filteredHotels.map((hotel, idx) => {
+                const IconComponent = getIcon(hotel.type);
+                const originalIdx = aiHotels.indexOf(hotel);
+                const distances = landmarkDistances[`${originalIdx}`] || {};
                 return (
                   <Card key={idx} className="p-3 shadow-soft hover:shadow-medium transition-all rounded-2xl border-0">
                     <div className="flex gap-3">
@@ -525,27 +288,25 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm truncate">{hotel.name}</h3>
-                          </div>
+                          <h3 className="font-semibold text-sm truncate flex-1">{hotel.name}</h3>
                           <div className="flex items-center gap-1 text-[10px] bg-warning/10 px-2 py-1 rounded-lg flex-shrink-0">
                             <Star className="w-3 h-3 fill-warning text-warning" />
                             <span className="font-semibold">{hotel.stars}</span>
                           </div>
                         </div>
 
-                        {/* Distances from landmarks */}
+                        {/* Landmark distances */}
                         <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-1.5">
-                          {landmarks.map((landmark, li) => (
-                            <div key={li} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                          {landmarks.map((landmark) => (
+                            <div key={landmark} className="flex items-center gap-1 text-[10px] text-muted-foreground">
                               <Navigation className="w-2.5 h-2.5" />
-                              <span>{getRandomDistance()} km from {landmark}</span>
+                              <span>{distances[landmark] || getRandomDistance()} km from {landmark}</span>
                             </div>
                           ))}
                         </div>
 
                         <div className="flex flex-wrap gap-1 mb-2">
-                          {hotel.amenities?.filter(a => a.toLowerCase() !== 'safe' && a.toLowerCase() !== 'safety').slice(0, 3).map((amenity, i) => (
+                          {hotel.amenities?.slice(0, 3).map((amenity, i) => (
                             <Badge key={i} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">
                               {amenity}
                             </Badge>
@@ -589,134 +350,6 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
               })}
             </>
           )}
-
-          {/* API Hotel Results */}
-          {!isLoadingHotels && !hotelError && filteredStayOptions.length > 0 ? (
-            filteredStayOptions.map((stay) => {
-              const IconComponent = stay.icon;
-              const comparison = stayComparisons[stay.id];
-              const { minPrice, bestPlatform } = getBestPrice(comparison || {});
-
-              return (
-                <Card key={stay.id} className="p-3 shadow-soft hover:shadow-medium transition-all rounded-2xl border-0">
-                  <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <IconComponent className="w-5 h-5 text-primary" />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 mb-0.5">
-                            <h3 className="font-semibold text-sm truncate">{stay.name}</h3>
-                            {stay.verified && <CheckCircle className="w-3.5 h-3.5 text-success flex-shrink-0" />}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] bg-warning/10 px-2 py-1 rounded-lg flex-shrink-0">
-                          <Star className="w-3 h-3 fill-warning text-warning" />
-                          <span className="font-semibold">{stay.rating}</span>
-                        </div>
-                      </div>
-
-                      {/* Distances from landmarks */}
-                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-1.5">
-                        {landmarks.map((landmark, li) => (
-                          <div key={li} className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                            <Navigation className="w-2.5 h-2.5" />
-                            <span>{getRandomDistance()} km from {landmark}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="flex flex-wrap gap-1 my-2">
-                        {stay.amenities.slice(0, 3).map((amenity) => (
-                          <Badge key={amenity} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">
-                            {amenity.includes("WiFi") && <Wifi className="w-2.5 h-2.5 mr-1" />}
-                            {amenity.includes("Kitchen") && <Utensils className="w-2.5 h-2.5 mr-1" />}
-                            {amenity}
-                          </Badge>
-                        ))}
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                        <div className="text-sm font-bold text-primary">{stay.price}</div>
-                        <Button
-                          size="sm"
-                          onClick={() => setSelectedStay(selectedStay === stay.id ? null : stay.id)}
-                          className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
-                        >
-                          <Zap className="w-3 h-3 mr-1" />
-                          Compare
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {selectedStay === stay.id && comparison && (
-                    <div className="mt-3 p-3 bg-muted/50 rounded-xl">
-                      <div className="flex items-center gap-2 mb-3">
-                        <TrendingDown className="w-4 h-4 text-success" />
-                        <h4 className="font-semibold text-sm">Best Prices</h4>
-                      </div>
-
-                      <div className="space-y-2 mb-3">
-                        {Object.entries(comparison).map(([platform, data]) => {
-                          const isBest = platform === bestPlatform;
-                          return (
-                            <div
-                              key={platform}
-                              className={cn(
-                                "flex items-center justify-between p-2.5 rounded-xl transition-all",
-                                isBest ? "bg-success/10 border border-success/30" : "bg-background",
-                              )}
-                            >
-                              <div className="flex items-center gap-2">
-                                {renderPlatformLogo(platform)}
-                                <span className="font-medium text-sm capitalize">{platform}</span>
-                                {isBest && (
-                                  <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
-                                    <Award className="w-2.5 h-2.5 mr-0.5" />
-                                    Best
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="text-right">
-                                <div className="font-bold text-primary text-sm">{(data as any).price}</div>
-                                {(data as any).savings !== "₹0" && (
-                                  <div className="text-[10px] text-success">Save {(data as any).savings}</div>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      <Button
-                        className="w-full bg-gradient-primary text-white h-10 rounded-xl text-sm"
-                        onClick={() => {
-                          const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(stay.name + ' book hotel ' + effectiveLocation)}`;
-                          window.open(searchUrl, '_blank');
-                        }}
-                      >
-                        Book via {bestPlatform} • ₹{minPrice}
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </div>
-                  )}
-                </Card>
-              );
-            })
-          ) : !isLoadingHotels && !hotelError && searchQuery.length < 2 && showAIStayResults ? (
-            <AISearchResults
-              results={aiResults}
-              isLoading={aiLoading}
-              error={aiError}
-              searchQuery={searchQuery}
-              showDestinations={false}
-              showStays={true}
-              showTravel={false}
-            />
-          ) : null}
         </div>
       </div>
     </div>
