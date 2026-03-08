@@ -472,7 +472,117 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       </div>
 
       {/* Dialogs */}
-      <MyBookingsDialog open={bookingsDialogOpen} onOpenChange={setBookingsDialogOpen} bookings={[]} />
+      {/* My Trips Dialog */}
+      <Dialog open={myTripsDialogOpen} onOpenChange={setMyTripsDialogOpen}>
+        <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" /> My Trips
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            {myTrips.length === 0 ? (
+              <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
+                <Calendar className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                <h3 className="font-semibold text-sm">No trips yet</h3>
+                <p className="text-xs text-muted-foreground mt-1">Create or join a trip from the Companion page</p>
+              </Card>
+            ) : (
+              myTrips.map(trip => {
+                const isPending = !trip.is_member && trip.my_request_status === "pending";
+                const isDeclined = !trip.is_member && trip.my_request_status === "declined";
+                const isMember = trip.is_member || trip.my_request_status === "accepted";
+
+                return (
+                  <Card key={trip.id} className="p-4 shadow-soft rounded-2xl border-0 bg-card">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 className="font-semibold text-sm flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-primary" />
+                          {trip.destination}
+                        </h3>
+                        <p className="text-[10px] text-muted-foreground">{trip.start_date} → {trip.end_date}</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <Badge variant="secondary" className="text-[10px] rounded-lg">{getTripTypeLabel(trip.trip_type)}</Badge>
+                        {trip.is_owner && <Badge className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">Owner</Badge>}
+                        {isPending && <Badge className="text-[10px] rounded-lg bg-yellow-500/10 text-yellow-600 border-0">Pending</Badge>}
+                        {isDeclined && <Badge variant="destructive" className="text-[10px] rounded-lg">Declined</Badge>}
+                        {isMember && !trip.is_owner && <Badge className="text-[10px] rounded-lg bg-green-500/10 text-green-600 border-0">Accepted</Badge>}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
+                        <Users className="w-3 h-3" />{trip.member_count} members
+                      </Badge>
+                      <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
+                        <Shield className="w-3 h-3" />{getGroupTypeLabel(trip.group_type)}
+                      </Badge>
+                    </div>
+                    {isMember ? (
+                      <div className="flex gap-2">
+                        <Button size="sm" className="flex-1 bg-gradient-primary text-white rounded-xl text-xs h-9" onClick={() => { setChatTrip(trip); setChatOpen(true); }}>
+                          <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Group Chat
+                        </Button>
+                        {trip.is_owner && (
+                          <Button size="sm" variant="outline" className="rounded-xl text-xs h-9" onClick={() => openManageRequests(trip)}>
+                            <Eye className="w-3.5 h-3.5 mr-1.5" /> Requests
+                          </Button>
+                        )}
+                      </div>
+                    ) : isPending ? (
+                      <div className="flex items-center gap-2 text-xs text-yellow-600 bg-yellow-500/5 rounded-xl px-3 py-2">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Your request is pending review</span>
+                      </div>
+                    ) : isDeclined ? (
+                      <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/5 rounded-xl px-3 py-2">
+                        <Shield className="w-3.5 h-3.5" />
+                        <span>Your request was declined</span>
+                      </div>
+                    ) : null}
+                  </Card>
+                );
+              })
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Requests Dialog */}
+      <Dialog open={requestsDialogOpen} onOpenChange={setRequestsDialogOpen}>
+        <DialogContent className="max-w-md rounded-2xl max-h-[70vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Join Requests — {managingTrip?.destination}</DialogTitle>
+          </DialogHeader>
+          {loadingRequests ? (
+            <p className="text-center text-sm text-muted-foreground py-4">Loading...</p>
+          ) : pendingRequests.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-4">No pending requests</p>
+          ) : (
+            <div className="space-y-3">
+              {pendingRequests.map(req => (
+                <Card key={req.id} className="p-3 rounded-2xl border-0 shadow-soft">
+                  <p className="text-xs text-muted-foreground mb-2">{req.message || "No message"}</p>
+                  <div className="flex gap-2">
+                    <Button size="sm" className="flex-1 bg-success text-white rounded-xl text-xs h-8" onClick={() => handleReviewRequest(req, "accepted")}>Accept</Button>
+                    <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-8 text-destructive" onClick={() => handleReviewRequest(req, "declined")}>Decline</Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Trip Chat */}
+      <TripChatDialog
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        tripId={chatTrip?.id || null}
+        tripName={chatTrip?.destination || "Trip"}
+        currentUserId={currentUserId}
+      />
       <MyCoCompanionDialog open={coCompanionDialogOpen} onOpenChange={setCoCompanionDialogOpen} companions={likedCompanionProfiles} />
       <MyInterestsDialog 
         open={interestsDialogOpen} 
