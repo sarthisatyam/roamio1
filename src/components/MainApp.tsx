@@ -19,6 +19,9 @@ interface MainAppProps {
 const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [showAccount, setShowAccount] = useState(false);
+  const [showPlanBuilder, setShowPlanBuilder] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [userGender, setUserGender] = useState<string | null>(null);
   const [likedCompanions, setLikedCompanions] = useState<number[]>([]);
   const [bookmarkedPlaces, setBookmarkedPlaces] = useState<{ id: number; name: string; image: string }[]>([]);
   const [plannerActivities, setPlannerActivities] = useState<{ title: string; location: string; type: string }[]>([]);
