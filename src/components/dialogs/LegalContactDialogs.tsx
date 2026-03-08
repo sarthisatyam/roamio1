@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Send, CheckCircle, Shield, FileText, Headphones, Mail, ChevronRight, ArrowLeft } from "lucide-react";
+import { Send, CheckCircle, Shield, FileText, Headphones, Mail, ChevronRight, ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface DialogProps {
@@ -31,14 +32,33 @@ export const HelpLegalDialog: React.FC<DialogProps> = ({ open, onOpenChange }) =
     onOpenChange(val);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [sending, setSending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       toast({ title: "Please fill in all required fields", variant: "destructive" });
       return;
     }
-    setSubmitted(true);
-    toast({ title: "Message sent!", description: "We'll get back to you soon." });
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject.trim(),
+          message: formData.message.trim(),
+        },
+      });
+      if (error) throw error;
+      setSubmitted(true);
+      toast({ title: "Message sent!", description: "We'll get back to you soon." });
+    } catch (err) {
+      console.error("Contact form error:", err);
+      toast({ title: "Failed to send message", description: "Please try again later.", variant: "destructive" });
+    } finally {
+      setSending(false);
+    }
   };
 
   const menuItems = [
@@ -150,8 +170,8 @@ export const HelpLegalDialog: React.FC<DialogProps> = ({ open, onOpenChange }) =
                 <Label className="text-[10px]">Message *</Label>
                 <Textarea placeholder="Tell us how we can help..." value={formData.message} onChange={e => setFormData(p => ({ ...p, message: e.target.value }))} rows={3} className="text-xs rounded-xl" />
               </div>
-              <Button type="submit" className="w-full gap-2 rounded-xl h-9 text-xs">
-                <Send className="w-3.5 h-3.5" /> Send Message
+              <Button type="submit" className="w-full gap-2 rounded-xl h-9 text-xs" disabled={sending}>
+                {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />} {sending ? "Sending..." : "Send Message"}
               </Button>
             </form>
           )
