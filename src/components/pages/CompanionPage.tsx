@@ -176,6 +176,10 @@ const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({
   const [connectMessage, setConnectMessage] = useState("");
   const [isSendingConnect, setIsSendingConnect] = useState(false);
 
+  // Profile view dialog
+  const [profileViewOpen, setProfileViewOpen] = useState(false);
+  const [viewedCompanion, setViewedCompanion] = useState<Companion | null>(null);
+
   // Chat
   const [chatOpen, setChatOpen] = useState(false);
   const [chatPartner, setChatPartner] = useState<{ id: string; name: string; avatar?: string | null } | null>(null);
