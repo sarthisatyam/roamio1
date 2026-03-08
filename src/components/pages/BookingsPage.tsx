@@ -635,15 +635,24 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
 
             <div className="space-y-3">
               {/* Loading State */}
-              {isLoadingHotels && (
+              {(isLoadingHotels || isLoadingAI) && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-primary mb-3" />
-                  <p className="text-sm text-muted-foreground">Searching hotels in "{effectiveLocation}"...</p>
+                  <p className="text-sm text-muted-foreground">
+                    {isLoadingAI ? (
+                      <span className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        AI is finding real hotels near "{effectiveLocation}"...
+                      </span>
+                    ) : (
+                      <>Searching hotels in "{effectiveLocation}"...</>
+                    )}
+                  </p>
                 </div>
               )}
 
               {/* Error State */}
-              {hotelError && !isLoadingHotels && (
+              {hotelError && !isLoadingHotels && !isLoadingAI && (
                 <Card className="p-6 text-center">
                   <Search className="w-8 h-8 mx-auto text-destructive mb-2" />
                   <p className="text-sm text-destructive">{hotelError}</p>
@@ -651,7 +660,7 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
               )}
 
               {/* No Results State */}
-              {!isLoadingHotels && !hotelError && effectiveLocation && filteredStayOptions.length === 0 && (
+              {!isLoadingHotels && !isLoadingAI && !hotelError && effectiveLocation && filteredStayOptions.length === 0 && aiHotels.length === 0 && aiSearchDone && (
                 <Card className="p-6 text-center">
                   <Search className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">No hotels found for "{effectiveLocation}"</p>
@@ -660,12 +669,99 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
               )}
               
               {/* Enable Location Prompt */}
-              {!isLoadingHotels && !effectiveLocation && (
+              {!isLoadingHotels && !isLoadingAI && !effectiveLocation && (
                 <Card className="p-6 text-center">
                   <MapPin className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">Search for a destination or enable location</p>
                   <p className="text-xs text-muted-foreground mt-1">to see stays near you</p>
                 </Card>
+              )}
+
+              {/* AI-Powered Hotel Results */}
+              {!isLoadingHotels && !isLoadingAI && aiHotels.length > 0 && (
+                <>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-primary">AI-Powered Results</span>
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                      Real Hotels
+                    </Badge>
+                  </div>
+                  {aiHotels.map((hotel, idx) => {
+                    const IconComponent = hotel.type === "hotel" ? Building2 : hotel.type === "hostel" ? Bed : Home;
+                    return (
+                      <Card key={idx} className="p-3 shadow-soft hover:shadow-medium transition-all rounded-2xl border-0">
+                        <div className="flex gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <IconComponent className="w-5 h-5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-sm truncate">{hotel.name}</h3>
+                                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                  <MapPin className="w-3 h-3" />
+                                  <span className="truncate">{hotel.distance} away</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 text-[10px] bg-warning/10 px-2 py-1 rounded-lg flex-shrink-0">
+                                <Star className="w-3 h-3 fill-warning text-warning" />
+                                <span className="font-semibold">{hotel.stars}</span>
+                              </div>
+                            </div>
+
+                            <p className="text-[10px] text-muted-foreground mb-1.5">{hotel.description}</p>
+
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {hotel.amenities?.slice(0, 3).map((amenity, i) => (
+                                <Badge key={i} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">
+                                  {amenity}
+                                </Badge>
+                              ))}
+                              {hotel.safetyRating === "High" && (
+                                <Badge variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg border-green-500/30 text-green-600">
+                                  <Shield className="w-2.5 h-2.5 mr-0.5" />
+                                  Safe
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                              <div className="text-sm font-bold text-primary">
+                                ₹{hotel.pricePerNight?.toLocaleString("en-IN")}/night
+                              </div>
+                              <div className="flex gap-1.5">
+                                {hotel.mapLink && (
+                                  <a href={hotel.mapLink} target="_blank" rel="noopener noreferrer">
+                                    <Button size="sm" variant="outline" className="text-xs h-7 rounded-lg px-2">
+                                      <MapPin className="w-3 h-3 mr-1" />
+                                      Map
+                                    </Button>
+                                  </a>
+                                )}
+                                <Button
+                                  size="sm"
+                                  className="text-xs h-7 rounded-lg px-3 bg-gradient-primary text-white"
+                                  onClick={() => {
+                                    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(hotel.name + ' ' + (hotel.address || effectiveLocation) + ' book hotel')}`;
+                                    window.open(searchUrl, '_blank');
+                                  }}
+                                >
+                                  <ExternalLink className="w-3 h-3 mr-1" />
+                                  Book
+                                </Button>
+                              </div>
+                            </div>
+
+                            <p className="text-[9px] text-muted-foreground mt-1.5 truncate">
+                              📍 {hotel.address}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </>
               )}
 
               {/* Results */}
