@@ -1180,16 +1180,6 @@ const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => vo
 
       {stage === "explore" && (
         <div className="px-4 pt-3 space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search a destination..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleExploreSearch()}
-              className="pl-10 text-xs bg-card border shadow-soft h-10 rounded-xl"
-            />
-          </div>
 
           <Card className="p-4 bg-primary/5 border-primary/20 rounded-2xl">
             <div className="flex items-start gap-3">
