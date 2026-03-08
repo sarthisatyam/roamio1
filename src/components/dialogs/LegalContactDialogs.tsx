@@ -170,8 +170,8 @@ export const HelpLegalDialog: React.FC<DialogProps> = ({ open, onOpenChange }) =
                 <Label className="text-[10px]">Message *</Label>
                 <Textarea placeholder="Tell us how we can help..." value={formData.message} onChange={e => setFormData(p => ({ ...p, message: e.target.value }))} rows={3} className="text-xs rounded-xl" />
               </div>
-              <Button type="submit" className="w-full gap-2 rounded-xl h-9 text-xs">
-                <Send className="w-3.5 h-3.5" /> Send Message
+              <Button type="submit" className="w-full gap-2 rounded-xl h-9 text-xs" disabled={sending}>
+                {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />} {sending ? "Sending..." : "Send Message"}
               </Button>
             </form>
           )
