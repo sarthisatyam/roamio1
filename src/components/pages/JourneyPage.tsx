@@ -18,6 +18,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import GroupMembersManager, { GroupMember } from "@/components/journey/GroupMembersManager";
 import ActivityPoll, { PollActivity } from "@/components/journey/ActivityPoll";
 import ExpenseSplitter, { GroupExpense } from "@/components/journey/ExpenseSplitter";
+import { supabase } from "@/integrations/supabase/client";
+import { useJourneyInvites } from "@/hooks/useJourneyInvites";
 
 interface JourneyPageProps {
   onNavigateToAccount?: () => void;
@@ -32,6 +34,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
   const [activityDialogMode, setActivityDialogMode] = useState<"add" | "edit">("add");
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [addedExternalCount, setAddedExternalCount] = useState(0);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Trip Info
   const [tripDialogOpen, setTripDialogOpen] = useState(false);
@@ -42,6 +45,60 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
   const [polls, setPolls] = useState<PollActivity[]>([]);
   const [currentVoter, setCurrentVoter] = useState("me");
   const [groupExpenses, setGroupExpenses] = useState<GroupExpense[]>([]);
+
+  // Auth
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id || null));
+  }, []);
+
+  // Journey invites
+  const {
+    pendingReceived,
+    acceptedInvites,
+    searchUsers,
+    sendInvite,
+    respondToInvite,
+    getInviteStatusForUser,
+    refetch: refetchInvites,
+  } = useJourneyInvites(currentUserId);
+
+  // Add accepted invite users to group members
+  useEffect(() => {
+    if (!currentUserId) return;
+    const addAccepted = async () => {
+      const otherUserIds = acceptedInvites.map(inv =>
+        inv.from_user_id === currentUserId ? inv.to_user_id : inv.from_user_id
+      );
+      if (otherUserIds.length === 0) return;
+
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, display_name, avatar_url")
+        .in("user_id", otherUserIds);
+
+      const { data: presence } = await supabase
+        .from("user_presence")
+        .select("user_id, is_online")
+        .in("user_id", otherUserIds);
+
+      const presenceMap = new Map(presence?.map(p => [p.user_id, p.is_online]) || []);
+
+      const newMembers: GroupMember[] = [{ id: "me", name: "You" }];
+      profiles?.forEach(p => {
+        if (!newMembers.some(m => m.user_id === p.user_id)) {
+          newMembers.push({
+            id: p.user_id,
+            name: p.display_name || "User",
+            user_id: p.user_id,
+            avatar_url: p.avatar_url || undefined,
+            is_online: presenceMap.get(p.user_id) || false,
+          });
+        }
+      });
+      setGroupMembers(newMembers);
+    };
+    addAccepted();
+  }, [acceptedInvites, currentUserId]);
 
   const getTripDetails = () => {
     if (!tripInfo.start || !tripInfo.end || !tripInfo.city) return null;
@@ -284,7 +341,15 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
             {/* Group: Members + Polls | Solo: Activities */}
             {travelMode === "group" ? (
               <>
-                <GroupMembersManager members={groupMembers} onMembersChange={setGroupMembers} />
+                <GroupMembersManager
+                  members={groupMembers}
+                  onMembersChange={setGroupMembers}
+                  onSearchUsers={searchUsers}
+                  onSendInvite={sendInvite}
+                  onRespondToInvite={respondToInvite}
+                  getInviteStatus={getInviteStatusForUser}
+                  pendingInvites={pendingReceived}
+                />
                 <ActivityPoll
                   polls={polls}
                   onPollsChange={setPolls}
@@ -387,7 +452,15 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
           <TabsContent value="expenses" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
             {travelMode === "group" ? (
               <>
-                <GroupMembersManager members={groupMembers} onMembersChange={setGroupMembers} />
+                <GroupMembersManager
+                  members={groupMembers}
+                  onMembersChange={setGroupMembers}
+                  onSearchUsers={searchUsers}
+                  onSendInvite={sendInvite}
+                  onRespondToInvite={respondToInvite}
+                  getInviteStatus={getInviteStatusForUser}
+                  pendingInvites={pendingReceived}
+                />
                 <ExpenseSplitter expenses={groupExpenses} onExpensesChange={setGroupExpenses} members={groupMembers} />
               </>
             ) : (

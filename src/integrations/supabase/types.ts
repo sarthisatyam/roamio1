@@ -194,6 +194,33 @@ export type Database = {
           },
         ]
       }
+      journey_invites: {
+        Row: {
+          created_at: string
+          from_user_id: string
+          id: string
+          message: string | null
+          status: string
+          to_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_user_id: string
+          id?: string
+          message?: string | null
+          status?: string
+          to_user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          message?: string | null
+          status?: string
+          to_user_id?: string
+        }
+        Relationships: []
+      }
       liked_companions: {
         Row: {
           created_at: string
