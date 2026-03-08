@@ -841,7 +841,7 @@ interface MyInterestsDialogProps {
   onOpenChange: (open: boolean) => void;
   interests?: string[];
   gender?: string;
-  age?: number;
+  age?: number | null;
   about?: string;
 }
 
