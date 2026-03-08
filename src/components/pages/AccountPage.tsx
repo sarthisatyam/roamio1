@@ -572,9 +572,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <VerifyDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen} />
       <SupportDialog open={supportDialogOpen} onOpenChange={setSupportDialogOpen} />
       <TravelGuideDialog open={travelGuideDialogOpen} onOpenChange={setTravelGuideDialogOpen} />
-      <PrivacyPolicyDialog open={privacyDialogOpen} onOpenChange={setPrivacyDialogOpen} />
-      <TermsOfServiceDialog open={termsDialogOpen} onOpenChange={setTermsDialogOpen} />
-      <ContactDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} />
+      <HelpLegalDialog open={helpLegalDialogOpen} onOpenChange={setHelpLegalDialogOpen} />
     </div>
   );
 };
