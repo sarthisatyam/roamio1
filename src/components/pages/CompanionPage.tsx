@@ -29,7 +29,6 @@ import { usePlans, Plan } from "@/hooks/usePlans";
 import { useDirectMessages } from "@/hooks/useDirectMessages";
 import GroupChatDialog from "@/components/dialogs/GroupChatDialog";
 import DirectChatDialog from "@/components/dialogs/DirectChatDialog";
-import SelfieVerificationDialog from "@/components/SelfieVerificationDialog";
 import { format, formatDistanceToNow } from "date-fns";
 import { useLikedCompanions } from "@/hooks/useLikedCompanions";
 
@@ -38,24 +37,8 @@ interface CompanionPageProps {
   userCity?: string | null;
 }
 
-const TRIP_TYPES = [
-  { value: "darshan", label: "Darshan" },
-  { value: "trek", label: "Trek" },
-  { value: "relaxed", label: "Relaxed" },
-  { value: "adventure", label: "Adventure" },
-  { value: "spiritual", label: "Spiritual" },
-];
-
-const BUDGET_RANGES = [
-  { value: "budget", label: "Budget" },
-  { value: "mid-range", label: "Mid-Range" },
-  { value: "premium", label: "Premium" },
-];
-
-const GROUP_TYPES_TRIP = [
-  { value: "women-only", label: "Women Only" },
-  { value: "mixed", label: "Mixed" },
-  { value: "family", label: "Family" },
+const GROUP_CATEGORIES = [
+  "Backpacking", "Road Trips", "Weekend Trips", "Adventure", "Food Trips", "Digital Nomads",
 ];
 
 const GROUP_CATEGORIES = [
