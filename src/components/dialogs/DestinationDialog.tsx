@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Star, Shield, Clock, Utensils, Calendar, Plus, CloudSun } from "lucide-react";
+import { Star, Shield, Clock, Utensils, Calendar, Plus, CloudSun, BookOpen, CheckCircle, XCircle, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 import { useWeather } from "@/hooks/useWeather";
 
@@ -52,6 +52,11 @@ interface Eatery {
   specialty: string;
 }
 
+interface TravelTip {
+  tip: string;
+  category: 'general' | 'do' | 'dont';
+}
+
 interface Destination {
   id: number;
   name: string;
@@ -62,6 +67,7 @@ interface Destination {
   tags: string[];
   itinerary?: Itinerary[];
   eateries?: Eatery[];
+  travelGuide?: TravelTip[];
 }
 
 interface DestinationDialogProps {
@@ -255,6 +261,44 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
                 ))}
               </div>
             </div>
+          )}
+
+          {/* Travel Guide */}
+          {destination.travelGuide && destination.travelGuide.length > 0 && (
+            <>
+              <Separator />
+              <div>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-primary" />
+                  Travel Guide
+                </h3>
+                <div className="space-y-2.5">
+                  {destination.travelGuide.map((item, idx) => {
+                    const icon = item.category === 'do'
+                      ? <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                      : item.category === 'dont'
+                      ? <XCircle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                      : <Lightbulb className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />;
+                    const label = item.category === 'do' ? 'DO' : item.category === 'dont' ? "DON'T" : 'TIP';
+                    const labelColor = item.category === 'do'
+                      ? 'bg-emerald-500/10 text-emerald-600'
+                      : item.category === 'dont'
+                      ? 'bg-destructive/10 text-destructive'
+                      : 'bg-amber-500/10 text-amber-600';
+
+                    return (
+                      <div key={idx} className="flex items-start gap-2.5 p-2.5 rounded-xl bg-muted/50">
+                        {icon}
+                        <div className="flex-1 min-w-0">
+                          <Badge className={`text-[9px] px-1.5 py-0 mb-1 ${labelColor}`}>{label}</Badge>
+                          <p className="text-sm leading-relaxed">{item.tip}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
           )}
         </div>
       </DialogContent>
