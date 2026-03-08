@@ -172,7 +172,12 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} />}
-        {activeTab === 1 && <ExplorePage onNavigateToAccount={handleNavigateToAccount} />}
+        {activeTab === 1 && (
+          <div className="h-full relative">
+            <ExplorePage onNavigateToAccount={handleNavigateToAccount} onCreatePlan={() => setShowPlanBuilder(true)} />
+          </div>
+        )}
+        {activeTab === 2 && <BookingsPage />}
         {activeTab === 3 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} />}
         {activeTab === 4 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
