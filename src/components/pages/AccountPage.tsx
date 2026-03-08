@@ -419,7 +419,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-primary" /> My Plans
+              <Calendar className="w-5 h-5 text-primary" /> My Trips
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
