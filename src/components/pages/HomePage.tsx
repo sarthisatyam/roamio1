@@ -385,11 +385,11 @@ const HomePage: React.FC<HomePageProps> = ({
           </section>
         )}
 
-        {/* Explore Plans Section */}
+        {/* Explore Trips Section */}
         <section className="px-4 mb-4">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-sm font-semibold">Explore Plans</h2>
+              <h2 className="text-sm font-semibold">Explore Trips</h2>
               <p className="text-[10px] text-muted-foreground">Join trips created by travelers</p>
             </div>
             {onCreatePlan && (
@@ -406,8 +406,8 @@ const HomePage: React.FC<HomePageProps> = ({
           ) : plans.length === 0 ? (
             <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
               <Sparkles className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm font-medium text-muted-foreground">No plans yet</p>
-              <p className="text-[10px] text-muted-foreground mt-1">Be the first to create a plan!</p>
+              <p className="text-sm font-medium text-muted-foreground">No trips yet</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Be the first to create a trip!</p>
             </Card>
           ) : (
             <div className="space-y-3">
