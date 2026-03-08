@@ -179,8 +179,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     if (type === "males_only") return { label: "Males Only", color: "bg-blue-500/10 text-blue-600" };
     return { label: "Everyone", color: "bg-green-500/10 text-green-600" };
   };
-    }
-  };
 
   const handleReviewRequest = async (req: JoinRequest, action: "approved" | "rejected") => {
     try {
