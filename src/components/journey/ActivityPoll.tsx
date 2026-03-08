@@ -5,14 +5,19 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ThumbsUp, ThumbsDown, Vote, Plus, Trophy, Clock, MapPin } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ThumbsUp, ThumbsDown, Vote, Plus, Trophy, Clock, MapPin, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import type { GroupMember } from "./GroupMembersManager";
 
 export interface PollActivity {
   id: string;
   title: string;
   location: string;
+  date: string;
   time: string;
   proposedBy: string;
   votes: Record<string, "up" | "down">; // memberId -> vote
@@ -33,6 +38,7 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ title: "", location: "", time: "" });
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const handlePropose = () => {
     if (!form.title.trim()) { toast.error("Enter activity title"); return; }
@@ -41,12 +47,14 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
       id: crypto.randomUUID(),
       title: form.title.trim(),
       location: form.location.trim(),
+      date: selectedDate ? format(selectedDate, "PPP") : "",
       time: form.time.trim(),
       proposedBy: proposer?.name || "Unknown",
       votes: { [currentVoter]: "up" },
       resolved: false,
     }]);
     setForm({ title: "", location: "", time: "" });
+    setSelectedDate(undefined);
     setDialogOpen(false);
     toast.success("Activity proposed for voting!");
   };
@@ -125,6 +133,11 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
                       {poll.location && (
                         <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
                           <MapPin className="w-3 h-3" /> {poll.location}
+                        </div>
+                      )}
+                      {poll.date && (
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
+                          <CalendarIcon className="w-3 h-3" /> {poll.date}
                         </div>
                       )}
                       {poll.time && (
@@ -240,6 +253,32 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
                 onChange={e => setForm({ ...form, location: e.target.value })}
                 className="rounded-xl"
               />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-sm">Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal rounded-xl",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "PPP (EEEE)") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="space-y-1">
               <Label className="text-sm">Time</Label>
