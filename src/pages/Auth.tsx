@@ -45,18 +45,11 @@ const Auth = () => {
   }, [navigate]);
 
   const validateForm = () => {
-    const newErrors: { email?: string; phone?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string } = {};
 
-    if (authMethod === "email") {
-      const emailResult = emailSchema.safeParse(email);
-      if (!emailResult.success) {
-        newErrors.email = emailResult.error.errors[0].message;
-      }
-    } else {
-      const phoneResult = phoneSchema.safeParse(phone);
-      if (!phoneResult.success) {
-        newErrors.phone = phoneResult.error.errors[0].message;
-      }
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) {
+      newErrors.email = emailResult.error.errors[0].message;
     }
 
     const passwordResult = passwordSchema.safeParse(password);
