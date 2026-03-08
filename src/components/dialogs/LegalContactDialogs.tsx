@@ -169,7 +169,7 @@ export const HelpLegalDialog: React.FC<DialogProps> = ({ open, onOpenChange }) =
                 { t: "4. Data Sharing", c: "We do not sell your personal information. We may share limited profile information with other users for companion matching purposes. We use trusted third-party services for authentication, data storage, and AI-powered features." },
                 { t: "5. Data Security", c: "We implement industry-standard security measures including encryption, secure authentication, and row-level security policies to protect your data." },
                 { t: "6. Your Rights", c: "You have the right to access, update, or delete your personal information. You can manage your preferences through account settings or contact us directly for data-related requests." },
-                { t: "7. Contact Us", c: "For privacy-related inquiries, please contact us at privacy@roamio.app." },
+                { t: "7. Contact Us", c: "For privacy-related inquiries, please contact us at info.roamio@gmail.com." },
               ].map(({ t, c }) => (
                 <section key={t}>
                   <h3 className="text-foreground font-semibold mb-1 text-xs">{t}</h3>
