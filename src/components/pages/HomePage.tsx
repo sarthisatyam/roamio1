@@ -94,19 +94,38 @@ const HomePage: React.FC<HomePageProps> = ({
     fetchPlans();
   }, [fetchPlans]);
 
-  // Fetch popular destinations based on user's city
+  // Fetch popular destinations: 3 nearby + 2 famous overall
   const fetchPopularDestinations = useCallback(async () => {
     setPopularLoading(true);
     try {
       const city = userData?.locationEnabled && userData?.currentCity
         ? userData.currentCity
-        : "India";
-      const { data, error } = await supabase.functions.invoke('search-generator', {
-        body: { query: `popular destinations near ${city}`, pageContext: "home" }
-      });
-      if (!error && data?.destinations) {
-        setPopularDestinations(data.destinations);
-      }
+        : "Delhi";
+
+      // Fetch nearby and famous destinations in parallel
+      const [nearbyRes, famousRes] = await Promise.all([
+        supabase.functions.invoke('search-generator', {
+          body: { query: `top 3 nearby destinations close to ${city} for solo women travelers`, pageContext: "home" }
+        }),
+        supabase.functions.invoke('search-generator', {
+          body: { query: `top 2 most famous must-visit destinations in India for solo women travelers (not near ${city})`, pageContext: "home" }
+        }),
+      ]);
+
+      const nearby = (nearbyRes.data?.destinations || []).slice(0, 3);
+      const famous = (famousRes.data?.destinations || []).slice(0, 2);
+
+      // Tag them so UI can differentiate
+      const taggedNearby = nearby.map((d: AIDestination) => ({
+        ...d,
+        tags: ["Nearby", ...d.tags.filter((t: string) => t !== "Nearby")],
+      }));
+      const taggedFamous = famous.map((d: AIDestination) => ({
+        ...d,
+        tags: ["Must Visit", ...d.tags.filter((t: string) => t !== "Must Visit")],
+      }));
+
+      setPopularDestinations([...taggedNearby, ...taggedFamous]);
     } catch (err) {
       console.error('Failed to fetch popular destinations:', err);
     } finally {
