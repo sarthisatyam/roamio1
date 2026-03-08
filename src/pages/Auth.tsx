@@ -6,25 +6,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Plane, Compass, Mail, Phone } from "lucide-react";
+import { MapPin, Plane, Compass } from "lucide-react";
 import { z } from "zod";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 digits");
-const phoneSchema = z.string().regex(/^\+?[1-9]\d{6,14}$/, "Please enter a valid phone number with country code");
+
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; phone?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -47,18 +45,11 @@ const Auth = () => {
   }, [navigate]);
 
   const validateForm = () => {
-    const newErrors: { email?: string; phone?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string } = {};
 
-    if (authMethod === "email") {
-      const emailResult = emailSchema.safeParse(email);
-      if (!emailResult.success) {
-        newErrors.email = emailResult.error.errors[0].message;
-      }
-    } else {
-      const phoneResult = phoneSchema.safeParse(phone);
-      if (!phoneResult.success) {
-        newErrors.phone = phoneResult.error.errors[0].message;
-      }
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) {
+      newErrors.email = emailResult.error.errors[0].message;
     }
 
     const passwordResult = passwordSchema.safeParse(password);
@@ -103,8 +94,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (authMethod === "email") {
-        if (isLogin) {
+      if (isLogin) {
           const { error } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -164,61 +154,6 @@ const Auth = () => {
               description: "Welcome to Roamio! You can now start exploring.",
             });
           }
-        }
-      } else {
-        // Phone auth
-        if (isLogin) {
-          const { error } = await supabase.auth.signInWithPassword({
-            phone,
-            password,
-          });
-
-          if (error) {
-            toast({
-              title: "Login failed",
-              description: error.message.includes("Invalid login credentials")
-                ? "Invalid phone number or password. Please try again."
-                : error.message,
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Welcome back!",
-              description: "You've successfully logged in.",
-            });
-          }
-        } else {
-          const { error } = await supabase.auth.signUp({
-            phone,
-            password,
-            options: {
-              data: {
-                display_name: displayName,
-              },
-            },
-          });
-
-          if (error) {
-            if (error.message.includes("User already registered")) {
-              toast({
-                title: "Account exists",
-                description: "An account with this phone number already exists. Please login instead.",
-                variant: "destructive",
-              });
-            } else {
-              toast({
-                title: "Signup failed",
-                description: error.message,
-                variant: "destructive",
-              });
-            }
-          } else {
-            toast({
-              title: "Account created!",
-              description: "Welcome to Roamio! You can now start exploring.",
-            });
-          }
-        }
       }
     } catch (error) {
       toast({
@@ -302,76 +237,40 @@ const Auth = () => {
             </div>
           </div>
 
-          {/* Auth Method Tabs */}
-          <Tabs value={authMethod} onValueChange={(v) => setAuthMethod(v as "email" | "phone")} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="email" className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
+          <form onSubmit={handleAuth} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="displayName" className="text-foreground">
+                  Display Name
+                </Label>
+                <Input
+                  id="displayName"
+                  type="text"
+                  placeholder="Your name"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="bg-background border-border focus:border-primary"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-foreground">
                 Email
-              </TabsTrigger>
-              <TabsTrigger value="phone" className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                Phone
-              </TabsTrigger>
-            </TabsList>
-
-            <form onSubmit={handleAuth} className="space-y-4">
-              {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="displayName" className="text-foreground">
-                    Display Name
-                  </Label>
-                  <Input
-                    id="displayName"
-                    type="text"
-                    placeholder="Your name"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    className="bg-background border-border focus:border-primary"
-                  />
-                </div>
-              )}
-
-              <TabsContent value="email" className="mt-0 space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setErrors((prev) => ({ ...prev, email: undefined }));
-                    }}
-                    className={`bg-background border-border focus:border-primary ${errors.email ? "border-destructive" : ""}`}
-                  />
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="phone" className="mt-0 space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-foreground">
-                    Phone Number
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+1234567890"
-                    value={phone}
-                    onChange={(e) => {
-                      setPhone(e.target.value);
-                      setErrors((prev) => ({ ...prev, phone: undefined }));
-                    }}
-                    className={`bg-background border-border focus:border-primary ${errors.phone ? "border-destructive" : ""}`}
-                  />
-                  {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-                  <p className="text-xs text-muted-foreground">Include country code (e.g., +1 for US)</p>
-                </div>
-              </TabsContent>
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setErrors((prev) => ({ ...prev, email: undefined }));
+                }}
+                className={`bg-background border-border focus:border-primary ${errors.email ? "border-destructive" : ""}`}
+              />
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+            </div>
 
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-foreground">
@@ -408,8 +307,7 @@ const Auth = () => {
                   "Create Account"
                 )}
               </Button>
-            </form>
-          </Tabs>
+          </form>
 
           <div className="text-center">
             <button
