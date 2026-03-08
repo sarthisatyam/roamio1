@@ -194,11 +194,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const menuItems = [
     {
       icon: Calendar,
-      title: "My Bookings",
-      description: "View and manage your travel bookings",
+      title: "My Trips",
+      description: "View and manage your trips",
       color: "text-primary",
       bgColor: "bg-primary/10",
-      action: () => setBookingsDialogOpen(true)
+      action: () => { setMyTripsDialogOpen(true); fetchMyTrips(); }
     },
     {
       icon: Users,
