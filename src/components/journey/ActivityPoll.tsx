@@ -41,11 +41,12 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
       id: crypto.randomUUID(),
       title: form.title.trim(),
       location: form.location.trim(),
+      time: form.time.trim(),
       proposedBy: proposer?.name || "Unknown",
       votes: { [currentVoter]: "up" },
       resolved: false,
     }]);
-    setForm({ title: "", location: "" });
+    setForm({ title: "", location: "", time: "" });
     setDialogOpen(false);
     toast.success("Activity proposed for voting!");
   };
