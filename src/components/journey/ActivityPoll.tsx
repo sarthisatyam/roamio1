@@ -32,7 +32,7 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
   polls, onPollsChange, members, currentVoter, onCurrentVoterChange
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", location: "" });
+  const [form, setForm] = useState({ title: "", location: "", time: "" });
 
   const handlePropose = () => {
     if (!form.title.trim()) { toast.error("Enter activity title"); return; }
