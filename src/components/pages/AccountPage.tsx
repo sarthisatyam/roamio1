@@ -567,10 +567,10 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <MyInterestsDialog 
         open={interestsDialogOpen} 
         onOpenChange={setInterestsDialogOpen} 
-        interests={userData?.preferences || []}
-        gender={userData?.preferences?.includes('Male') ? 'Male' : userData?.preferences?.includes('Female') ? 'Female' : 'Not specified'}
-        age={25}
-        about="Passionate traveler looking for authentic experiences and meaningful connections."
+        interests={userProfile?.interests || userData?.preferences || []}
+        gender={userProfile?.gender || 'Not specified'}
+        age={userProfile?.age || null}
+        about={userProfile?.bio || "No bio yet. Tap edit to add one."}
       />
       <TravelListDialog open={travelListDialogOpen} onOpenChange={setTravelListDialogOpen} places={bookmarkedPlaces} />
       <EmergencyDialog open={emergencyDialogOpen} onOpenChange={setEmergencyDialogOpen} />
