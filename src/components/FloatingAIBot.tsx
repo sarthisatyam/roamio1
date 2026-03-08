@@ -508,6 +508,8 @@ const FloatingAIBot: React.FC<FloatingAIBotProps> = ({ currentCity, locationEnab
           </Card>
         </div>
       )}
+      {/* Emergency Dialog */}
+      <EmergencyDialog open={emergencyDialogOpen} onOpenChange={setEmergencyDialogOpen} />
     </>
   );
 };

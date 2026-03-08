@@ -23,7 +23,7 @@ import {
   EyeOff,
   Sparkles,
   Plus,
-  AlertTriangle,
+  
 } from "lucide-react";
 import { useWeather } from "@/hooks/useWeather";
 import { cn } from "@/lib/utils";
