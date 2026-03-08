@@ -258,36 +258,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     },
     {
       icon: Headphones,
-      title: "Customer Support",
-      description: "Get help and support",
+      title: "Help & Support",
+      description: "Support, contact, privacy & terms",
       color: "text-success",
       bgColor: "bg-success/10",
-      action: () => setSupportDialogOpen(true)
+      action: () => setHelpLegalDialogOpen(true)
     },
-    {
-      icon: Shield,
-      title: "Privacy Policy",
-      description: "How we handle your data",
-      color: "text-muted-foreground",
-      bgColor: "bg-muted",
-      action: () => setPrivacyDialogOpen(true)
-    },
-    {
-      icon: CheckCircle,
-      title: "Terms of Service",
-      description: "Usage terms and conditions",
-      color: "text-muted-foreground",
-      bgColor: "bg-muted",
-      action: () => setTermsDialogOpen(true)
-    },
-    {
-      icon: Mail,
-      title: "Contact Us",
-      description: "Get in touch with our team",
-      color: "text-primary",
-      bgColor: "bg-primary/10",
-      action: () => setContactDialogOpen(true)
-    }
   ];
 
   const getAccountTypeIcon = () => {
