@@ -74,23 +74,43 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const handleLocationToggle = async (enabled: boolean) => {
     if (enabled) {
       try {
-        // Request permission first
-        const permStatus = await Geolocation.requestPermissions();
-        if (permStatus.location === 'denied') {
-          setLocationEnabled(false);
-          localStorage.setItem('locationEnabled', 'false');
-          setCurrentCity(null);
-          localStorage.removeItem('currentCity');
-          return;
+        const isNative = Capacitor.isNativePlatform();
+
+        // Request permission - use Capacitor on native, browser API on web
+        if (isNative) {
+          const permStatus = await Geolocation.requestPermissions();
+          if (permStatus.location === 'denied') {
+            setLocationEnabled(false);
+            localStorage.setItem('locationEnabled', 'false');
+            setCurrentCity(null);
+            localStorage.removeItem('currentCity');
+            return;
+          }
         }
 
-        // Get current position with high accuracy
-        const position = await Geolocation.getCurrentPosition({
-          enableHighAccuracy: true,
-          timeout: 15000,
-        });
+        // Get position
+        let latitude: number;
+        let longitude: number;
 
-        const { latitude, longitude } = position.coords;
+        if (isNative) {
+          const position = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 15000,
+          });
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        } else {
+          // Fallback to browser geolocation API on web
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 15000,
+            });
+          });
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        }
+
         setLocationEnabled(true);
         localStorage.setItem('locationEnabled', 'true');
         setUserLat(latitude);
