@@ -517,8 +517,6 @@ const HomePage: React.FC<HomePageProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* Emergency Dialog */}
-      <EmergencyDialog open={emergencyDialogOpen} onOpenChange={setEmergencyDialogOpen} />
     </div>
   );
 };
