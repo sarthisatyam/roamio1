@@ -43,8 +43,8 @@ import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
 import { HelpLegalDialog } from "@/components/dialogs/LegalContactDialogs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { useTrips, Trip, TripRequest } from "@/hooks/useTrips";
-import TripChatDialog from "@/components/dialogs/TripChatDialog";
+import { usePlans, Plan, JoinRequest } from "@/hooks/usePlans";
+import { format } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -82,12 +82,10 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
 
   // Trips state
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatTrip, setChatTrip] = useState<Trip | null>(null);
   const [requestsDialogOpen, setRequestsDialogOpen] = useState(false);
-  const [pendingRequests, setPendingRequests] = useState<TripRequest[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
-  const [managingTrip, setManagingTrip] = useState<Trip | null>(null);
+  const [managingPlan, setManagingPlan] = useState<Plan | null>(null);
 
   useEffect(() => {
     const getSession = async () => {
@@ -107,30 +105,19 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     getSession();
   }, []);
 
-  const { myTrips, fetchMyTrips, handleRequest, getPendingRequests } = useTrips(currentUserId);
+  const { myPlans, fetchMyPlans, handleJoinRequest, getPendingRequests } = usePlans(currentUserId);
 
-  const GROUP_TYPES = [
-    { value: "women-only", label: "Women Only" },
-    { value: "mixed", label: "Mixed" },
-    { value: "family", label: "Family" },
-  ];
-  const TRIP_TYPES = [
-    { value: "darshan", label: "Darshan" },
-    { value: "trek", label: "Trek" },
-    { value: "relaxed", label: "Relaxed" },
-    { value: "adventure", label: "Adventure" },
-    { value: "spiritual", label: "Spiritual" },
-  ];
-
-  const getGroupTypeLabel = (type: string) => GROUP_TYPES.find(g => g.value === type)?.label || type;
-  const getTripTypeLabel = (type: string) => TRIP_TYPES.find(t => t.value === type)?.label || type;
-
-  const openManageRequests = async (trip: Trip) => {
-    setManagingTrip(trip);
+  const getGroupBadge = (type: string) => {
+    if (type === "females_only") return { label: "Females Only", color: "bg-pink-500/10 text-pink-600" };
+    if (type === "males_only") return { label: "Males Only", color: "bg-blue-500/10 text-blue-600" };
+    return { label: "Everyone", color: "bg-green-500/10 text-green-600" };
+  };
+  const openManageRequests = async (plan: Plan) => {
+    setManagingPlan(plan);
     setLoadingRequests(true);
     setRequestsDialogOpen(true);
     try {
-      const reqs = await getPendingRequests(trip.id);
+      const reqs = await getPendingRequests(plan.id);
       setPendingRequests(reqs);
     } catch {
       toast.error("Failed to load requests");
@@ -139,12 +126,12 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     }
   };
 
-  const handleReviewRequest = async (req: TripRequest, action: "accepted" | "declined") => {
+  const handleReviewRequest = async (req: JoinRequest, action: "approved" | "rejected") => {
     try {
-      await handleRequest(req.id, action, req.trip_id, req.user_id);
+      await handleJoinRequest(req.id, action, req.plan_id, req.user_id);
       setPendingRequests(prev => prev.filter(r => r.id !== req.id));
-      toast.success(action === "accepted" ? "Request accepted!" : "Request declined.");
-      await fetchMyTrips();
+      toast.success(action === "approved" ? "Request approved!" : "Request rejected.");
+      await fetchMyPlans();
     } catch {
       toast.error("Failed to process request");
     }
@@ -210,7 +197,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       description: "View and manage your trips",
       color: "text-primary",
       bgColor: "bg-primary/10",
-      action: () => { setMyTripsDialogOpen(true); fetchMyTrips(); }
+      action: () => { setMyTripsDialogOpen(true); fetchMyPlans(); }
     },
     {
       icon: Users,
@@ -457,70 +444,86 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-primary" /> My Trips
+              <Calendar className="w-5 h-5 text-primary" /> My Plans
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            {myTrips.length === 0 ? (
+            {myPlans.length === 0 ? (
               <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
                 <Calendar className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                <h3 className="font-semibold text-sm">No trips yet</h3>
-                <p className="text-xs text-muted-foreground mt-1">Create or join a trip from the Companion page</p>
+                <h3 className="font-semibold text-sm">No plans yet</h3>
+                <p className="text-xs text-muted-foreground mt-1">Create or join a plan from the Companion page</p>
               </Card>
             ) : (
-              myTrips.map(trip => {
-                const isPending = !trip.is_member && trip.my_request_status === "pending";
-                const isDeclined = !trip.is_member && trip.my_request_status === "declined";
-                const isMember = trip.is_member || trip.my_request_status === "accepted";
+              myPlans.map(plan => {
+                const isPending = !plan.is_member && plan.my_request_status === "pending";
+                const isRejected = !plan.is_member && plan.my_request_status === "rejected";
+                const isMember = plan.is_member || plan.my_request_status === "approved";
+                const groupBadge = getGroupBadge(plan.group_type);
 
                 return (
-                  <Card key={trip.id} className="p-4 shadow-soft rounded-2xl border-0 bg-card">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="font-semibold text-sm flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-primary" />
-                          {trip.destination}
-                        </h3>
-                        <p className="text-[10px] text-muted-foreground">{trip.start_date} → {trip.end_date}</p>
+                  <Card key={plan.id} className="overflow-hidden shadow-soft rounded-2xl border-0 bg-card">
+                    {/* Cover Image */}
+                    {plan.cover_image_url ? (
+                      <div className="relative h-32 w-full">
+                        <img src={plan.cover_image_url} alt={plan.destination_name} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute bottom-2 left-3 right-3">
+                          <h3 className="font-bold text-sm text-white">{plan.plan_name}</h3>
+                          <p className="text-[10px] text-white/80 flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> {plan.destination_name}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Badge variant="secondary" className="text-[10px] rounded-lg">{getTripTypeLabel(trip.trip_type)}</Badge>
-                        {trip.is_owner && <Badge className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">Owner</Badge>}
-                        {isPending && <Badge className="text-[10px] rounded-lg bg-yellow-500/10 text-yellow-600 border-0">Pending</Badge>}
-                        {isDeclined && <Badge variant="destructive" className="text-[10px] rounded-lg">Declined</Badge>}
-                        {isMember && !trip.is_owner && <Badge className="text-[10px] rounded-lg bg-green-500/10 text-green-600 border-0">Accepted</Badge>}
+                    ) : (
+                      <div className="relative h-24 w-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                        <MapPin className="w-8 h-8 text-primary/40" />
+                        <div className="absolute bottom-2 left-3">
+                          <h3 className="font-bold text-sm">{plan.plan_name}</h3>
+                          <p className="text-[10px] text-muted-foreground">{plan.destination_name}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
-                        <Users className="w-3 h-3" />{trip.member_count} members
-                      </Badge>
-                      <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
-                        <Shield className="w-3 h-3" />{getGroupTypeLabel(trip.group_type)}
-                      </Badge>
-                    </div>
-                    {isMember ? (
-                      <div className="flex gap-2">
-                        <Button size="sm" className="flex-1 bg-gradient-primary text-white rounded-xl text-xs h-9" onClick={() => { setChatTrip(trip); setChatOpen(true); }}>
-                          <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Group Chat
+                    )}
+
+                    <div className="p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] text-muted-foreground">
+                          {format(new Date(plan.start_date), "MMM d")} → {format(new Date(plan.end_date), "MMM d, yyyy")}
+                        </p>
+                        <div className="flex gap-1">
+                          <Badge className={cn("text-[10px] rounded-lg border-0", groupBadge.color)}>{groupBadge.label}</Badge>
+                          {plan.is_owner && <Badge className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">Owner</Badge>}
+                          {isPending && <Badge className="text-[10px] rounded-lg bg-warning/10 text-warning border-0">Pending</Badge>}
+                          {isRejected && <Badge variant="destructive" className="text-[10px] rounded-lg">Rejected</Badge>}
+                          {isMember && !plan.is_owner && <Badge className="text-[10px] rounded-lg bg-success/10 text-success border-0">Joined</Badge>}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        <Badge variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg gap-1">
+                          <Users className="w-3 h-3" /> {plan.member_count || 1} / {plan.max_members}
+                        </Badge>
+                        {(plan.interests || []).slice(0, 3).map(tag => (
+                          <Badge key={tag} variant="secondary" className="text-[10px] py-0.5 px-2 rounded-lg">{tag}</Badge>
+                        ))}
+                      </div>
+
+                      {isMember && plan.is_owner ? (
+                        <Button size="sm" variant="outline" className="w-full rounded-xl text-xs h-9" onClick={() => openManageRequests(plan)}>
+                          <Eye className="w-3.5 h-3.5 mr-1.5" /> Manage Requests
                         </Button>
-                        {trip.is_owner && (
-                          <Button size="sm" variant="outline" className="rounded-xl text-xs h-9" onClick={() => openManageRequests(trip)}>
-                            <Eye className="w-3.5 h-3.5 mr-1.5" /> Requests
-                          </Button>
-                        )}
-                      </div>
-                    ) : isPending ? (
-                      <div className="flex items-center gap-2 text-xs text-yellow-600 bg-yellow-500/5 rounded-xl px-3 py-2">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>Your request is pending review</span>
-                      </div>
-                    ) : isDeclined ? (
-                      <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/5 rounded-xl px-3 py-2">
-                        <Shield className="w-3.5 h-3.5" />
-                        <span>Your request was declined</span>
-                      </div>
-                    ) : null}
+                      ) : isPending ? (
+                        <div className="flex items-center gap-2 text-xs text-warning bg-warning/5 rounded-xl px-3 py-2">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>Your request is pending review</span>
+                        </div>
+                      ) : isRejected ? (
+                        <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/5 rounded-xl px-3 py-2">
+                          <Shield className="w-3.5 h-3.5" />
+                          <span>Your request was rejected</span>
+                        </div>
+                      ) : null}
+                    </div>
                   </Card>
                 );
               })
@@ -533,7 +536,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <Dialog open={requestsDialogOpen} onOpenChange={setRequestsDialogOpen}>
         <DialogContent className="max-w-md rounded-2xl max-h-[70vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Join Requests — {managingTrip?.destination}</DialogTitle>
+            <DialogTitle>Join Requests — {managingPlan?.destination_name}</DialogTitle>
           </DialogHeader>
           {loadingRequests ? (
             <p className="text-center text-sm text-muted-foreground py-4">Loading...</p>
@@ -543,10 +546,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
             <div className="space-y-3">
               {pendingRequests.map(req => (
                 <Card key={req.id} className="p-3 rounded-2xl border-0 shadow-soft">
+                  <p className="font-medium text-sm mb-1">{req.sender_name}</p>
                   <p className="text-xs text-muted-foreground mb-2">{req.message || "No message"}</p>
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1 bg-success text-white rounded-xl text-xs h-8" onClick={() => handleReviewRequest(req, "accepted")}>Accept</Button>
-                    <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-8 text-destructive" onClick={() => handleReviewRequest(req, "declined")}>Decline</Button>
+                    <Button size="sm" className="flex-1 bg-success text-white rounded-xl text-xs h-8" onClick={() => handleReviewRequest(req, "approved")}>Approve</Button>
+                    <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-8 text-destructive" onClick={() => handleReviewRequest(req, "rejected")}>Reject</Button>
                   </div>
                 </Card>
               ))}
@@ -555,14 +559,6 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         </DialogContent>
       </Dialog>
 
-      {/* Trip Chat */}
-      <TripChatDialog
-        open={chatOpen}
-        onOpenChange={setChatOpen}
-        tripId={chatTrip?.id || null}
-        tripName={chatTrip?.destination || "Trip"}
-        currentUserId={currentUserId}
-      />
       <MyCoCompanionDialog open={coCompanionDialogOpen} onOpenChange={setCoCompanionDialogOpen} companions={likedCompanionProfiles} />
       <MyInterestsDialog 
         open={interestsDialogOpen} 
