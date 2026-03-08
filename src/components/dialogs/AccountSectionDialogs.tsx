@@ -864,6 +864,7 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
   open, 
   onOpenChange, 
   interests = [], 
+  avatarUrl,
   gender = "",
   age,
   about = "",
@@ -876,6 +877,9 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
   const [editBio, setEditBio] = useState(about);
   const [editInterests, setEditInterests] = useState<string[]>(interests);
   const [saving, setSaving] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(avatarUrl || null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -884,8 +888,10 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
       setEditAge(age?.toString() || "");
       setEditBio(about);
       setEditInterests(interests);
+      setAvatarPreview(avatarUrl || null);
+      setAvatarFile(null);
     }
-  }, [open, displayName, gender, age, about, interests]);
+  }, [open, displayName, gender, age, about, interests, avatarUrl]);
 
   const toggleInterest = (interest: string) => {
     setEditInterests(prev =>
@@ -893,11 +899,36 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
     );
   };
 
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Image must be under 3MB");
+      return;
+    }
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast.error("Not logged in"); return; }
+
+      let newAvatarUrl = avatarUrl;
+
+      // Upload avatar if changed
+      if (avatarFile) {
+        const ext = avatarFile.name.split(".").pop();
+        const filePath = `${user.id}/avatar.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, avatarFile, { upsert: true });
+        if (uploadErr) throw uploadErr;
+        const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+        newAvatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      }
 
       const { error } = await supabase
         .from("profiles")
@@ -907,6 +938,7 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
           age: editAge ? parseInt(editAge) : null,
           bio: editBio.trim() || null,
           interests: editInterests.length > 0 ? editInterests : null,
+          avatar_url: newAvatarUrl || null,
         })
         .eq("user_id", user.id);
 
