@@ -131,10 +131,11 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   };
 
   const tabs = [
-    { id: 0, name: "Home", icon: Home, component: HomePage },
-    { id: 1, name: "Bookings", icon: Calendar, component: BookingsPage },
-    { id: 2, name: "Companion", icon: Users, component: CompanionPage },
-    { id: 3, name: "Journey", icon: Map, component: JourneyPage },
+    { id: 0, name: "Home", icon: Home },
+    { id: 1, name: "Explore", icon: Compass },
+    { id: 2, name: "Create", icon: Plus, isCreate: true },
+    { id: 3, name: "Companion", icon: Users },
+    { id: 4, name: "Journey", icon: Map },
   ];
 
   const handleNavigateToAccount = () => {
