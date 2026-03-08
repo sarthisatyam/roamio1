@@ -146,7 +146,8 @@ const PlanBuilder: React.FC<PlanBuilderProps> = ({ currentUserId, userGender, on
     const g = userGender?.toLowerCase();
     if (g === "male") return { canMale: true, canFemale: false };
     if (g === "female") return { canMale: false, canFemale: true };
-    return { canMale: true, canFemale: true };
+    // If gender is not set, only allow "Everyone" — no gender-restricted groups
+    return { canMale: false, canFemale: false };
   };
 
   const { canMale, canFemale } = genderRestrictions();
