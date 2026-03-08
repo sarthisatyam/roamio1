@@ -567,6 +567,106 @@ const HomePage: React.FC<HomePageProps> = ({
             )
           )}
         </section>
+
+        {/* Explore Plans Section */}
+        <section className="px-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-sm font-semibold">Explore Plans</h2>
+              <p className="text-[10px] text-muted-foreground">Join trips created by travelers</p>
+            </div>
+            {onCreatePlan && (
+              <Button size="sm" className="bg-gradient-primary text-white border-0 h-8 text-xs rounded-xl px-3" onClick={onCreatePlan}>
+                <Plus className="w-3.5 h-3.5 mr-1" /> Create
+              </Button>
+            )}
+          </div>
+
+          {plansLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : plans.length === 0 ? (
+            <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
+              <Sparkles className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm font-medium text-muted-foreground">No plans yet</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Be the first to create a plan!</p>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {plans.map(plan => {
+                const badge = getGroupBadge(plan.group_type);
+                return (
+                  <Card key={plan.id} className="overflow-hidden rounded-2xl border-0 shadow-soft">
+                    {/* Cover */}
+                    <div className="aspect-[2/1] relative bg-muted">
+                      {plan.cover_image_url ? (
+                        <img src={plan.cover_image_url} alt={plan.plan_name} className="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                          <MapPin className="w-10 h-10 text-primary/40" />
+                        </div>
+                      )}
+                      <div className="absolute top-2 left-2 flex gap-1.5">
+                        <Badge className={cn("text-[10px]", badge.color)}>{badge.label}</Badge>
+                        <Badge className={cn("text-[10px]", plan.plan_visibility === "public" ? "bg-accent/80 text-accent-foreground" : "bg-muted/80 text-muted-foreground")}>
+                          {plan.plan_visibility === "public" ? <Eye className="w-2.5 h-2.5 mr-0.5" /> : <EyeOff className="w-2.5 h-2.5 mr-0.5" />}
+                          {plan.plan_visibility === "public" ? "Public" : "Private"}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="p-3 space-y-2">
+                      <h3 className="font-bold text-sm leading-tight">{plan.plan_name}</h3>
+                      <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <MapPin className="w-3 h-3" />
+                        <span>{plan.destination_name}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          <span>{format(new Date(plan.start_date), "MMM dd")} – {format(new Date(plan.end_date), "MMM dd")}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          <span>{plan.member_count || 1}/{plan.max_members}</span>
+                        </div>
+                      </div>
+
+                      {plan.interests && plan.interests.length > 0 && (
+                        <div className="flex gap-1 flex-wrap">
+                          {plan.interests.map(i => (
+                            <Badge key={i} variant="secondary" className="text-[9px] py-0 px-1.5 rounded-md">{i}</Badge>
+                          ))}
+                        </div>
+                      )}
+
+                      {plan.is_owner ? (
+                        <Badge className="bg-primary/10 text-primary text-[10px]">Your Plan</Badge>
+                      ) : plan.is_member ? (
+                        <Badge className="bg-green-500/10 text-green-600 text-[10px]">Joined</Badge>
+                      ) : plan.my_request_status === "pending" ? (
+                        <Badge className="bg-yellow-500/10 text-yellow-600 text-[10px]">
+                          <Clock className="w-2.5 h-2.5 mr-0.5" /> Pending
+                        </Badge>
+                      ) : plan.my_request_status === "rejected" ? (
+                        <Badge className="bg-destructive/10 text-destructive text-[10px]">Declined</Badge>
+                      ) : (
+                        <Button
+                          onClick={() => setSelectedPlan(plan)}
+                          className="w-full rounded-xl bg-gradient-primary text-xs h-8"
+                          size="sm"
+                        >
+                          Request to Join <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
 
       {/* Booking Dialog */}
