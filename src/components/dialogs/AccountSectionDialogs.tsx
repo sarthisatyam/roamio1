@@ -853,7 +853,11 @@ const INTEREST_OPTIONS = [
   "Spiritual", "Trekking", "Wildlife", "Backpacking", "Luxury"
 ];
 
-const GENDER_OPTIONS = ["Male", "Female", "Non-binary", "Prefer not to say"];
+const GENDER_OPTIONS = [
+  { label: "Male", value: "male" },
+  { label: "Female", value: "female" },
+  { label: "Other", value: "other" },
+];
 
 export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({ 
   open, 
