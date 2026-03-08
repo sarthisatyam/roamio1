@@ -853,7 +853,11 @@ const INTEREST_OPTIONS = [
   "Spiritual", "Trekking", "Wildlife", "Backpacking", "Luxury"
 ];
 
-const GENDER_OPTIONS = ["Male", "Female", "Non-binary", "Prefer not to say"];
+const GENDER_OPTIONS = [
+  { label: "Male", value: "male" },
+  { label: "Female", value: "female" },
+  { label: "Other", value: "other" },
+];
 
 export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({ 
   open, 
@@ -948,7 +952,7 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
                 className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">Select</option>
-                {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+                {GENDER_OPTIONS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
               </select>
             </div>
             <div className="space-y-1">
