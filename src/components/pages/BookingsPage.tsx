@@ -57,46 +57,46 @@ interface HotelResult {
   pricePercentile?: Record<string, number>;
 }
 
-// Prominent landmarks by city for distance display
-const PROMINENT_PLACES: Record<string, string> = {
-  hyderabad: "Charminar",
-  delhi: "India Gate",
-  mumbai: "Gateway of India",
-  bangalore: "Lalbagh Garden",
-  bengaluru: "Lalbagh Garden",
-  chennai: "Marina Beach",
-  kolkata: "Victoria Memorial",
-  jaipur: "Hawa Mahal",
-  goa: "Calangute Beach",
-  agra: "Taj Mahal",
-  varanasi: "Kashi Vishwanath Temple",
-  udaipur: "City Palace",
-  shimla: "Mall Road",
-  manali: "Hadimba Temple",
-  rishikesh: "Laxman Jhula",
-  mysore: "Mysore Palace",
-  ooty: "Botanical Garden",
-  munnar: "Tea Gardens",
-  pondicherry: "Promenade Beach",
-  amritsar: "Golden Temple",
-  darjeeling: "Tiger Hill",
-  leh: "Leh Palace",
-  pune: "Shaniwar Wada",
-  ahmedabad: "Sabarmati Ashram",
-  lucknow: "Bara Imambara",
-  kochi: "Fort Kochi",
-  jodhpur: "Mehrangarh Fort",
-  pushkar: "Pushkar Lake",
-  alleppey: "Backwaters",
-  coorg: "Abbey Falls",
+// Famous landmarks by city (max 3 per city)
+const CITY_LANDMARKS: Record<string, string[]> = {
+  hyderabad: ["Charminar", "Golconda Fort", "Hussain Sagar Lake"],
+  delhi: ["India Gate", "Red Fort", "Qutub Minar"],
+  mumbai: ["Gateway of India", "Marine Drive", "Elephanta Caves"],
+  bangalore: ["Lalbagh Garden", "Bangalore Palace", "Cubbon Park"],
+  bengaluru: ["Lalbagh Garden", "Bangalore Palace", "Cubbon Park"],
+  chennai: ["Marina Beach", "Kapaleeshwarar Temple", "Fort St. George"],
+  kolkata: ["Victoria Memorial", "Howrah Bridge", "Indian Museum"],
+  jaipur: ["Hawa Mahal", "Amber Fort", "City Palace"],
+  goa: ["Calangute Beach", "Basilica of Bom Jesus", "Fort Aguada"],
+  agra: ["Taj Mahal", "Agra Fort", "Fatehpur Sikri"],
+  varanasi: ["Kashi Vishwanath Temple", "Dashashwamedh Ghat", "Sarnath"],
+  udaipur: ["City Palace", "Lake Pichola", "Jag Mandir"],
+  shimla: ["Mall Road", "Jakhoo Temple", "Christ Church"],
+  manali: ["Hadimba Temple", "Solang Valley", "Old Manali"],
+  rishikesh: ["Laxman Jhula", "Ram Jhula", "Triveni Ghat"],
+  mysore: ["Mysore Palace", "Chamundi Hills", "Brindavan Gardens"],
+  ooty: ["Botanical Garden", "Ooty Lake", "Doddabetta Peak"],
+  munnar: ["Tea Gardens", "Eravikulam National Park", "Mattupetty Dam"],
+  pondicherry: ["Promenade Beach", "Auroville", "French Quarter"],
+  amritsar: ["Golden Temple", "Jallianwala Bagh", "Wagah Border"],
+  darjeeling: ["Tiger Hill", "Batasia Loop", "Peace Pagoda"],
+  leh: ["Leh Palace", "Pangong Lake", "Shanti Stupa"],
+  pune: ["Shaniwar Wada", "Aga Khan Palace", "Sinhagad Fort"],
+  ahmedabad: ["Sabarmati Ashram", "Adalaj Stepwell", "Kankaria Lake"],
+  lucknow: ["Bara Imambara", "Rumi Darwaza", "Hazratganj"],
+  kochi: ["Fort Kochi", "Chinese Fishing Nets", "Mattancherry Palace"],
+  jodhpur: ["Mehrangarh Fort", "Umaid Bhawan Palace", "Jaswant Thada"],
+  pushkar: ["Pushkar Lake", "Brahma Temple", "Savitri Temple"],
+  alleppey: ["Backwaters", "Alappuzha Beach", "Krishnapuram Palace"],
+  coorg: ["Abbey Falls", "Raja's Seat", "Dubare Elephant Camp"],
 };
 
-function getProminentPlace(location: string): string {
+function getCityLandmarks(location: string): string[] {
   const key = location.toLowerCase().trim();
-  for (const [city, landmark] of Object.entries(PROMINENT_PLACES)) {
-    if (key.includes(city)) return landmark;
+  for (const [city, landmarks] of Object.entries(CITY_LANDMARKS)) {
+    if (key.includes(city)) return landmarks;
   }
-  return "City Center";
+  return ["Main Market", "Railway Station", "Bus Stand"];
 }
 
 function getRandomDistance(): string {
