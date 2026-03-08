@@ -766,10 +766,10 @@ export const MyBookingsDialog: React.FC<BookingsDialogProps> = ({ open, onOpenCh
 
 // My Co-Companion Dialog
 interface Companion {
-  id: number;
+  id: string | number;
   name: string;
   profileImage: string;
-  age: number;
+  age: number | null;
   location: string;
   bio: string;
   interests: string[];
@@ -841,7 +841,7 @@ interface MyInterestsDialogProps {
   onOpenChange: (open: boolean) => void;
   interests?: string[];
   gender?: string;
-  age?: number;
+  age?: number | null;
   about?: string;
 }
 
