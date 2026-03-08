@@ -599,8 +599,10 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
           {!isLoadingHotels && !hotelError && filteredStayOptions.length > 0 ? (
             filteredStayOptions.map((stay) => {
               const IconComponent = stay.icon;
-              const comparison = stayComparisons[stay.id];
-              const { minPrice, bestPlatform } = getBestPrice(comparison || {});
+              const stayKey = `api-${stay.id}`;
+              const comparison = aiComparisons[stayKey];
+              const best = comparison ? getBestFromPlatforms(comparison) : null;
+              const priceNum = parseInt(stay.price.replace(/[₹,/night]/g, '') || '0');
 
               return (
                 <Card key={stay.id} className="p-3 shadow-soft hover:shadow-medium transition-all rounded-2xl border-0">
@@ -647,17 +649,21 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                         <div className="text-sm font-bold text-primary">{stay.price}</div>
                         <Button
                           size="sm"
-                          onClick={() => setSelectedStay(selectedStay === stay.id ? null : stay.id)}
+                          onClick={() => handleCompare(stayKey, stay.name, stay.location, stay.rating, priceNum)}
                           className="text-xs h-8 rounded-xl px-4 bg-gradient-primary text-white"
                         >
-                          <Zap className="w-3 h-3 mr-1" />
+                          {loadingCompareId === stayKey ? (
+                            <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                          ) : (
+                            <Zap className="w-3 h-3 mr-1" />
+                          )}
                           Compare
                         </Button>
                       </div>
                     </div>
                   </div>
 
-                  {selectedStay === stay.id && comparison && (
+                  {selectedStay === stayKey && comparison && (
                     <div className="mt-3 p-3 bg-muted/50 rounded-xl">
                       <div className="flex items-center gap-2 mb-3">
                         <TrendingDown className="w-4 h-4 text-success" />
@@ -665,19 +671,19 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                       </div>
 
                       <div className="space-y-2 mb-3">
-                        {Object.entries(comparison).map(([platform, data]) => {
-                          const isBest = platform === bestPlatform;
+                        {comparison.map((platform: any) => {
+                          const isBest = platform.name === best?.bestName;
                           return (
                             <div
-                              key={platform}
+                              key={platform.name}
                               className={cn(
                                 "flex items-center justify-between p-2.5 rounded-xl transition-all",
                                 isBest ? "bg-success/10 border border-success/30" : "bg-background",
                               )}
                             >
                               <div className="flex items-center gap-2">
-                                {renderPlatformLogo(platform)}
-                                <span className="font-medium text-sm capitalize">{platform}</span>
+                                {renderPlatformLogo(platform.name)}
+                                <span className="font-medium text-sm">{platform.name}</span>
                                 {isBest && (
                                   <Badge className="bg-success text-white text-[10px] py-0 px-1.5">
                                     <Award className="w-2.5 h-2.5 mr-0.5" />
@@ -686,9 +692,9 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                                 )}
                               </div>
                               <div className="text-right">
-                                <div className="font-bold text-primary text-sm">{(data as any).price}</div>
-                                {(data as any).savings !== "₹0" && (
-                                  <div className="text-[10px] text-success">Save {(data as any).savings}</div>
+                                <div className="font-bold text-primary text-sm">{platform.price}/night</div>
+                                {platform.savings !== "₹0" && (
+                                  <div className="text-[10px] text-success">Save {platform.savings}</div>
                                 )}
                               </div>
                             </div>
@@ -699,11 +705,11 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
                       <Button
                         className="w-full bg-gradient-primary text-white h-10 rounded-xl text-sm"
                         onClick={() => {
-                          const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(stay.name + ' book hotel ' + effectiveLocation)}`;
-                          window.open(searchUrl, '_blank');
+                          const bestP = comparison.find((p: any) => p.name === best?.bestName);
+                          if (bestP?.url) window.open(bestP.url, '_blank');
                         }}
                       >
-                        Book via {bestPlatform} • ₹{minPrice}
+                        Book via {best?.bestName} • ₹{best?.minPrice?.toLocaleString("en-IN")}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </div>
