@@ -9,6 +9,7 @@ export interface AIDestination {
   price: string;
   safety: number;
   tags: string[];
+  recommendedDays?: number;
   itinerary: {
     day: number;
     title: string;
