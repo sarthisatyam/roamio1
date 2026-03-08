@@ -309,6 +309,9 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         {/* Profile Section */}
         <div className="flex items-center gap-3">
           <Avatar className="w-14 h-14">
+            {userProfile?.avatar_url && (
+              <AvatarImage src={userProfile.avatar_url} alt="Profile" />
+            )}
             <AvatarFallback className="bg-white/20 text-white text-lg font-bold">
               {userData?.name?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
