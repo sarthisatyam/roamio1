@@ -149,7 +149,8 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
 
             const timeSlots = [
               { label: "Morning", icon: "🌅", range: [5, 12] },
-              { label: "Evening", icon: "🌇", range: [12, 21] },
+              { label: "Daytime", icon: "☀️", range: [12, 17] },
+              { label: "Evening", icon: "🌇", range: [17, 21] },
               { label: "Night", icon: "🌙", range: [21, 29] },
             ];
 
