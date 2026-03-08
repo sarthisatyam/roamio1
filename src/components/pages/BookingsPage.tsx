@@ -91,16 +91,9 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
         });
         if (!error && data?.hotels) {
           setAiHotels(data.hotels);
-          // Generate stable landmark distances
-          const newDistances: Record<string, Record<string, string>> = {};
-          const cityLandmarks = getCityLandmarks(effectiveLocation);
-          data.hotels.forEach((_: AIHotel, i: number) => {
-            newDistances[`${i}`] = {};
-            cityLandmarks.forEach((l) => {
-              newDistances[`${i}`][l] = getRandomDistance();
-            });
-          });
-          setLandmarkDistances(newDistances);
+          if (data.landmarks && Array.isArray(data.landmarks)) {
+            setCityLandmarks(data.landmarks.map((l: AILandmark) => l.name));
+          }
         }
       } catch (e) {
         console.error("AI hotel search error:", e);
