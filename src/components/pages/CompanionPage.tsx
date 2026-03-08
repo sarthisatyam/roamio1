@@ -420,12 +420,18 @@ const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({
                       {companion.age && <span className="text-xs text-muted-foreground">{companion.age}</span>}
                     </div>
 
-                    {companion.distance !== undefined && (
+                    {(companion.distance !== undefined || companion.city) && (
                       <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
                         <MapPin className="w-3 h-3" />
-                        {companion.distance < 1 ? "<1 km" : `${Math.round(companion.distance)} km`}
-                        {companion.city && <span>• {companion.city}</span>}
+                        {companion.distance !== undefined && (
+                          <span>{companion.distance < 1 ? "<1 km" : `${Math.round(companion.distance)} km`}</span>
+                        )}
+                        {companion.city && <span>{companion.distance !== undefined ? "• " : ""}{companion.city}</span>}
                       </div>
+                    )}
+
+                    {companion.bio && (
+                      <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{companion.bio}</p>
                     )}
 
                     {/* Interests */}
