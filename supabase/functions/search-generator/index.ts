@@ -63,7 +63,8 @@ Make the content relevant to Indian solo women travelers with safety-focused rec
                         rating: { type: "number" },
                         price: { type: "string", description: "Price per day like ₹1,500/day" },
                         safety: { type: "number", description: "Safety score 85-99" },
-                        tags: { type: "array", items: { type: "string" } },
+                        tags: { type: "array", items: { type: "string" }, description: "At least 3 relevant tags like 'Heritage', 'Beach', 'Hill Station', 'Adventure', 'Spiritual', 'Nightlife', 'Nature', 'Culture'" },
+                        recommendedDays: { type: "number", description: "Recommended number of days to visit this destination based on typical tourist stays (e.g. 2, 3, 5)" },
                         itinerary: {
                           type: "array",
                           items: {
