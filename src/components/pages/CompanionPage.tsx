@@ -1213,9 +1213,10 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
   };
 
   const filteredGroups = useMemo(() => {
-    if (!searchQuery.trim()) return groups;
+    const nonPlanGroups = groups.filter(g => !g.plan_id);
+    if (!searchQuery.trim()) return nonPlanGroups;
     const q = searchQuery.toLowerCase();
-    return groups.filter(g =>
+    return nonPlanGroups.filter(g =>
       g.name.toLowerCase().includes(q) ||
       g.category.toLowerCase().includes(q) ||
       g.description?.toLowerCase().includes(q)
