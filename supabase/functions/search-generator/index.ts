@@ -100,9 +100,21 @@ Make the content relevant to Indian solo women travelers with safety-focused rec
                             },
                             required: ["name", "type", "rating", "priceRange", "specialty"]
                           }
+                        },
+                        travelGuide: {
+                          type: "array",
+                          description: "Exactly 5 travel tips mixing general suggestions, DOs, and DON'Ts",
+                          items: {
+                            type: "object",
+                            properties: {
+                              tip: { type: "string", description: "A practical travel tip or advice" },
+                              category: { type: "string", enum: ["general", "do", "dont"], description: "Type of tip" }
+                            },
+                            required: ["tip", "category"]
+                          }
                         }
                       },
-                      required: ["id", "name", "image", "rating", "price", "safety", "tags", "itinerary", "eateries"]
+                      required: ["id", "name", "image", "rating", "price", "safety", "tags", "itinerary", "eateries", "travelGuide"]
                     }
                   },
                   stays: {

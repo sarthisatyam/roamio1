@@ -21,6 +21,10 @@ export interface AIDestination {
     priceRange: string;
     specialty: string;
   }[];
+  travelGuide?: {
+    tip: string;
+    category: 'general' | 'do' | 'dont';
+  }[];
 }
 
 export interface AIStay {
