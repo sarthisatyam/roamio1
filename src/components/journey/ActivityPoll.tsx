@@ -13,6 +13,7 @@ export interface PollActivity {
   id: string;
   title: string;
   location: string;
+  time: string;
   proposedBy: string;
   votes: Record<string, "up" | "down">; // memberId -> vote
   resolved: boolean;
