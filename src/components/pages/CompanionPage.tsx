@@ -995,569 +995,161 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
 
 // ==================== TRIPS TAB ====================
 const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => void; searchQuery: string }> = ({ currentUserId, onNavigateToAccount, searchQuery }) => {
-  const [stage, setStage] = useState<"explore" | "intent" | "discover" | "my-trips">("explore");
-
-  // Intent form
-  const [destination, setDestination] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [tripType, setTripType] = useState("");
-  const [budgetRange, setBudgetRange] = useState("");
-  const [groupType, setGroupType] = useState("");
-  const [maxMembers, setMaxMembers] = useState(6);
-  const [tripDescription, setTripDescription] = useState("");
-
-  // Join
-  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
-  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [joinMessage, setJoinMessage] = useState("");
-  const [joinAnswers, setJoinAnswers] = useState({ arrival: "", first_visit: "", group_stay: "" });
-  const [isSendingRequest, setIsSendingRequest] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
 
-  // Requests
-  const [requestsDialogOpen, setRequestsDialogOpen] = useState(false);
-  const [pendingRequests, setPendingRequests] = useState<TripRequest[]>([]);
-  const [loadingRequests, setLoadingRequests] = useState(false);
-  const [managingTrip, setManagingTrip] = useState<Trip | null>(null);
+  const { plans, isLoading, fetchPlans, requestToJoin } = usePlans(currentUserId);
 
-  // Chat
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatTrip, setChatTrip] = useState<Trip | null>(null);
-
-  // Create
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-
-  // Selfie
-  const [selfieDialogOpen, setSelfieDialogOpen] = useState(false);
-  const [selfieAction, setSelfieAction] = useState<"create" | "join" | null>(null);
-  const [genderVerified, setGenderVerified] = useState(false);
-
-  const { trips, myTrips, isLoading, fetchTrips, fetchMyTrips, createTrip, requestToJoin, handleRequest, getPendingRequests } = useTrips(currentUserId);
-
-  const handleExploreSearch = () => {
-    if (!searchQuery.trim()) return;
-    setDestination(searchQuery.trim());
-    fetchTrips(searchQuery.trim());
-    setStage("discover");
-  };
-
-  const handleDeclareIntent = () => {
-    if (!destination.trim()) { toast.error("Enter a destination"); return; }
-    if (!startDate || !endDate) { toast.error("Select dates"); return; }
-    if (!tripType) { toast.error("Select trip type"); return; }
-    if (!budgetRange) { toast.error("Select budget range"); return; }
-    setStage("discover");
-    fetchTrips(destination);
-  };
-
-  const handleCreateTrip = async () => {
-    if (!destination.trim() || !startDate || !endDate || !tripType || !budgetRange || !groupType) {
-      toast.error("Please fill all required fields");
-      return;
+  useEffect(() => {
+    if (searchQuery.length > 2) {
+      const timer = setTimeout(() => fetchPlans(searchQuery), 300);
+      return () => clearTimeout(timer);
+    } else if (searchQuery.length === 0) {
+      fetchPlans();
     }
-    if (groupType === "women-only" && !genderVerified) {
-      setSelfieAction("create");
-      setSelfieDialogOpen(true);
-      return;
-    }
-    await executeCreateTrip();
-  };
+  }, [searchQuery, fetchPlans]);
 
-  const executeCreateTrip = async () => {
+  const handleJoinRequest = async () => {
+    if (!selectedPlan) return;
+    setIsJoining(true);
     try {
-      setIsCreating(true);
-      await createTrip({
-        destination: destination.trim(),
-        start_date: startDate,
-        end_date: endDate,
-        trip_type: tripType,
-        budget_range: budgetRange,
-        group_type: groupType || "mixed",
-        max_members: maxMembers,
-        trip_style: tripType,
-        description: tripDescription || undefined,
-      });
-      toast.success("Trip created!");
-      setCreateDialogOpen(false);
-      setStage("my-trips");
-      resetForm();
-      setGenderVerified(false);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to create trip");
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const handleRequestJoin = async () => {
-    if (!selectedTrip) return;
-    if (selectedTrip.group_type === "women-only" && !genderVerified) {
-      setSelfieAction("join");
-      setSelfieDialogOpen(true);
-      return;
-    }
-    await executeRequestJoin();
-  };
-
-  const executeRequestJoin = async () => {
-    if (!selectedTrip) return;
-    try {
-      setIsSendingRequest(true);
-      await requestToJoin(selectedTrip.id, joinMessage, joinAnswers);
-      toast.success("Request sent!");
-      setJoinDialogOpen(false);
+      await requestToJoin(selectedPlan.id, joinMessage || undefined);
+      toast.success("Join request sent! ✈️");
+      setSelectedPlan(null);
       setJoinMessage("");
-      setJoinAnswers({ arrival: "", first_visit: "", group_stay: "" });
-      setSelectedTrip(null);
-      setGenderVerified(false);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to send request");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send request");
     } finally {
-      setIsSendingRequest(false);
+      setIsJoining(false);
     }
   };
 
-  const handleSelfieVerified = () => {
-    setGenderVerified(true);
-    setSelfieDialogOpen(false);
-    if (selfieAction === "create") setTimeout(() => executeCreateTrip(), 300);
-    else if (selfieAction === "join") setTimeout(() => executeRequestJoin(), 300);
-    setSelfieAction(null);
-  };
-
-  const handleSelfieDenied = () => {
-    setSelfieAction(null);
-    setGenderVerified(false);
-  };
-
-  const openManageRequests = async (trip: Trip) => {
-    setManagingTrip(trip);
-    setLoadingRequests(true);
-    setRequestsDialogOpen(true);
-    try {
-      const reqs = await getPendingRequests(trip.id);
-      setPendingRequests(reqs);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to load requests");
-    } finally {
-      setLoadingRequests(false);
+  const getGroupBadge = (type: string) => {
+    switch (type) {
+      case "males_only": return { label: "Males Only", color: "bg-blue-500/10 text-blue-600" };
+      case "females_only": return { label: "Females Only", color: "bg-pink-500/10 text-pink-600" };
+      default: return { label: "Everyone", color: "bg-green-500/10 text-green-600" };
     }
   };
-
-  const handleReviewRequest = async (req: TripRequest, action: "accepted" | "declined") => {
-    try {
-      await handleRequest(req.id, action, req.trip_id, req.user_id);
-      setPendingRequests(prev => prev.filter(r => r.id !== req.id));
-      toast.success(action === "accepted" ? "Request accepted!" : "Request declined.");
-      await fetchMyTrips();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to process request");
-    }
-  };
-
-  const resetForm = () => {
-    setDestination(""); setStartDate(""); setEndDate(""); setTripType("");
-    setBudgetRange(""); setGroupType(""); setMaxMembers(6); setTripDescription("");
-  };
-
-  const getGroupTypeLabel = (t: string) => GROUP_TYPES_TRIP.find(g => g.value === t)?.label || t;
-  const getTripTypeLabel = (t: string) => TRIP_TYPES.find(x => x.value === t)?.label || t;
-  const getBudgetLabel = (t: string) => BUDGET_RANGES.find(b => b.value === t)?.label || t;
 
   return (
-    <div className="space-y-0">
-      {/* Sub navigation for trips */}
-      <div className="px-4 pt-3 flex gap-2">
-        <Button
-          size="sm"
-          variant={stage === "explore" || stage === "intent" || stage === "discover" ? "default" : "outline"}
-          className={cn("rounded-xl text-xs h-8", (stage === "explore" || stage === "intent" || stage === "discover") && "bg-gradient-primary text-primary-foreground border-0")}
-          onClick={() => setStage("explore")}
-        >
-          <Compass className="w-3 h-3 mr-1" />
-          Find Trips
-        </Button>
-        <Button
-          size="sm"
-          variant={stage === "my-trips" ? "default" : "outline"}
-          className={cn("rounded-xl text-xs h-8", stage === "my-trips" && "bg-gradient-primary text-primary-foreground border-0")}
-          onClick={() => { setStage("my-trips"); fetchMyTrips(); }}
-        >
-          <Calendar className="w-3 h-3 mr-1" />
-          My Trips
-        </Button>
-      </div>
-
-      {stage === "explore" && (
-        <div className="px-4 pt-3 space-y-3">
-
-          <Card className="p-4 bg-primary/5 border-primary/20 rounded-2xl">
-            <div className="flex items-start gap-3">
-              <Shield className="w-8 h-8 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-sm">How it works</h3>
-                <ul className="text-xs text-muted-foreground mt-1.5 space-y-1">
-                  <li><span className="text-primary font-bold">1.</span> Search a destination</li>
-                  <li><span className="text-primary font-bold">2.</span> Declare your intent</li>
-                  <li><span className="text-primary font-bold">3.</span> Join or create a trip</li>
-                  <li><span className="text-primary font-bold">4.</span> Chat unlocks after consent</li>
-                </ul>
-              </div>
-            </div>
-          </Card>
-
-          <div>
-            <h4 className="text-xs font-medium text-muted-foreground mb-2">Popular Destinations</h4>
-            <div className="flex flex-wrap gap-2">
-              {["Girnar", "Manali", "Rishikesh", "Goa", "Varanasi", "Ladakh"].map(dest => (
-                <Badge
-                  key={dest}
-                  variant="secondary"
-                  className="text-xs py-1.5 px-3 rounded-xl cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
-                  onClick={() => {
-                    setDestination(dest);
-                    fetchTrips(dest);
-                    setStage("discover");
-                  }}
-                >
-                  <MapPin className="w-3 h-3 mr-1" /> {dest}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          <Card className="p-4 rounded-2xl border-dashed border-2 border-primary/30 bg-primary/5">
-            <div className="text-center">
-              <Mountain className="w-8 h-8 mx-auto text-primary mb-2" />
-              <h3 className="font-semibold text-sm">Plan a Trip</h3>
-              <p className="text-xs text-muted-foreground mt-1">Declare your travel intent</p>
-              <Button className="mt-3 bg-gradient-primary text-primary-foreground rounded-xl text-xs h-9" onClick={() => setStage("intent")}>
-                Declare Intent <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-              </Button>
-            </div>
-          </Card>
+    <div className="px-4 pt-3 space-y-4">
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
-      )}
-
-      {stage === "intent" && (
-        <div className="px-4 pt-3 space-y-3">
-          <Button variant="ghost" size="sm" className="rounded-xl text-xs h-8 gap-1" onClick={() => setStage("explore")}>
-            <ChevronLeft className="w-3 h-3" /> Back
-          </Button>
-          <h2 className="font-semibold text-base">Declare Your Travel Intent</h2>
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Destination *</label>
-              <Input value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g., Girnar" className="rounded-xl text-sm" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Start Date *</label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="rounded-xl text-sm" />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">End Date *</label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="rounded-xl text-sm" />
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Trip Type *</label>
-              <Select value={tripType} onValueChange={setTripType}>
-                <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Select type" /></SelectTrigger>
-                <SelectContent>{TRIP_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Budget *</label>
-              <Select value={budgetRange} onValueChange={setBudgetRange}>
-                <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Select budget" /></SelectTrigger>
-                <SelectContent>{BUDGET_RANGES.map(b => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="flex gap-3 pt-2">
-              <Button className="flex-1 bg-gradient-primary text-primary-foreground rounded-xl h-11" onClick={handleDeclareIntent}>
-                <Search className="w-4 h-4 mr-2" /> Find Trips
-              </Button>
-              <Button variant="outline" className="flex-1 rounded-xl h-11" onClick={() => {
-                if (!destination.trim() || !startDate || !endDate || !tripType || !budgetRange) {
-                  toast.error("Fill all required fields"); return;
-                }
-                setCreateDialogOpen(true);
-              }}>
-                <Plus className="w-4 h-4 mr-2" /> Create Trip
-              </Button>
-            </div>
-          </div>
+      ) : plans.length === 0 ? (
+        <div className="text-center py-20">
+          <Mountain className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <p className="text-lg font-medium">No plans yet</p>
+          <p className="text-sm text-muted-foreground">Be the first to create a plan!</p>
         </div>
-      )}
-
-      {stage === "discover" && (
-        <div className="px-4 pt-3 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="font-semibold text-sm flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-primary" /> Trips to {destination || "Destination"}
-              </h2>
-              <p className="text-[10px] text-muted-foreground">Trip groups — no individual profiles</p>
-            </div>
-            <div className="flex gap-1.5">
-              <Button size="sm" variant="ghost" className="rounded-xl text-xs h-8" onClick={() => setStage("explore")}>
-                <ChevronLeft className="w-3 h-3" />
-              </Button>
-              <Button size="sm" variant="outline" className="rounded-xl text-xs h-8" onClick={() => setStage("intent")}>
-                <Plus className="w-3 h-3 mr-1" /> Create
-              </Button>
-            </div>
-          </div>
-
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-          ) : trips.length === 0 ? (
-            <Card className="p-6 text-center rounded-2xl">
-              <Compass className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
-              <h3 className="font-semibold text-sm">No trips found</h3>
-              <p className="text-xs text-muted-foreground mt-1">Be the first to create a trip to {destination}!</p>
-              <Button className="mt-4 bg-gradient-primary text-primary-foreground rounded-xl text-xs" onClick={() => setStage("intent")}>
-                <Plus className="w-3.5 h-3.5 mr-1.5" /> Create a Trip
-              </Button>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {trips.map(trip => {
-                const isPending = trip.my_request_status === "pending";
-                const isAccepted = trip.my_request_status === "accepted" || trip.is_member;
-                const isFull = (trip.member_count || 0) >= trip.max_members;
-
-                return (
-                  <Card key={trip.id} className="p-4 shadow-soft rounded-2xl border-0 bg-card">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-semibold text-sm flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-primary" /> {trip.destination}
-                          </h3>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">{trip.start_date} → {trip.end_date}</p>
-                        </div>
-                        <Badge variant="secondary" className="text-[10px] rounded-lg bg-primary/10 text-primary border-0">
-                          {getTripTypeLabel(trip.trip_type)}
-                        </Badge>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
-                          <Users className="w-3 h-3" /> {trip.member_count || 0}/{trip.max_members}
-                        </Badge>
-                        <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
-                          <Shield className="w-3 h-3" /> {getGroupTypeLabel(trip.group_type)}
-                        </Badge>
-                        <Badge variant="outline" className="text-[10px] py-1 px-2 rounded-lg gap-1">
-                          <TrendingUp className="w-3 h-3" /> {getBudgetLabel(trip.budget_range)}
-                        </Badge>
-                      </div>
-                      {trip.description && <p className="text-xs text-muted-foreground line-clamp-2">{trip.description}</p>}
-                      <Button
-                        className={cn("w-full rounded-xl text-xs h-9",
-                          isAccepted ? "bg-success/10 text-success border border-success/30" :
-                          isPending ? "bg-muted text-muted-foreground" :
-                          isFull ? "bg-muted text-muted-foreground" :
-                          "bg-gradient-primary text-primary-foreground border-0"
-                        )}
-                        onClick={() => { setSelectedTrip(trip); setJoinDialogOpen(true); }}
-                        disabled={isAccepted || isPending || isFull}
-                      >
-                        {isAccepted ? <><CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Member</> :
-                         isPending ? <><Clock className="w-3.5 h-3.5 mr-1.5" /> Pending</> :
-                         isFull ? "Trip Full" :
-                         <><ArrowRight className="w-3.5 h-3.5 mr-1.5" /> Request to Join</>}
-                      </Button>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {stage === "my-trips" && (
-        <div className="px-4 pt-3 space-y-3">
-          <h2 className="font-semibold text-sm">My Trips</h2>
-          {myTrips.length === 0 ? (
-            <Card className="p-6 text-center rounded-2xl">
-              <Calendar className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
-              <h3 className="font-semibold text-sm">No trips yet</h3>
-              <p className="text-xs text-muted-foreground mt-1">Find or create a trip to get started.</p>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {myTrips.map(trip => (
-                <Card key={trip.id} className="p-3 rounded-2xl shadow-soft border-0 bg-card">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold text-sm flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-primary" /> {trip.destination}
-                      </h3>
-                      <p className="text-[10px] text-muted-foreground">{trip.start_date} → {trip.end_date} • {trip.member_count} members</p>
-                    </div>
-                    {trip.is_owner && <Badge className="text-[10px] bg-primary/10 text-primary border-0 rounded-lg">Owner</Badge>}
+      ) : (
+        plans.map(plan => {
+          const badge = getGroupBadge(plan.group_type);
+          return (
+            <Card key={plan.id} className="overflow-hidden rounded-2xl border-border shadow-sm">
+              {/* Cover Image */}
+              <div className="aspect-[16/9] relative bg-muted">
+                {plan.cover_image_url ? (
+                  <img
+                    src={plan.cover_image_url}
+                    alt={plan.plan_name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                    <MapPin className="w-12 h-12 text-primary/40" />
                   </div>
-                  <div className="flex gap-2 mt-2">
-                    {trip.is_member && (
-                      <Button size="sm" className="h-7 text-[10px] rounded-lg bg-gradient-primary text-primary-foreground border-0 gap-1"
-                        onClick={() => { setChatTrip(trip); setChatOpen(true); }}>
-                        <MessageCircle className="w-3 h-3" /> Chat
-                      </Button>
-                    )}
-                    {trip.is_owner && (
-                      <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-lg gap-1" onClick={() => openManageRequests(trip)}>
-                        <Users className="w-3 h-3" /> Requests
-                      </Button>
-                    )}
-                    {!trip.is_member && trip.my_request_status === "pending" && (
-                      <Badge variant="secondary" className="text-[10px] gap-1"><Clock className="w-3 h-3" /> Pending</Badge>
-                    )}
+                )}
+                {/* Badges */}
+                <div className="absolute top-3 left-3 flex gap-2">
+                  <Badge className={cn("text-xs", badge.color)}>{badge.label}</Badge>
+                  <Badge className={cn("text-xs", plan.plan_visibility === "public" ? "bg-accent/80 text-accent-foreground" : "bg-muted/80 text-muted-foreground")}>
+                    {plan.plan_visibility === "public" ? <Eye className="w-3 h-3 mr-1" /> : null}
+                    {plan.plan_visibility === "public" ? "Public" : "Private"}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Info */}
+              <div className="p-4 space-y-3">
+                <h3 className="font-bold text-lg leading-tight">{plan.plan_name}</h3>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>{plan.destination_name}</span>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>{format(new Date(plan.start_date), "MMM dd")} – {format(new Date(plan.end_date), "MMM dd")}</span>
                   </div>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
+                  <div className="flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5" />
+                    <span>{plan.member_count || 1} / {plan.max_members}</span>
+                  </div>
+                </div>
+
+                {/* Interests */}
+                {plan.interests && plan.interests.length > 0 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {plan.interests.map(i => (
+                      <Badge key={i} variant="secondary" className="text-xs">{i}</Badge>
+                    ))}
+                  </div>
+                )}
+
+                {/* Action */}
+                {plan.is_owner ? (
+                  <Badge className="bg-primary/10 text-primary">Your Plan</Badge>
+                ) : plan.is_member ? (
+                  <Badge className="bg-green-500/10 text-green-600">Joined</Badge>
+                ) : plan.my_request_status === "pending" ? (
+                  <Badge className="bg-yellow-500/10 text-yellow-600">
+                    <Clock className="w-3 h-3 mr-1" /> Pending
+                  </Badge>
+                ) : plan.my_request_status === "rejected" ? (
+                  <Badge className="bg-destructive/10 text-destructive">Declined</Badge>
+                ) : (
+                  <Button
+                    onClick={() => setSelectedPlan(plan)}
+                    className="w-full rounded-xl bg-gradient-primary"
+                    size="sm"
+                  >
+                    Request to Join <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                )}
+              </div>
+            </Card>
+          );
+        })
       )}
 
       {/* Join Request Dialog */}
-      <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
-        <DialogContent className="max-w-md rounded-2xl">
+      <Dialog open={!!selectedPlan} onOpenChange={() => setSelectedPlan(null)}>
+        <DialogContent className="max-w-sm rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-sm"><Send className="w-4 h-4 text-primary" /> Request to Join</DialogTitle>
-            <DialogDescription className="text-xs">The trip owner will review your request.</DialogDescription>
+            <DialogTitle>Request to Join</DialogTitle>
+            <DialogDescription>
+              Send a request to join "{selectedPlan?.plan_name}"
+            </DialogDescription>
           </DialogHeader>
-          {selectedTrip && (
-            <div className="space-y-3">
-              <Card className="p-3 bg-muted/50 rounded-xl">
-                <p className="text-xs font-medium">{selectedTrip.destination}</p>
-                <p className="text-[10px] text-muted-foreground">{selectedTrip.start_date} → {selectedTrip.end_date}</p>
-              </Card>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Arrival time?</label>
-                <Input value={joinAnswers.arrival} onChange={e => setJoinAnswers(p => ({ ...p, arrival: e.target.value }))} placeholder="e.g., Morning" className="rounded-xl text-sm" />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">First visit?</label>
-                <Select value={joinAnswers.first_visit} onValueChange={v => setJoinAnswers(p => ({ ...p, first_visit: v }))}>
-                  <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="yes">Yes</SelectItem>
-                    <SelectItem value="no">No</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Group stay?</label>
-                <Select value={joinAnswers.group_stay} onValueChange={v => setJoinAnswers(p => ({ ...p, group_stay: v }))}>
-                  <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="yes">Yes</SelectItem>
-                    <SelectItem value="no">No</SelectItem>
-                    <SelectItem value="flexible">Flexible</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">Message (optional)</label>
-                <Textarea value={joinMessage} onChange={e => setJoinMessage(e.target.value)} placeholder="Introduce yourself..." className="rounded-xl text-sm resize-none" rows={2} />
-              </div>
-              <Button className="w-full bg-gradient-primary text-primary-foreground rounded-xl h-10" onClick={handleRequestJoin} disabled={isSendingRequest}>
-                {isSendingRequest ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
-                Send Request
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Create Trip Dialog */}
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="max-w-md rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-sm"><Plus className="w-4 h-4 text-primary" /> Create a Trip</DialogTitle>
-            <DialogDescription className="text-xs">You'll approve/decline join requests.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Card className="p-3 bg-muted/50 rounded-xl">
-              <p className="text-xs font-medium">{destination} • {getTripTypeLabel(tripType)} • {getBudgetLabel(budgetRange)}</p>
-              <p className="text-[10px] text-muted-foreground">{startDate} → {endDate}</p>
-            </Card>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Group Type *</label>
-              <Select value={groupType} onValueChange={setGroupType}>
-                <SelectTrigger className="rounded-xl text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{GROUP_TYPES_TRIP.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Max Members</label>
-              <Select value={String(maxMembers)} onValueChange={v => setMaxMembers(Number(v))}>
-                <SelectTrigger className="rounded-xl text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>{[3,4,5,6,8,10].map(n => <SelectItem key={n} value={String(n)}>{n} people</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Description</label>
-              <Textarea value={tripDescription} onChange={e => setTripDescription(e.target.value)} placeholder="Brief plan..." className="rounded-xl text-sm resize-none" rows={2} />
-            </div>
-            <Button className="w-full bg-gradient-primary text-primary-foreground rounded-xl h-10" onClick={handleCreateTrip} disabled={isCreating}>
-              {isCreating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-              Create Trip
+          <Textarea
+            value={joinMessage}
+            onChange={e => setJoinMessage(e.target.value)}
+            placeholder="Introduce yourself (optional)"
+            className="min-h-[80px]"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedPlan(null)}>Cancel</Button>
+            <Button onClick={handleJoinRequest} disabled={isJoining} className="bg-gradient-primary">
+              {isJoining ? "Sending..." : "Send Request"}
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Manage Requests Dialog */}
-      <Dialog open={requestsDialogOpen} onOpenChange={setRequestsDialogOpen}>
-        <DialogContent className="max-w-md rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-sm"><Users className="w-4 h-4 text-primary" /> Requests — {managingTrip?.destination}</DialogTitle>
-          </DialogHeader>
-          {loadingRequests ? (
-            <div className="flex items-center justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
-          ) : pendingRequests.length === 0 ? (
-            <div className="text-center py-8"><CheckCircle className="w-8 h-8 mx-auto text-muted-foreground/50 mb-2" /><p className="text-sm text-muted-foreground">No pending requests</p></div>
-          ) : (
-            <div className="space-y-3 max-h-[50vh] overflow-y-auto">
-              {pendingRequests.map(req => (
-                <Card key={req.id} className="p-3 rounded-xl">
-                  <p className="text-sm font-medium">{req.sender_name}</p>
-                  {req.answers && (
-                    <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
-                      {req.answers.arrival && <p>Arrival: {req.answers.arrival}</p>}
-                      {req.answers.first_visit && <p>First visit: {req.answers.first_visit}</p>}
-                      {req.answers.group_stay && <p>Group stay: {req.answers.group_stay}</p>}
-                    </div>
-                  )}
-                  {req.message && <p className="text-xs text-muted-foreground mt-1 italic">"{req.message}"</p>}
-                  <div className="flex gap-2 mt-3">
-                    <Button size="sm" className="flex-1 bg-gradient-primary text-primary-foreground rounded-xl text-xs h-8" onClick={() => handleReviewRequest(req, "accepted")}>
-                      <CheckCircle className="w-3 h-3 mr-1" /> Accept
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-8" onClick={() => handleReviewRequest(req, "declined")}>Decline</Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Trip Chat */}
-      <TripChatDialog open={chatOpen} onOpenChange={setChatOpen} tripId={chatTrip?.id || null} tripName={chatTrip?.destination || "Trip"} currentUserId={currentUserId} />
-
-      {/* Selfie Verification */}
-      <SelfieVerificationDialog open={selfieDialogOpen} onOpenChange={setSelfieDialogOpen} onVerified={handleSelfieVerified} onDenied={handleSelfieDenied} />
     </div>
   );
 };
