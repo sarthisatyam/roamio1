@@ -106,10 +106,10 @@ const HomePage: React.FC<HomePageProps> = ({
       const [nearbyRes, famousRes] = await Promise.all([
         supabase.functions.invoke('search-generator', {
           body: { query: `top 3 nearby destinations close to ${city} for solo women travelers`, pageContext: "home" }
-        }),
+        }).catch(() => ({ data: null, error: true })),
         supabase.functions.invoke('search-generator', {
           body: { query: `top 2 most famous must-visit destinations in India for solo women travelers (not near ${city})`, pageContext: "home" }
-        }),
+        }).catch(() => ({ data: null, error: true })),
       ]);
 
       const nearby = (nearbyRes.data?.destinations || []).slice(0, 3);
