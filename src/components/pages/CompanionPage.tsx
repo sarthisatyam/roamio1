@@ -1011,6 +1011,9 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
                     <div className="flex items-center gap-1">
                       <span className="text-sm font-medium truncate">{member.display_name || "User"}</span>
                       {member.is_verified && <CheckCircle className="w-3 h-3 text-success flex-shrink-0" />}
+                      {member.role === "owner" && (
+                        <Badge className="text-[8px] py-0 px-1.5 rounded-md bg-primary/10 text-primary border-0">Admin</Badge>
+                      )}
                     </div>
                     <span className="text-[10px] text-muted-foreground">
                       {member.is_online ? "Online" : "Offline"}
