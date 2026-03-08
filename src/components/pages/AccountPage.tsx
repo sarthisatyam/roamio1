@@ -301,6 +301,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
             size="sm"
             onClick={() => setInterestsDialogOpen(true)}
             className="w-9 h-9 rounded-full bg-white/20 text-white hover:bg-white/30 border-0"
+            title="Edit Profile"
           >
             <Edit className="w-4 h-4" />
           </Button>
