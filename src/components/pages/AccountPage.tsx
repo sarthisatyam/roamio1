@@ -526,8 +526,17 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
                       </div>
 
                       {isMember && plan.is_owner ? (
-                        <Button size="sm" variant="outline" className="w-full rounded-xl text-xs h-9" onClick={() => openManageRequests(plan)}>
-                          <Eye className="w-3.5 h-3.5 mr-1.5" /> Manage Requests
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-9" onClick={() => openManageRequests(plan)}>
+                            <Eye className="w-3.5 h-3.5 mr-1.5" /> Requests
+                          </Button>
+                          <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-9" onClick={() => openManageMembers(plan)}>
+                            <Users className="w-3.5 h-3.5 mr-1.5" /> Members
+                          </Button>
+                        </div>
+                      ) : isMember && !plan.is_owner ? (
+                        <Button size="sm" variant="outline" className="w-full rounded-xl text-xs h-9 text-destructive hover:bg-destructive/10" onClick={() => handleLeavePlan(plan.id)}>
+                          <DoorOpen className="w-3.5 h-3.5 mr-1.5" /> Leave Trip
                         </Button>
                       ) : isPending ? (
                         <div className="flex items-center gap-2 text-xs text-warning bg-warning/5 rounded-xl px-3 py-2">
