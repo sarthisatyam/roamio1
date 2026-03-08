@@ -94,8 +94,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (authMethod === "email") {
-        if (isLogin) {
+      if (isLogin) {
           const { error } = await supabase.auth.signInWithPassword({
             email,
             password,
