@@ -100,7 +100,8 @@ const TYPE_TABS = [
 
 const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccount }) => {
   const [activeType, setActiveType] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [priceFilter, setPriceFilter] = useState("all");
+  const [ratingFilter, setRatingFilter] = useState("all");
   const [aiHotels, setAiHotels] = useState<AIHotel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchDone, setSearchDone] = useState(false);
