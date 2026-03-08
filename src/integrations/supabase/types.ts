@@ -62,6 +62,30 @@ export type Database = {
         }
         Relationships: []
       }
+      direct_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       group_members: {
         Row: {
           group_id: string
