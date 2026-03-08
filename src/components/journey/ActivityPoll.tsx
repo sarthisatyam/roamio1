@@ -241,6 +241,15 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
                 className="rounded-xl"
               />
             </div>
+            <div className="space-y-1">
+              <Label className="text-sm">Time</Label>
+              <Input
+                type="time"
+                value={form.time}
+                onChange={e => setForm({ ...form, time: e.target.value })}
+                className="rounded-xl"
+              />
+            </div>
             <p className="text-[10px] text-muted-foreground">
               Proposing as <span className="font-medium">{currentMember?.name}</span>. Your upvote will be auto-added.
             </p>
