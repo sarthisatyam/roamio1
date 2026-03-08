@@ -886,7 +886,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
       ) : filteredGroups.length === 0 ? (
         <Card className="p-6 text-center rounded-2xl">
           <Users className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
-          <h3 className="font-semibold text-sm">{searchQuery ? "No groups match your search" : "No groups yet"}</h3>
+          <h3 className="font-semibold text-sm">{searchQuery ? "No communities match your search" : "No communities yet"}</h3>
           <p className="text-xs text-muted-foreground mt-1">{searchQuery ? "Try a different search term." : "Be the first to create a travel community!"}</p>
         </Card>
       ) : (
