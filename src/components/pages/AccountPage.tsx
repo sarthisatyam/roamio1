@@ -419,15 +419,15 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
         <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-primary" /> My Plans
+              <Calendar className="w-5 h-5 text-primary" /> My Trips
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             {myPlans.length === 0 ? (
               <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
                 <Calendar className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                <h3 className="font-semibold text-sm">No plans yet</h3>
-                <p className="text-xs text-muted-foreground mt-1">Create or join a plan from the Companion page</p>
+                <h3 className="font-semibold text-sm">No trips yet</h3>
+                <p className="text-xs text-muted-foreground mt-1">Create or join a trip from the Companion page</p>
               </Card>
             ) : (
               myPlans.map(plan => {

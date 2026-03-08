@@ -99,7 +99,7 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
         ) : plans.length === 0 ? (
           <div className="text-center py-20">
             <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-lg font-medium">No plans yet</p>
+            <p className="text-lg font-medium">No trips yet</p>
             <p className="text-sm text-muted-foreground">Be the first to create a trip!</p>
           </div>
         ) : (
@@ -138,16 +138,22 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
                     <MapPin className="w-3.5 h-3.5" />
                     <span>{plan.destination_name}</span>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>{format(new Date(plan.start_date), "MMM dd")} – {format(new Date(plan.end_date), "MMM dd")}</span>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{format(new Date(plan.start_date), "MMM dd")} – {format(new Date(plan.end_date), "MMM dd")}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5" />
+                        <span>{plan.member_count || 1} / {plan.max_members}</span>
+                      </div>
+                      {(plan.request_count ?? 0) > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{plan.request_count} pending</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{plan.member_count || 1} / {plan.max_members}</span>
-                    </div>
-                  </div>
 
                   {/* Interests */}
                   {plan.interests && plan.interests.length > 0 && (

@@ -19,6 +19,7 @@ export interface Plan {
   status: string;
   created_at: string;
   member_count?: number;
+  request_count?: number;
   is_member?: boolean;
   is_owner?: boolean;
   my_request_status?: string | null;
@@ -61,16 +62,19 @@ export const usePlans = (currentUserId: string | null) => {
       const planIds = (plansData || []).map((p: any) => p.id);
       let membersData: any[] = [];
       let requestsData: any[] = [];
+      let allRequestsData: any[] = [];
       let coCompanions: any[] = [];
 
       if (planIds.length > 0) {
-        const [membersRes, requestsRes, coCompRes] = await Promise.all([
+        const [membersRes, requestsRes, allRequestsRes, coCompRes] = await Promise.all([
           supabase.from("plan_members").select("plan_id, user_id, role").in("plan_id", planIds),
           supabase.from("join_requests").select("plan_id, user_id, status").eq("user_id", currentUserId).in("plan_id", planIds),
+          supabase.from("join_requests").select("plan_id, status").in("plan_id", planIds),
           supabase.from("co_companions").select("companion_id").eq("user_id", currentUserId),
         ]);
         membersData = membersRes.data || [];
         requestsData = requestsRes.data || [];
+        allRequestsData = allRequestsRes.data || [];
         coCompanions = coCompRes.data || [];
       }
 
@@ -93,6 +97,7 @@ export const usePlans = (currentUserId: string | null) => {
         const members = membersData.filter((m: any) => m.plan_id === plan.id);
         const myMembership = members.find((m: any) => m.user_id === currentUserId);
         const myRequest = requestsData.find((r: any) => r.plan_id === plan.id);
+        const pendingRequests = allRequestsData.filter((r: any) => r.plan_id === plan.id && r.status === "pending");
 
         // Filter private plans: only show if user is creator or co-companion of creator
         if (plan.plan_visibility === "private" && plan.creator_id !== currentUserId && !coCompanionIds.includes(plan.creator_id)) {
@@ -102,7 +107,8 @@ export const usePlans = (currentUserId: string | null) => {
         return {
           ...plan,
           interests: plan.interests || [],
-          member_count: members.filter((m: any) => m.status === "approved").length,
+          member_count: members.filter((m: any) => m.status === "approved" || !m.status).length,
+          request_count: pendingRequests.length,
           is_member: !!myMembership,
           is_owner: myMembership?.role === "owner",
           my_request_status: myRequest?.status || null,
@@ -139,24 +145,26 @@ export const usePlans = (currentUserId: string | null) => {
       const allPlanIds = [...memberPlanIds, ...requestPlanIds];
       if (allPlanIds.length === 0) { setMyPlans([]); return; }
 
-      const { data: plansData } = await supabase
-        .from("plans")
-        .select("*")
-        .in("id", allPlanIds);
+      const [plansRes, allMembersRes, allRequestsRes] = await Promise.all([
+        supabase.from("plans").select("*").in("id", allPlanIds),
+        supabase.from("plan_members").select("plan_id, user_id, role").in("plan_id", allPlanIds),
+        supabase.from("join_requests").select("plan_id, status").in("plan_id", allPlanIds),
+      ]);
 
-      const { data: allMembers } = await supabase
-        .from("plan_members")
-        .select("plan_id, user_id, role")
-        .in("plan_id", allPlanIds);
+      const plansData = plansRes.data || [];
+      const allMembers = allMembersRes.data || [];
+      const allRequests = allRequestsRes.data || [];
 
-      const enriched: Plan[] = (plansData || []).map((plan: any) => {
-        const members = (allMembers || []).filter((m: any) => m.plan_id === plan.id);
+      const enriched: Plan[] = plansData.map((plan: any) => {
+        const members = allMembers.filter((m: any) => m.plan_id === plan.id);
         const myRole = (memberships || []).find((m: any) => m.plan_id === plan.id);
         const myRequest = (myRequests || []).find((r: any) => r.plan_id === plan.id);
+        const pendingRequests = allRequests.filter((r: any) => r.plan_id === plan.id && r.status === "pending");
         return {
           ...plan,
           interests: plan.interests || [],
           member_count: members.length,
+          request_count: pendingRequests.length,
           is_member: !!myRole,
           is_owner: myRole?.role === "owner",
           my_request_status: myRequest?.status || null,
@@ -168,6 +176,62 @@ export const usePlans = (currentUserId: string | null) => {
       console.error("Error fetching my plans:", err);
     }
   }, [currentUserId]);
+
+  const autoCreateGroup = async (planId: string) => {
+    // Check if plan already has a group
+    const { data: existingGroup } = await supabase
+      .from("groups")
+      .select("id")
+      .eq("plan_id", planId)
+      .maybeSingle();
+
+    if (existingGroup) return; // Group already exists
+
+    // Check member count
+    const { data: members } = await supabase
+      .from("plan_members")
+      .select("user_id")
+      .eq("plan_id", planId);
+
+    if (!members || members.length < 2) return; // Need at least 2 members
+
+    // Get plan details
+    const { data: plan } = await supabase
+      .from("plans")
+      .select("plan_name, destination_name, creator_id")
+      .eq("id", planId)
+      .single();
+
+    if (!plan) return;
+
+    // Create the group
+    const { data: newGroup, error: createErr } = await supabase
+      .from("groups")
+      .insert({
+        name: (plan as any).plan_name,
+        description: `Trip group for ${(plan as any).destination_name}`,
+        category: "Plan",
+        icon: "MapPin",
+        created_by: (plan as any).creator_id,
+        plan_id: planId,
+      })
+      .select()
+      .single();
+
+    if (createErr) {
+      console.error("Failed to auto-create group:", createErr);
+      return;
+    }
+
+    // Add all plan members to the group
+    if (newGroup) {
+      const inserts = members.map((m: any) => ({
+        group_id: newGroup.id,
+        user_id: m.user_id,
+      }));
+      await supabase.from("group_members").insert(inserts);
+    }
+  };
 
   const createPlan = async (planData: {
     plan_name: string;
@@ -261,6 +325,23 @@ export const usePlans = (currentUserId: string | null) => {
       await supabase
         .from("plan_members")
         .insert({ plan_id: planId, user_id: requestUserId, role: "member" } as any);
+
+      // Auto-create group when 2+ members
+      await autoCreateGroup(planId);
+
+      // Also add new member to existing group if it exists
+      const { data: existingGroup } = await supabase
+        .from("groups")
+        .select("id")
+        .eq("plan_id", planId)
+        .maybeSingle();
+
+      if (existingGroup) {
+        await supabase.from("group_members").insert({
+          group_id: existingGroup.id,
+          user_id: requestUserId,
+        });
+      }
     }
 
     await Promise.all([fetchPlans(), fetchMyPlans()]);
@@ -298,6 +379,40 @@ export const usePlans = (currentUserId: string | null) => {
       fetchPlans();
       fetchMyPlans();
     }
+  }, [currentUserId, fetchPlans, fetchMyPlans]);
+
+  // Realtime subscriptions for live member/request counts
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const membersChannel = supabase
+      .channel("plan-members-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "plan_members" },
+        () => {
+          fetchPlans();
+          fetchMyPlans();
+        }
+      )
+      .subscribe();
+
+    const requestsChannel = supabase
+      .channel("join-requests-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "join_requests" },
+        () => {
+          fetchPlans();
+          fetchMyPlans();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(membersChannel);
+      supabase.removeChannel(requestsChannel);
+    };
   }, [currentUserId, fetchPlans, fetchMyPlans]);
 
   return {
