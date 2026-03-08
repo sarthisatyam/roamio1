@@ -246,12 +246,15 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
     const fetchHotels = async () => {
       if (!effectiveLocation) {
         setHotelResults([]);
+        setAiHotels([]);
         setHotelError(null);
+        setAiSearchDone(false);
         return;
       }
 
       setIsLoadingHotels(true);
       setHotelError(null);
+      setAiSearchDone(false);
 
       try {
         const { data, error } = await supabase.functions.invoke('hotels-search', {
@@ -263,12 +266,40 @@ const BookingsPage: React.FC<BookingsPageProps> = ({ userData, onNavigateToAccou
         }
 
         setHotelResults(data || []);
+        
+        // Check if results are mock data (sequential IDs 1-5 with generic names)
+        const isMockData = Array.isArray(data) && data.length > 0 && 
+          data.every((h: HotelResult, i: number) => h.hotelId === i + 1);
+        
+        // Also fetch AI-powered results for richer data
+        if (isMockData || !data || data.length === 0) {
+          fetchAIHotels(effectiveLocation);
+        }
       } catch (error) {
         console.error("Error fetching hotels:", error);
-        setHotelError("Failed to fetch hotels. Please try again.");
-        setHotelResults([]);
+        setHotelError(null); // Don't show error, try AI instead
+        fetchAIHotels(effectiveLocation);
       } finally {
         setIsLoadingHotels(false);
+      }
+    };
+
+    const fetchAIHotels = async (location: string) => {
+      setIsLoadingAI(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('ai-hotel-search', {
+          body: { location, query: `hotels and hostels in ${location}` }
+        });
+        if (!error && data?.hotels) {
+          setAiHotels(data.hotels);
+          // Replace mock results with AI results
+          setHotelResults([]);
+        }
+      } catch (e) {
+        console.error("AI hotel search error:", e);
+      } finally {
+        setIsLoadingAI(false);
+        setAiSearchDone(true);
       }
     };
 
