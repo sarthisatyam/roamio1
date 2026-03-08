@@ -43,8 +43,8 @@ import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
 import { HelpLegalDialog } from "@/components/dialogs/LegalContactDialogs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { useTrips, Trip, TripRequest } from "@/hooks/useTrips";
-import TripChatDialog from "@/components/dialogs/TripChatDialog";
+import { usePlans, Plan, JoinRequest } from "@/hooks/usePlans";
+import { format } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
