@@ -48,7 +48,7 @@ const INTEREST_LIST = [
   "History", "Nature", "Adventure", "Spiritual", "Beach", "Mountains",
 ];
 
-const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, userCity }) => {
+const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, userCity, onCreatePlan }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("discover");
   const [searchQuery, setSearchQuery] = useState("");
