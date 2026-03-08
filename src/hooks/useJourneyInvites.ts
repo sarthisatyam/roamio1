@@ -65,7 +65,7 @@ export const useJourneyInvites = (currentUserId: string | null) => {
       }
 
       setSentInvites(sent);
-      setReceivedInvites(received);
+      setReceivedInvites(enrichedReceived.length > 0 ? enrichedReceived : received.map(r => ({ ...r })));
     } catch (err) {
       console.error("Error fetching journey invites:", err);
     } finally {
