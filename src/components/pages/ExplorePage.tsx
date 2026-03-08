@@ -19,6 +19,7 @@ import { format } from "date-fns";
 
 interface ExplorePageProps {
   onNavigateToAccount?: () => void;
+  onCreatePlan?: () => void;
 }
 
 const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount }) => {
