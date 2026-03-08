@@ -13,6 +13,7 @@ export interface PollActivity {
   id: string;
   title: string;
   location: string;
+  time: string;
   proposedBy: string;
   votes: Record<string, "up" | "down">; // memberId -> vote
   resolved: boolean;
@@ -31,7 +32,7 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
   polls, onPollsChange, members, currentVoter, onCurrentVoterChange
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", location: "" });
+  const [form, setForm] = useState({ title: "", location: "", time: "" });
 
   const handlePropose = () => {
     if (!form.title.trim()) { toast.error("Enter activity title"); return; }
@@ -40,11 +41,12 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
       id: crypto.randomUUID(),
       title: form.title.trim(),
       location: form.location.trim(),
+      time: form.time.trim(),
       proposedBy: proposer?.name || "Unknown",
       votes: { [currentVoter]: "up" },
       resolved: false,
     }]);
-    setForm({ title: "", location: "" });
+    setForm({ title: "", location: "", time: "" });
     setDialogOpen(false);
     toast.success("Activity proposed for voting!");
   };
@@ -123,6 +125,11 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
                       {poll.location && (
                         <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
                           <MapPin className="w-3 h-3" /> {poll.location}
+                        </div>
+                      )}
+                      {poll.time && (
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
+                          <Clock className="w-3 h-3" /> {poll.time}
                         </div>
                       )}
                       <p className="text-[10px] text-muted-foreground mt-0.5">
@@ -231,6 +238,15 @@ const ActivityPoll: React.FC<ActivityPollProps> = ({
                 placeholder="e.g., Agra"
                 value={form.location}
                 onChange={e => setForm({ ...form, location: e.target.value })}
+                className="rounded-xl"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-sm">Time</Label>
+              <Input
+                type="time"
+                value={form.time}
+                onChange={e => setForm({ ...form, time: e.target.value })}
                 className="rounded-xl"
               />
             </div>
