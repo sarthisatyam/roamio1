@@ -538,17 +538,22 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
 
                       {isMember && plan.is_owner ? (
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-9" onClick={() => openManageRequests(plan)}>
-                            <Eye className="w-3.5 h-3.5 mr-1.5" /> Requests
+                          <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-9" onClick={() => openManageDialog(plan)}>
+                            <Settings className="w-3.5 h-3.5 mr-1.5" /> Manage
                           </Button>
-                          <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-9" onClick={() => openManageMembers(plan)}>
-                            <Users className="w-3.5 h-3.5 mr-1.5" /> Members
+                          <Button size="sm" className="flex-1 rounded-xl text-xs h-9 bg-gradient-primary text-white" onClick={() => openTripChat(plan)}>
+                            <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Chat
                           </Button>
                         </div>
                       ) : isMember && !plan.is_owner ? (
-                        <Button size="sm" variant="outline" className="w-full rounded-xl text-xs h-9 text-destructive hover:bg-destructive/10" onClick={() => handleLeavePlan(plan.id)}>
-                          <DoorOpen className="w-3.5 h-3.5 mr-1.5" /> Leave Trip
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button size="sm" className="flex-1 rounded-xl text-xs h-9 bg-gradient-primary text-white" onClick={() => openTripChat(plan)}>
+                            <MessageCircle className="w-3.5 h-3.5 mr-1.5" /> Chat
+                          </Button>
+                          <Button size="sm" variant="outline" className="flex-1 rounded-xl text-xs h-9 text-destructive hover:bg-destructive/10" onClick={() => handleLeavePlan(plan.id)}>
+                            <DoorOpen className="w-3.5 h-3.5 mr-1.5" /> Leave
+                          </Button>
+                        </div>
                       ) : isPending ? (
                         <div className="flex items-center gap-2 text-xs text-warning bg-warning/5 rounded-xl px-3 py-2">
                           <Clock className="w-3.5 h-3.5" />
@@ -558,6 +563,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
                         <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/5 rounded-xl px-3 py-2">
                           <Shield className="w-3.5 h-3.5" />
                           <span>Your request was rejected</span>
+                        </div>
                         </div>
                       ) : null}
                     </div>
