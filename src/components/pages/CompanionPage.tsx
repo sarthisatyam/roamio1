@@ -13,7 +13,7 @@ import {
   Users, Search, MapPin, Shield, CheckCircle, User, Compass,
   Plus, Loader2, Calendar, ArrowRight, Send, Clock,
   MessageCircle, Eye, ChevronLeft, TrendingUp, UserCheck,
-  Heart, Filter, X, RefreshCw,
+  Heart, Filter, X, RefreshCw, UsersRound, Vote,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -135,6 +135,10 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
             <Compass className="w-3.5 h-3.5" />
             Discover
           </TabsTrigger>
+          <TabsTrigger value="plangroups" className="flex-1 rounded-lg text-xs gap-1.5 data-[state=active]:bg-background">
+            <UsersRound className="w-3.5 h-3.5" />
+            Groups
+          </TabsTrigger>
           <TabsTrigger value="groups" className="flex-1 rounded-lg text-xs gap-1.5 data-[state=active]:bg-background">
             <Users className="w-3.5 h-3.5" />
             Community
@@ -143,6 +147,10 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
 
         <TabsContent value="discover" className="flex-1 overflow-y-auto mt-0 pb-24">
           <DiscoverTab currentUserId={currentUserId} searchQuery={searchQuery} />
+        </TabsContent>
+
+        <TabsContent value="plangroups" className="flex-1 overflow-y-auto mt-0 pb-24">
+          <PlanGroupsTab currentUserId={currentUserId} searchQuery={searchQuery} />
         </TabsContent>
 
         <TabsContent value="groups" className="flex-1 overflow-y-auto mt-0 pb-24">
@@ -699,7 +707,361 @@ const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({
   );
 };
 
-// ==================== GROUPS TAB ====================
+// ==================== PLAN GROUPS TAB ====================
+const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ currentUserId, searchQuery }) => {
+  const { groups, isLoading, createGroup, joinGroup, refetch } = useGroups(currentUserId);
+
+  // Create group dialog
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupDescription, setNewGroupDescription] = useState("");
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+
+  // Group chat
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatGroup, setChatGroup] = useState<Group | null>(null);
+
+  // Group members
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false);
+  const [viewingGroup, setViewingGroup] = useState<Group | null>(null);
+  const [groupMembers, setGroupMembers] = useState<any[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+
+  // Direct chat from group
+  const [directChatOpen, setDirectChatOpen] = useState(false);
+  const [directChatPartner, setDirectChatPartner] = useState<{ id: string; name: string; avatar?: string | null } | null>(null);
+
+  // Connection request
+  const [connectFromGroupOpen, setConnectFromGroupOpen] = useState(false);
+  const [connectFromGroupUser, setConnectFromGroupUser] = useState<any>(null);
+
+  const { connectedUserIds, sendConnectionRequest, getConnectionStatus } = useConnections(currentUserId);
+
+  const handleCreateGroup = async () => {
+    if (!newGroupName.trim()) {
+      toast.error("Group name is required");
+      return;
+    }
+    try {
+      setIsCreatingGroup(true);
+      await createGroup(newGroupName.trim(), newGroupDescription, "Plan");
+      toast.success("Group created!");
+      setCreateDialogOpen(false);
+      setNewGroupName("");
+      setNewGroupDescription("");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create group");
+    } finally {
+      setIsCreatingGroup(false);
+    }
+  };
+
+  const openGroupMembers = async (group: Group) => {
+    setViewingGroup(group);
+    setMembersDialogOpen(true);
+    setLoadingMembers(true);
+    try {
+      const { data: members } = await supabase
+        .from("group_members")
+        .select("user_id, joined_at")
+        .eq("group_id", group.id);
+
+      if (members && members.length > 0) {
+        const userIds = members.map(m => m.user_id);
+        const [profilesRes, presenceRes] = await Promise.all([
+          supabase.from("profiles").select("user_id, display_name, avatar_url, is_verified").in("user_id", userIds),
+          supabase.from("user_presence").select("user_id, is_online").in("user_id", userIds),
+        ]);
+
+        const profileMap = new Map((profilesRes.data || []).map(p => [p.user_id, p]));
+        const presenceMap = new Map((presenceRes.data || []).map(p => [p.user_id, p.is_online]));
+
+        setGroupMembers(
+          members.map(m => ({
+            user_id: m.user_id,
+            joined_at: m.joined_at,
+            ...profileMap.get(m.user_id),
+            is_online: presenceMap.get(m.user_id) || false,
+          }))
+        );
+      } else {
+        setGroupMembers([]);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  const handleMessageMember = (member: any) => {
+    const status = getConnectionStatus(member.user_id);
+    if (status === "accepted") {
+      setDirectChatPartner({
+        id: member.user_id,
+        name: member.display_name || "User",
+        avatar: member.avatar_url,
+      });
+      setDirectChatOpen(true);
+    } else {
+      setConnectFromGroupUser(member);
+      setConnectFromGroupOpen(true);
+    }
+  };
+
+  const handleSendConnectFromGroup = async () => {
+    if (!connectFromGroupUser) return;
+    try {
+      await sendConnectionRequest(connectFromGroupUser.user_id, "Hi! I'd like to connect from our group.");
+      toast.success("Connection request sent!");
+      setConnectFromGroupOpen(false);
+      setConnectFromGroupUser(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to send request");
+    }
+  };
+
+  // Filter only plan-based groups
+  const planGroups = useMemo(() => {
+    const filtered = groups.filter(g => g.plan_id);
+    if (!searchQuery.trim()) return filtered;
+    const q = searchQuery.toLowerCase();
+    return filtered.filter(g =>
+      g.name.toLowerCase().includes(q) ||
+      g.description?.toLowerCase().includes(q)
+    );
+  }, [groups, searchQuery]);
+
+  return (
+    <div className="px-4 pt-3 space-y-3">
+      {/* Create Group Button */}
+      <Button
+        className="w-full bg-gradient-primary text-primary-foreground rounded-xl h-10 text-xs gap-1.5"
+        onClick={() => setCreateDialogOpen(true)}
+      >
+        <Plus className="w-4 h-4" />
+        Create New Group
+      </Button>
+
+      {/* Plan groups list */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </div>
+      ) : planGroups.length === 0 ? (
+        <Card className="p-6 text-center rounded-2xl">
+          <UsersRound className="w-10 h-10 mx-auto text-muted-foreground/50 mb-3" />
+          <h3 className="font-semibold text-sm">{searchQuery ? "No groups match your search" : "No groups yet"}</h3>
+          <p className="text-xs text-muted-foreground mt-1">{searchQuery ? "Try a different search term." : "Join or create a plan to see groups here!"}</p>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {planGroups.map(group => (
+            <Card key={group.id} className="p-3 rounded-2xl shadow-soft border-0 bg-card">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center text-lg flex-shrink-0">
+                  📋
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-sm truncate">{group.name}</h4>
+                    {group.last_activity && (
+                      <div className="w-2 h-2 rounded-full bg-success animate-pulse flex-shrink-0" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <Badge variant="secondary" className="text-[10px] py-0 px-1.5 rounded-md">Plan</Badge>
+                    <span className="text-[10px] text-muted-foreground">{group.member_count} members</span>
+                    {group.last_activity && (
+                      <span className="text-[10px] text-muted-foreground">
+                        • {formatDistanceToNow(new Date(group.last_activity), { addSuffix: true })}
+                      </span>
+                    )}
+                  </div>
+                  {group.description && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{group.description}</p>
+                  )}
+
+                  <div className="flex items-center gap-2 mt-2">
+                    {group.is_member ? (
+                      <>
+                        <Button
+                          size="sm"
+                          className="h-7 text-[10px] rounded-lg bg-gradient-primary text-primary-foreground border-0 gap-1"
+                          onClick={() => {
+                            setChatGroup(group);
+                            setChatOpen(true);
+                          }}
+                        >
+                          <MessageCircle className="w-3 h-3" />
+                          Chat
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-[10px] rounded-lg gap-1"
+                          onClick={() => openGroupMembers(group)}
+                        >
+                          <Users className="w-3 h-3" />
+                          Members
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="h-7 text-[10px] rounded-lg bg-gradient-primary text-primary-foreground border-0 gap-1"
+                        onClick={() => joinGroup(group.id)}
+                      >
+                        <Plus className="w-3 h-3" />
+                        Join
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Create Group Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              <Plus className="w-4 h-4 text-primary" />
+              Create New Group
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Group Name *</label>
+              <Input value={newGroupName} onChange={e => setNewGroupName(e.target.value)} placeholder="e.g., Goa Trip Squad" className="rounded-xl text-sm" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Description</label>
+              <Textarea
+                value={newGroupDescription}
+                onChange={e => setNewGroupDescription(e.target.value)}
+                placeholder="What's this group about?"
+                className="rounded-xl text-sm resize-none"
+                rows={3}
+              />
+            </div>
+            <Button
+              className="w-full bg-gradient-primary text-primary-foreground rounded-xl h-10"
+              onClick={handleCreateGroup}
+              disabled={isCreatingGroup}
+            >
+              {isCreatingGroup ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+              Create Group
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Group Members Dialog */}
+      <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              <Users className="w-4 h-4 text-primary" />
+              {viewingGroup?.name} — Members
+            </DialogTitle>
+          </DialogHeader>
+          {loadingMembers ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            </div>
+          ) : groupMembers.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-8">No members yet</p>
+          ) : (
+            <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+              {groupMembers.filter(m => m.user_id !== currentUserId).map(member => (
+                <div key={member.user_id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/50">
+                  <div className="relative">
+                    <Avatar className="w-9 h-9">
+                      <AvatarImage src={member.avatar_url || undefined} />
+                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                        {member.display_name?.charAt(0) || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    {member.is_online && (
+                      <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success border-2 border-card" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-medium truncate">{member.display_name || "User"}</span>
+                      {member.is_verified && <CheckCircle className="w-3 h-3 text-success flex-shrink-0" />}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      {member.is_online ? "Online" : "Offline"}
+                    </span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-[10px] rounded-lg gap-1"
+                    onClick={() => handleMessageMember(member)}
+                  >
+                    <MessageCircle className="w-3 h-3" />
+                    Message
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect from group dialog */}
+      <Dialog open={connectFromGroupOpen} onOpenChange={setConnectFromGroupOpen}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-sm">Send connection request?</DialogTitle>
+            <DialogDescription className="text-xs">
+              You need to be connected with {connectFromGroupUser?.display_name} before messaging.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setConnectFromGroupOpen(false)} className="rounded-xl">Cancel</Button>
+            <Button
+              className="bg-gradient-primary text-primary-foreground rounded-xl gap-1.5"
+              onClick={handleSendConnectFromGroup}
+            >
+              <Send className="w-3.5 h-3.5" />
+              Send Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Group Chat */}
+      <GroupChatDialog
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        groupId={chatGroup?.id || null}
+        groupName={chatGroup?.name || ""}
+        currentUserId={currentUserId}
+      />
+
+      {/* Direct Chat */}
+      <DirectChatDialog
+        open={directChatOpen}
+        onOpenChange={setDirectChatOpen}
+        currentUserId={currentUserId}
+        partnerId={directChatPartner?.id || null}
+        partnerName={directChatPartner?.name || ""}
+        partnerAvatar={directChatPartner?.avatar}
+      />
+    </div>
+  );
+};
+
+// ==================== COMMUNITY TAB (non-plan groups) ====================
 const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ currentUserId, searchQuery }) => {
   const { groups, isLoading, createGroup, joinGroup, leaveGroup, refetch } = useGroups(currentUserId);
 
@@ -851,9 +1213,10 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
   };
 
   const filteredGroups = useMemo(() => {
-    if (!searchQuery.trim()) return groups;
+    const nonPlanGroups = groups.filter(g => !g.plan_id);
+    if (!searchQuery.trim()) return nonPlanGroups;
     const q = searchQuery.toLowerCase();
-    return groups.filter(g =>
+    return nonPlanGroups.filter(g =>
       g.name.toLowerCase().includes(q) ||
       g.category.toLowerCase().includes(q) ||
       g.description?.toLowerCase().includes(q)
