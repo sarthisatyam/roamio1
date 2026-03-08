@@ -1153,6 +1153,17 @@ const TripsTab: React.FC<{ currentUserId: string; onNavigateToAccount?: () => vo
 
   return (
     <div className="px-4 pt-3 space-y-4">
+      {/* Create Plan Button */}
+      {onCreatePlan && (
+        <Button
+          onClick={onCreatePlan}
+          className="w-full bg-gradient-primary text-primary-foreground rounded-xl h-10 text-xs gap-1.5"
+        >
+          <Plus className="w-4 h-4" />
+          Create New Plan
+        </Button>
+      )}
+
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
