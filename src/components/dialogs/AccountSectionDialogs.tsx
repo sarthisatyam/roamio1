@@ -952,7 +952,7 @@ export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({
                 className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">Select</option>
-                {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+                {GENDER_OPTIONS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
               </select>
             </div>
             <div className="space-y-1">
