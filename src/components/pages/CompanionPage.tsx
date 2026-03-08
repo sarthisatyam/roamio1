@@ -35,6 +35,7 @@ import { useLikedCompanions } from "@/hooks/useLikedCompanions";
 interface CompanionPageProps {
   onNavigateToAccount?: () => void;
   userCity?: string | null;
+  onCreatePlan?: () => void;
 }
 
 const GROUP_CATEGORIES = [
