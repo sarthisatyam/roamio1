@@ -71,7 +71,12 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
     return saved ? parseFloat(saved) : null;
   });
 
+  const [locationLoading, setLocationLoading] = useState(false);
+
   const handleLocationToggle = async (enabled: boolean) => {
+    if (locationLoading) return;
+    setLocationLoading(true);
+    try {
     if (enabled) {
       try {
         const isNative = Capacitor.isNativePlatform();
