@@ -57,7 +57,7 @@ const quickAccessCategories = [
   { icon: Shield, label: "Safe Places", color: "bg-emerald-500/10 text-emerald-600" },
   { icon: Compass, label: "Solo-Friendly", color: "bg-blue-500/10 text-blue-600" },
   { icon: Users, label: "Women-Safe", color: "bg-pink-500/10 text-pink-600" },
-  { icon: Compass, label: "Budget Friendly", color: "bg-amber-500/10 text-amber-600" },
+  { icon: Wallet, label: "Budget Friendly", color: "bg-amber-500/10 text-amber-600" },
 ];
 
 const HomePage: React.FC<HomePageProps> = ({
