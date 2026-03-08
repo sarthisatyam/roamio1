@@ -334,7 +334,7 @@ const HomePage: React.FC<HomePageProps> = ({
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-sm truncate">{dest.name}</h3>
                           <div className="flex items-center gap-1 mt-1 flex-wrap">
-                            {dest.tags.slice(0, 2).map((tag) => (
+                            {dest.tags.slice(0, 3).map((tag) => (
                               <Badge key={tag} variant="outline" className="text-[10px] py-0.5 px-2 rounded-lg">
                                 {tag}
                               </Badge>
