@@ -835,7 +835,7 @@ export const MyCoCompanionDialog: React.FC<CoCompanionDialogProps> = ({ open, on
   );
 };
 
-// My Interests Dialog
+// My Interests Dialog (Editable Profile)
 interface MyInterestsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -843,61 +843,169 @@ interface MyInterestsDialogProps {
   gender?: string;
   age?: number | null;
   about?: string;
+  displayName?: string;
+  onProfileUpdated?: () => void;
 }
+
+const INTEREST_OPTIONS = [
+  "Adventure", "Beach", "Culture", "Food", "History", "Mountains",
+  "Nature", "Nightlife", "Photography", "Road Trips", "Shopping",
+  "Spiritual", "Trekking", "Wildlife", "Backpacking", "Luxury"
+];
+
+const GENDER_OPTIONS = ["Male", "Female", "Non-binary", "Prefer not to say"];
 
 export const MyInterestsDialog: React.FC<MyInterestsDialogProps> = ({ 
   open, 
   onOpenChange, 
   interests = [], 
-  gender = "Not specified",
+  gender = "",
   age,
-  about = "No description yet"
+  about = "",
+  displayName = "",
+  onProfileUpdated
 }) => {
+  const [editName, setEditName] = useState(displayName);
+  const [editGender, setEditGender] = useState(gender);
+  const [editAge, setEditAge] = useState(age?.toString() || "");
+  const [editBio, setEditBio] = useState(about);
+  const [editInterests, setEditInterests] = useState<string[]>(interests);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setEditName(displayName);
+      setEditGender(gender);
+      setEditAge(age?.toString() || "");
+      setEditBio(about);
+      setEditInterests(interests);
+    }
+  }, [open, displayName, gender, age, about, interests]);
+
+  const toggleInterest = (interest: string) => {
+    setEditInterests(prev =>
+      prev.includes(interest) ? prev.filter(i => i !== interest) : [...prev, interest]
+    );
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Not logged in"); return; }
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          display_name: editName.trim() || null,
+          gender: editGender || null,
+          age: editAge ? parseInt(editAge) : null,
+          bio: editBio.trim() || null,
+          interests: editInterests.length > 0 ? editInterests : null,
+        })
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      toast.success("Profile updated!");
+      onProfileUpdated?.();
+      onOpenChange(false);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      toast.error("Failed to save changes");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md rounded-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Star className="w-5 h-5 text-accent" />
-            My Interests
+            Edit Profile
           </DialogTitle>
-          <DialogDescription>Your travel preferences and profile</DialogDescription>
+          <DialogDescription>Update your profile and travel preferences</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 p-3 bg-muted/30 rounded-xl">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">Gender</label>
-              <p className="text-sm font-medium">{gender}</p>
-            </div>
-            {age && (
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Age</label>
-                <p className="text-sm font-medium">{age} years</p>
-              </div>
-            )}
-          </div>
-          
-          <div>
-            <label className="text-sm font-medium text-muted-foreground mb-2 block">Interests</label>
-            {interests.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No interests added yet</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {interests.map((interest) => (
-                  <Badge key={interest} variant="secondary" className="text-sm py-1 px-3">
-                    {interest}
-                  </Badge>
-                ))}
-              </div>
-            )}
+          <div className="space-y-1">
+            <Label className="text-xs font-medium text-muted-foreground">Display Name</Label>
+            <Input
+              placeholder="Your name"
+              value={editName}
+              onChange={e => setEditName(e.target.value)}
+              className="rounded-xl"
+            />
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-muted-foreground mb-2 block">About</label>
-            <p className="text-sm p-3 bg-muted/30 rounded-xl">{about}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-muted-foreground">Gender</Label>
+              <select
+                value={editGender}
+                onChange={e => setEditGender(e.target.value)}
+                className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Select</option>
+                {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-muted-foreground">Age</Label>
+              <Input
+                type="number"
+                placeholder="Age"
+                value={editAge}
+                onChange={e => setEditAge(e.target.value)}
+                className="rounded-xl"
+                min={13}
+                max={100}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-xs font-medium text-muted-foreground">About</Label>
+            <Textarea
+              placeholder="Tell others about yourself..."
+              value={editBio}
+              onChange={e => setEditBio(e.target.value)}
+              className="rounded-xl min-h-[70px]"
+            />
+          </div>
+          
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">Interests</Label>
+            <div className="flex flex-wrap gap-2">
+              {INTEREST_OPTIONS.map((interest) => (
+                <Badge
+                  key={interest}
+                  variant={editInterests.includes(interest) ? "default" : "outline"}
+                  className={`text-xs py-1 px-3 cursor-pointer transition-colors ${
+                    editInterests.includes(interest) 
+                      ? "bg-primary text-primary-foreground" 
+                      : "hover:bg-muted"
+                  }`}
+                  onClick={() => toggleInterest(interest)}
+                >
+                  {interest}
+                </Badge>
+              ))}
+            </div>
           </div>
         </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">Cancel</Button>
+          <Button 
+            onClick={handleSave} 
+            disabled={saving}
+            className="bg-gradient-primary text-white rounded-xl"
+          >
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
