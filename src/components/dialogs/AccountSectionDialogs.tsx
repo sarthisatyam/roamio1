@@ -840,6 +840,7 @@ interface MyInterestsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   interests?: string[];
+  avatarUrl?: string | null;
   gender?: string;
   age?: number | null;
   about?: string;
