@@ -24,11 +24,7 @@ import {
   Calendar,
   Languages,
   MessageCircle,
-  Eye,
   Clock,
-  TrendingUp,
-  UserCheck,
-  UserMinus,
   DoorOpen,
   Trash2,
 } from "lucide-react";
