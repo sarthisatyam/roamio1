@@ -182,11 +182,7 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
 
       {/* Footer Links */}
       <div className="bg-muted/50 border-t border-border px-4 py-2 flex justify-center gap-4">
-        <button onClick={() => setPrivacyOpen(true)} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</button>
-        <span className="text-muted-foreground/40 text-[10px]">•</span>
-        <button onClick={() => setTermsOpen(true)} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Terms of Service</button>
-        <span className="text-muted-foreground/40 text-[10px]">•</span>
-        <button onClick={() => setContactOpen(true)} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Contact Us</button>
+        <button onClick={() => setHelpLegalOpen(true)} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Help & Support</button>
       </div>
 
       {/* Bottom Navigation */}
