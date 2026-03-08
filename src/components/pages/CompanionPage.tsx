@@ -189,7 +189,7 @@ const DiscoverTab: React.FC<{ currentUserId: string }> = ({ currentUserId }) => 
 
   const { companions, isLoading, refetch } = useCompanions(currentUserId);
   const { connections, connectedUserIds, sendConnectionRequest, hasConnectionWith, getConnectionStatus } = useConnections(currentUserId);
-  const { likedCompanions, toggleLike } = useLikedCompanions(currentUserId);
+  const { isLiked: isCompanionLiked, toggleLike } = useLikedCompanions(currentUserId);
 
   // Debounce search
   useEffect(() => {
