@@ -79,11 +79,11 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
 
   // Solo expenses
   const [expenses, setExpenses] = useState([
-    { category: "Accommodation", amount: 3500, budget: 5000, icon: Home },
-    { category: "Food & Drinks", amount: 2400, budget: 4000, icon: UtensilsCrossed },
-    { category: "Transportation", amount: 1200, budget: 2500, icon: Car },
-    { category: "Activities", amount: 1800, budget: 3000, icon: Ticket },
-    { category: "Shopping", amount: 800, budget: 1500, icon: ShoppingBag },
+    { category: "Accommodation", amount: 0, budget: 0, icon: Home },
+    { category: "Food & Drinks", amount: 0, budget: 0, icon: UtensilsCrossed },
+    { category: "Transportation", amount: 0, budget: 0, icon: Car },
+    { category: "Activities", amount: 0, budget: 0, icon: Ticket },
+    { category: "Shopping", amount: 0, budget: 0, icon: ShoppingBag },
   ]);
   const [editingExpense, setEditingExpense] = useState<any>(null);
 
