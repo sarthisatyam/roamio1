@@ -56,11 +56,10 @@ interface HomePageProps {
 }
 
 const quickAccessCategories = [
-  { icon: Shield, label: "Safe Places", color: "bg-emerald-500/10 text-emerald-600", isEmergency: false },
-  { icon: Compass, label: "Solo-Friendly", color: "bg-blue-500/10 text-blue-600", isEmergency: false },
-  { icon: Users, label: "Women-Safe", color: "bg-pink-500/10 text-pink-600", isEmergency: false },
-  { icon: Wallet, label: "Budget Friendly", color: "bg-amber-500/10 text-amber-600", isEmergency: false },
-  { icon: AlertTriangle, label: "Emergency", color: "bg-destructive/10 text-destructive", isEmergency: true },
+  { icon: Shield, label: "Safe Places", color: "bg-emerald-500/10 text-emerald-600" },
+  { icon: Compass, label: "Solo-Friendly", color: "bg-blue-500/10 text-blue-600" },
+  { icon: Users, label: "Women-Safe", color: "bg-pink-500/10 text-pink-600" },
+  { icon: Wallet, label: "Budget Friendly", color: "bg-amber-500/10 text-amber-600" },
 ];
 
 const HomePage: React.FC<HomePageProps> = ({
