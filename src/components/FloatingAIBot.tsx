@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Send, Bot, X, Sparkles, Loader2, MapPin, Star, Shield, ExternalLink, Building2, Bed, Home, Search } from "lucide-react";
+import { MessageCircle, Send, Bot, X, Sparkles, Loader2, MapPin, Star, Shield, ExternalLink, Building2, Bed, Home, Search, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { EmergencyDialog } from "@/components/dialogs/AccountSectionDialogs";
 
 interface ChatMessage {
   id: number;
@@ -210,6 +211,7 @@ const HotelCard: React.FC<{ hotel: HotelResult }> = ({ hotel }) => {
 
 const FloatingAIBot: React.FC<FloatingAIBotProps> = ({ currentCity, locationEnabled, latitude, longitude }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [emergencyDialogOpen, setEmergencyDialogOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
@@ -229,6 +231,10 @@ const FloatingAIBot: React.FC<FloatingAIBotProps> = ({ currentCity, locationEnab
     "Safe stays for solo women",
     "Local travel tips",
   ];
+
+  const handleEmergencyClick = () => {
+    setEmergencyDialogOpen(true);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -457,6 +463,14 @@ const FloatingAIBot: React.FC<FloatingAIBotProps> = ({ currentCity, locationEnab
             {/* Quick Actions */}
             <div className="px-4 pb-2">
               <div className="flex flex-wrap gap-2">
+                <Badge
+                  variant="destructive"
+                  className="cursor-pointer hover:bg-destructive/90 text-xs flex items-center gap-1"
+                  onClick={handleEmergencyClick}
+                >
+                  <AlertTriangle className="w-3 h-3" />
+                  Emergency Details
+                </Badge>
                 {quickActions.map((action) => (
                   <Badge
                     key={action}
@@ -494,6 +508,8 @@ const FloatingAIBot: React.FC<FloatingAIBotProps> = ({ currentCity, locationEnab
           </Card>
         </div>
       )}
+      {/* Emergency Dialog */}
+      <EmergencyDialog open={emergencyDialogOpen} onOpenChange={setEmergencyDialogOpen} />
     </>
   );
 };
