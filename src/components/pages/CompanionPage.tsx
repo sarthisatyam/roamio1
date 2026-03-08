@@ -176,6 +176,10 @@ const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({
   const [connectMessage, setConnectMessage] = useState("");
   const [isSendingConnect, setIsSendingConnect] = useState(false);
 
+  // Profile view dialog
+  const [profileViewOpen, setProfileViewOpen] = useState(false);
+  const [viewedCompanion, setViewedCompanion] = useState<Companion | null>(null);
+
   // Chat
   const [chatOpen, setChatOpen] = useState(false);
   const [chatPartner, setChatPartner] = useState<{ id: string; name: string; avatar?: string | null } | null>(null);
@@ -379,7 +383,11 @@ const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({
             const liked = isLiked(companion.user_id);
 
             return (
-              <Card key={companion.id} className="p-3 rounded-2xl shadow-soft border-0 bg-card">
+              <Card 
+                key={companion.id} 
+                className="p-3 rounded-2xl shadow-soft border-0 bg-card cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => { setViewedCompanion(companion); setProfileViewOpen(true); }}
+              >
                 <div className="flex items-start gap-3">
                   <div className="relative">
                     <Avatar className="w-12 h-12">
@@ -429,7 +437,7 @@ const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center gap-2 mt-2" onClick={e => e.stopPropagation()}>
                       {isConnected ? (
                         <>
                           <Badge variant="secondary" className="text-[10px] gap-1 bg-success/10 text-success border-0 rounded-lg">
@@ -554,6 +562,135 @@ const DiscoverTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Full Profile View Dialog */}
+      <Dialog open={profileViewOpen} onOpenChange={setProfileViewOpen}>
+        <DialogContent className="max-w-md rounded-2xl max-h-[85vh] overflow-y-auto p-0">
+          {viewedCompanion && (() => {
+            const status = getConnectionStatus(viewedCompanion.user_id);
+            const isConnected = status === "accepted";
+            const isPending = status === "pending";
+            const liked = isLiked(viewedCompanion.user_id);
+
+            return (
+              <>
+                {/* Hero / Avatar Section */}
+                <div className="relative bg-gradient-hero p-6 pb-10 flex flex-col items-center text-center">
+                  <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
+                    <AvatarImage src={viewedCompanion.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary/20 text-primary text-2xl font-bold">
+                      {viewedCompanion.display_name?.charAt(0) || "?"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="mt-3 flex items-center gap-1.5">
+                    <h2 className="text-lg font-bold text-primary-foreground">
+                      {viewedCompanion.display_name || "Traveler"}
+                    </h2>
+                    {viewedCompanion.is_verified && <CheckCircle className="w-4 h-4 text-primary-foreground/80" />}
+                  </div>
+                  {(viewedCompanion.age || viewedCompanion.gender) && (
+                    <p className="text-xs text-primary-foreground/70 mt-0.5">
+                      {viewedCompanion.age && `${viewedCompanion.age} yrs`}
+                      {viewedCompanion.age && viewedCompanion.gender && " • "}
+                      {viewedCompanion.gender && viewedCompanion.gender.charAt(0).toUpperCase() + viewedCompanion.gender.slice(1)}
+                    </p>
+                  )}
+                  {viewedCompanion.city && (
+                    <div className="flex items-center gap-1 text-xs text-primary-foreground/70 mt-1">
+                      <MapPin className="w-3 h-3" />
+                      {viewedCompanion.city}
+                      {viewedCompanion.distance !== undefined && ` • ${viewedCompanion.distance < 1 ? "<1" : Math.round(viewedCompanion.distance)} km away`}
+                    </div>
+                  )}
+                  {viewedCompanion.is_online && (
+                    <Badge className="mt-2 bg-success/20 text-success border-0 text-[10px] gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-success" />
+                      Online now
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="p-5 space-y-5">
+                  {/* Bio */}
+                  {viewedCompanion.bio && (
+                    <div>
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">About</h4>
+                      <p className="text-sm text-foreground leading-relaxed">{viewedCompanion.bio}</p>
+                    </div>
+                  )}
+
+                  {/* Interests */}
+                  {viewedCompanion.interests && viewedCompanion.interests.length > 0 && (
+                    <div>
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Interests</h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {viewedCompanion.interests.map(interest => (
+                          <Badge key={interest} variant="secondary" className="text-xs py-1 px-2.5 rounded-lg">
+                            {interest}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 pt-2">
+                    {isConnected ? (
+                      <>
+                        <Button
+                          className="flex-1 h-10 rounded-xl bg-gradient-primary text-primary-foreground border-0 gap-1.5"
+                          onClick={() => {
+                            setProfileViewOpen(false);
+                            setChatPartner({
+                              id: viewedCompanion.user_id,
+                              name: viewedCompanion.display_name || "Traveler",
+                              avatar: viewedCompanion.avatar_url,
+                            });
+                            setChatOpen(true);
+                          }}
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          Message
+                        </Button>
+                        <Badge variant="secondary" className="text-xs gap-1 bg-success/10 text-success border-0 rounded-lg h-10 px-3">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          Connected
+                        </Badge>
+                      </>
+                    ) : isPending ? (
+                      <Badge variant="secondary" className="text-xs gap-1 rounded-lg h-10 px-4">
+                        <Clock className="w-3.5 h-3.5" />
+                        Request Pending
+                      </Badge>
+                    ) : (
+                      <Button
+                        className="flex-1 h-10 rounded-xl bg-gradient-primary text-primary-foreground border-0 gap-1.5"
+                        onClick={() => {
+                          setProfileViewOpen(false);
+                          setSelectedCompanion(viewedCompanion);
+                          setConnectDialogOpen(true);
+                        }}
+                      >
+                        <UserCheck className="w-4 h-4" />
+                        Connect
+                      </Button>
+                    )}
+
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-10 w-10 rounded-xl"
+                      onClick={() => handleLike(viewedCompanion)}
+                    >
+                      <Heart className={cn("w-4 h-4", liked ? "fill-destructive text-destructive" : "text-muted-foreground")} />
+                    </Button>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
