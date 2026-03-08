@@ -83,12 +83,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   ];
 
   const languages = [
-    { code: "en", name: "English" },
-    { code: "hi", name: "हिन्दी" },
-    { code: "es", name: "Español" },
-    { code: "fr", name: "Français" },
-    { code: "de", name: "Deutsch" },
-    { code: "it", name: "Italiano" }
+    { code: "en", name: "English" }
   ];
 
   const handleNext = () => {
