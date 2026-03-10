@@ -196,17 +196,15 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
                   {plan.is_owner ? (
                     <div className="flex items-center gap-2">
                       <Badge className="bg-primary/10 text-primary">Your Plan</Badge>
-                      {(plan.request_count ?? 0) > 0 && (
-                        <Button
-                          onClick={() => openManageDialog(plan)}
-                          variant="outline"
-                          size="sm"
-                          className="rounded-xl ml-auto"
-                        >
-                          <Settings2 className="w-4 h-4 mr-1" />
-                          Manage ({plan.request_count})
-                        </Button>
-                      )}
+                      <Button
+                        onClick={() => openManageDialog(plan)}
+                        variant="outline"
+                        size="sm"
+                        className="rounded-xl ml-auto"
+                      >
+                        <Settings2 className="w-4 h-4 mr-1" />
+                        Manage{(plan.request_count ?? 0) > 0 ? ` (${plan.request_count})` : ""}
+                      </Button>
                     </div>
                   ) : plan.is_member ? (
                     <Badge className="bg-green-500/10 text-green-600">Joined</Badge>

@@ -274,18 +274,20 @@ export const usePlans = (currentUserId: string | null) => {
   const handleJoinRequest = async (requestId: string, action: "approved" | "rejected", planId: string, requestUserId: string) => {
     if (!currentUserId) throw new Error("Not authenticated");
 
-    const { error } = await supabase
-      .from("join_requests")
-      .update({ status: action } as any)
-      .eq("id", requestId);
+    // Use SECURITY DEFINER function to bypass RLS issues
+    const { error } = await supabase.rpc("handle_join_request", {
+      p_request_id: requestId,
+      p_action: action,
+      p_plan_id: planId,
+      p_request_user_id: requestUserId,
+    });
 
-    if (error) throw error;
+    if (error) {
+      console.error("handle_join_request RPC error:", error);
+      throw error;
+    }
 
     if (action === "approved") {
-      await supabase
-        .from("plan_members")
-        .insert({ plan_id: planId, user_id: requestUserId, role: "member" } as any);
-
       // Sync all plan members to group (creates group if needed, adds all members)
       await syncPlanGroup(planId);
     }
