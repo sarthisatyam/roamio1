@@ -752,6 +752,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      handle_join_request: {
+        Args: {
+          p_action: string
+          p_plan_id: string
+          p_request_id: string
+          p_request_user_id: string
+        }
+        Returns: undefined
+      }
       remove_plan_member: {
         Args: { p_plan_id: string; p_user_id: string }
         Returns: undefined
