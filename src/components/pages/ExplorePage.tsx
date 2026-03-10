@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Search, MapPin, Users, Calendar, Eye, EyeOff, Loader2, ArrowRight,
-  User, Shield, Clock, Sparkles, Plus,
+  User, Clock, Sparkles, Plus, CheckCircle, XCircle, Settings2,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { usePlans, Plan } from "@/hooks/usePlans";
+import { usePlans, Plan, JoinRequest } from "@/hooks/usePlans";
 import { format } from "date-fns";
 
 interface ExplorePageProps {
@@ -29,7 +29,12 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
   const [joinMessage, setJoinMessage] = useState("");
   const [isJoining, setIsJoining] = useState(false);
 
-  const { plans, isLoading, fetchPlans, requestToJoin } = usePlans(currentUserId);
+  // Manage requests state
+  const [managePlan, setManagePlan] = useState<Plan | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+
+  const { plans, isLoading, fetchPlans, requestToJoin, handleJoinRequest, getPendingRequests } = usePlans(currentUserId);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -46,7 +51,7 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
     }
   }, [searchQuery, fetchPlans]);
 
-  const handleJoinRequest = async () => {
+  const handleJoinRequestSubmit = async () => {
     if (!selectedPlan) return;
     setIsJoining(true);
     try {
@@ -58,6 +63,29 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
       toast.error(err.message || "Failed to send request");
     } finally {
       setIsJoining(false);
+    }
+  };
+
+  const openManageDialog = async (plan: Plan) => {
+    setManagePlan(plan);
+    setLoadingRequests(true);
+    try {
+      const reqs = await getPendingRequests(plan.id);
+      setPendingRequests(reqs);
+    } catch {
+      toast.error("Failed to load requests");
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleReviewRequest = async (req: JoinRequest, action: "approved" | "rejected") => {
+    try {
+      await handleJoinRequest(req.id, action, req.plan_id, req.user_id);
+      setPendingRequests(prev => prev.filter(r => r.id !== req.id));
+      toast.success(action === "approved" ? "Request approved! ✅" : "Request rejected.");
+    } catch {
+      toast.error("Failed to process request");
     }
   };
 
@@ -166,7 +194,20 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
 
                   {/* Action */}
                   {plan.is_owner ? (
-                    <Badge className="bg-primary/10 text-primary">Your Plan</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-primary/10 text-primary">Your Plan</Badge>
+                      {(plan.request_count ?? 0) > 0 && (
+                        <Button
+                          onClick={() => openManageDialog(plan)}
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl ml-auto"
+                        >
+                          <Settings2 className="w-4 h-4 mr-1" />
+                          Manage ({plan.request_count})
+                        </Button>
+                      )}
+                    </div>
                   ) : plan.is_member ? (
                     <Badge className="bg-green-500/10 text-green-600">Joined</Badge>
                   ) : plan.my_request_status === "pending" ? (
@@ -218,10 +259,71 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedPlan(null)}>Cancel</Button>
-            <Button onClick={handleJoinRequest} disabled={isJoining} className="bg-gradient-primary">
+            <Button onClick={handleJoinRequestSubmit} disabled={isJoining} className="bg-gradient-primary">
               {isJoining ? "Sending..." : "Send Request"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Requests Dialog */}
+      <Dialog open={!!managePlan} onOpenChange={() => setManagePlan(null)}>
+        <DialogContent className="max-w-sm rounded-2xl max-h-[70vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings2 className="w-5 h-5 text-primary" />
+              Pending Requests
+            </DialogTitle>
+            <DialogDescription>
+              Manage join requests for "{managePlan?.plan_name}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {loadingRequests ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            ) : pendingRequests.length === 0 ? (
+              <div className="text-center py-6">
+                <CheckCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">No pending requests</p>
+              </div>
+            ) : (
+              pendingRequests.map(req => (
+                <Card key={req.id} className="p-3 rounded-xl border-border">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm">{req.sender_name || "Traveler"}</p>
+                      {req.message && (
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">"{req.message}"</p>
+                      )}
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {format(new Date(req.created_at), "MMM dd, yyyy")}
+                      </p>
+                    </div>
+                    <div className="flex gap-1.5 shrink-0">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="w-8 h-8 rounded-lg border-green-500/30 text-green-600 hover:bg-green-500/10"
+                        onClick={() => handleReviewRequest(req, "approved")}
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="w-8 h-8 rounded-lg border-destructive/30 text-destructive hover:bg-destructive/10"
+                        onClick={() => handleReviewRequest(req, "rejected")}
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
