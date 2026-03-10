@@ -838,9 +838,9 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
     }
   };
 
-  // Filter only plan-based groups
+  // Filter only plan-based groups where user is a member
   const planGroups = useMemo(() => {
-    const filtered = groups.filter(g => g.plan_id);
+    const filtered = groups.filter(g => g.plan_id && g.is_member);
     if (!searchQuery.trim()) return filtered;
     const q = searchQuery.toLowerCase();
     return filtered.filter(g =>
