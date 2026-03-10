@@ -80,7 +80,7 @@ export function useAISearch(query: string, options: UseAISearchOptions) {
   const [results, setResults] = useState<AISearchResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (timeoutRef.current) {
