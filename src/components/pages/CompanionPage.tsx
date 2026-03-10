@@ -838,9 +838,9 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
     }
   };
 
-  // Filter only plan-based groups
+  // Filter only plan-based groups where user is a member
   const planGroups = useMemo(() => {
-    const filtered = groups.filter(g => g.plan_id);
+    const filtered = groups.filter(g => g.plan_id && g.is_member);
     if (!searchQuery.trim()) return filtered;
     const q = searchQuery.toLowerCase();
     return filtered.filter(g =>
@@ -851,14 +851,6 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
 
   return (
     <div className="px-4 pt-3 space-y-3">
-      {/* Create Group Button */}
-      <Button
-        className="w-full bg-gradient-primary text-primary-foreground rounded-xl h-10 text-xs gap-1.5"
-        onClick={() => setCreateDialogOpen(true)}
-      >
-        <Plus className="w-4 h-4" />
-        Create New Group
-      </Button>
 
       {/* Plan groups list */}
       {isLoading ? (
