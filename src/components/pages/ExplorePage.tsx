@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Search, MapPin, Users, Calendar, Eye, EyeOff, Loader2, ArrowRight,
-  User, Clock, Sparkles, Plus, CheckCircle, XCircle, Settings2,
+  User, Clock, Sparkles, Plus,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -14,8 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { usePlans, Plan, JoinRequest } from "@/hooks/usePlans";
+import { usePlans, Plan } from "@/hooks/usePlans";
 import { format } from "date-fns";
+import PlanOwnerDialog from "@/components/dialogs/PlanOwnerDialog";
 
 interface ExplorePageProps {
   onNavigateToAccount?: () => void;
@@ -28,11 +29,7 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [joinMessage, setJoinMessage] = useState("");
   const [isJoining, setIsJoining] = useState(false);
-
-  // Manage requests state
-  const [managePlan, setManagePlan] = useState<Plan | null>(null);
-  const [pendingRequests, setPendingRequests] = useState<JoinRequest[]>([]);
-  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [ownerPlan, setOwnerPlan] = useState<Plan | null>(null);
 
   const { plans, isLoading, fetchPlans, requestToJoin, handleJoinRequest, getPendingRequests } = usePlans(currentUserId);
 
@@ -66,26 +63,9 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
     }
   };
 
-  const openManageDialog = async (plan: Plan) => {
-    setManagePlan(plan);
-    setLoadingRequests(true);
-    try {
-      const reqs = await getPendingRequests(plan.id);
-      setPendingRequests(reqs);
-    } catch {
-      toast.error("Failed to load requests");
-    } finally {
-      setLoadingRequests(false);
-    }
-  };
-
-  const handleReviewRequest = async (req: JoinRequest, action: "approved" | "rejected") => {
-    try {
-      await handleJoinRequest(req.id, action, req.plan_id, req.user_id);
-      setPendingRequests(prev => prev.filter(r => r.id !== req.id));
-      toast.success(action === "approved" ? "Request approved! ✅" : "Request rejected.");
-    } catch {
-      toast.error("Failed to process request");
+  const handleCardClick = (plan: Plan) => {
+    if (plan.is_owner) {
+      setOwnerPlan(plan);
     }
   };
 
@@ -134,22 +114,23 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
           plans.map(plan => {
             const badge = getGroupBadge(plan.group_type);
             return (
-              <Card key={plan.id} className="overflow-hidden rounded-2xl border-border shadow-sm">
+              <Card
+                key={plan.id}
+                className={cn(
+                  "overflow-hidden rounded-2xl border-border shadow-sm",
+                  plan.is_owner && "cursor-pointer hover:shadow-md transition-shadow"
+                )}
+                onClick={() => handleCardClick(plan)}
+              >
                 {/* Cover Image */}
                 <div className="aspect-[16/9] relative bg-muted">
                   {plan.cover_image_url ? (
-                    <img
-                      src={plan.cover_image_url}
-                      alt={plan.plan_name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
+                    <img src={plan.cover_image_url} alt={plan.plan_name} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
                       <MapPin className="w-12 h-12 text-primary/40" />
                     </div>
                   )}
-                  {/* Badges */}
                   <div className="absolute top-3 left-3 flex gap-2">
                     <Badge className={cn("text-xs", badge.color)}>{badge.label}</Badge>
                     <Badge className={cn("text-xs", plan.plan_visibility === "public" ? "bg-accent/80 text-accent-foreground" : "bg-muted/80 text-muted-foreground")}>
@@ -166,22 +147,22 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
                     <MapPin className="w-3.5 h-3.5" />
                     <span>{plan.destination_name}</span>
                   </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span>{format(new Date(plan.start_date), "MMM dd")} – {format(new Date(plan.end_date), "MMM dd")}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" />
-                        <span>{plan.member_count || 1} / {plan.max_members}</span>
-                      </div>
-                      {(plan.request_count ?? 0) > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>{plan.request_count} pending</span>
-                        </div>
-                      )}
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>{format(new Date(plan.start_date), "MMM dd")} – {format(new Date(plan.end_date), "MMM dd")}</span>
                     </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="w-3.5 h-3.5" />
+                      <span>{plan.member_count || 1} / {plan.max_members}</span>
+                    </div>
+                    {plan.is_owner && (plan.request_count ?? 0) > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{plan.request_count} pending</span>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Interests */}
                   {plan.interests && plan.interests.length > 0 && (
@@ -194,18 +175,7 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
 
                   {/* Action */}
                   {plan.is_owner ? (
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-primary/10 text-primary">Your Plan</Badge>
-                      <Button
-                        onClick={() => openManageDialog(plan)}
-                        variant="outline"
-                        size="sm"
-                        className="rounded-xl ml-auto"
-                      >
-                        <Settings2 className="w-4 h-4 mr-1" />
-                        Manage{(plan.request_count ?? 0) > 0 ? ` (${plan.request_count})` : ""}
-                      </Button>
-                    </div>
+                    <Badge className="bg-primary/10 text-primary">Your Plan · Tap to manage</Badge>
                   ) : plan.is_member ? (
                     <Badge className="bg-green-500/10 text-green-600">Joined</Badge>
                   ) : plan.my_request_status === "pending" ? (
@@ -216,7 +186,7 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
                     <Badge className="bg-destructive/10 text-destructive">Declined</Badge>
                   ) : (
                     <Button
-                      onClick={() => setSelectedPlan(plan)}
+                      onClick={(e) => { e.stopPropagation(); setSelectedPlan(plan); }}
                       className="w-full rounded-xl bg-gradient-primary"
                       size="sm"
                     >
@@ -264,66 +234,14 @@ const ExplorePage: React.FC<ExplorePageProps> = ({ onNavigateToAccount, onCreate
         </DialogContent>
       </Dialog>
 
-      {/* Manage Requests Dialog */}
-      <Dialog open={!!managePlan} onOpenChange={() => setManagePlan(null)}>
-        <DialogContent className="max-w-sm rounded-2xl max-h-[70vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Settings2 className="w-5 h-5 text-primary" />
-              Pending Requests
-            </DialogTitle>
-            <DialogDescription>
-              Manage join requests for "{managePlan?.plan_name}"
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            {loadingRequests ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              </div>
-            ) : pendingRequests.length === 0 ? (
-              <div className="text-center py-6">
-                <CheckCircle className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">No pending requests</p>
-              </div>
-            ) : (
-              pendingRequests.map(req => (
-                <Card key={req.id} className="p-3 rounded-xl border-border">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">{req.sender_name || "Traveler"}</p>
-                      {req.message && (
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">"{req.message}"</p>
-                      )}
-                      <p className="text-[10px] text-muted-foreground mt-1">
-                        {format(new Date(req.created_at), "MMM dd, yyyy")}
-                      </p>
-                    </div>
-                    <div className="flex gap-1.5 shrink-0">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="w-8 h-8 rounded-lg border-green-500/30 text-green-600 hover:bg-green-500/10"
-                        onClick={() => handleReviewRequest(req, "approved")}
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="w-8 h-8 rounded-lg border-destructive/30 text-destructive hover:bg-destructive/10"
-                        onClick={() => handleReviewRequest(req, "rejected")}
-                      >
-                        <XCircle className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Owner Management Dialog */}
+      <PlanOwnerDialog
+        plan={ownerPlan}
+        onClose={() => setOwnerPlan(null)}
+        onUpdated={() => { setOwnerPlan(null); fetchPlans(); }}
+        getPendingRequests={getPendingRequests}
+        handleJoinRequest={handleJoinRequest}
+      />
     </div>
   );
 };
