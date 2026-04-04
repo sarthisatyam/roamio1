@@ -66,43 +66,79 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
     refetch: refetchInvites,
   } = useJourneyInvites(currentUserId);
 
-  // Add accepted invite users to group members
+  // Load group members based on source selection
   useEffect(() => {
     if (!currentUserId) return;
-    const addAccepted = async () => {
-      const otherUserIds = acceptedInvites.map(inv =>
-        inv.from_user_id === currentUserId ? inv.to_user_id : inv.from_user_id
-      );
-      if (otherUserIds.length === 0) return;
 
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, display_name, avatar_url")
-        .in("user_id", otherUserIds);
-
-      const { data: presence } = await supabase
-        .from("user_presence")
-        .select("user_id, is_online")
-        .in("user_id", otherUserIds);
-
-      const presenceMap = new Map(presence?.map(p => [p.user_id, p.is_online]) || []);
-
-      const newMembers: GroupMember[] = [{ id: "me", name: "You" }];
-      profiles?.forEach(p => {
-        if (!newMembers.some(m => m.user_id === p.user_id)) {
-          newMembers.push({
-            id: p.user_id,
-            name: p.display_name || "User",
-            user_id: p.user_id,
-            avatar_url: p.avatar_url || undefined,
-            is_online: presenceMap.get(p.user_id) || false,
-          });
+    if (groupSource === "others") {
+      // In "Others" mode, load from accepted journey invites
+      const loadFromInvites = async () => {
+        const otherUserIds = acceptedInvites.map(inv =>
+          inv.from_user_id === currentUserId ? inv.to_user_id : inv.from_user_id
+        );
+        if (otherUserIds.length === 0) {
+          setGroupMembers([{ id: "me", name: "You" }]);
+          return;
         }
-      });
-      setGroupMembers(newMembers);
-    };
-    addAccepted();
-  }, [acceptedInvites, currentUserId]);
+
+        const [profilesRes, presenceRes] = await Promise.all([
+          supabase.from("profiles").select("user_id, display_name, avatar_url").in("user_id", otherUserIds),
+          supabase.from("user_presence").select("user_id, is_online").in("user_id", otherUserIds),
+        ]);
+
+        const presenceMap = new Map(presenceRes.data?.map(p => [p.user_id, p.is_online]) || []);
+        const newMembers: GroupMember[] = [{ id: "me", name: "You" }];
+        profilesRes.data?.forEach(p => {
+          if (!newMembers.some(m => m.user_id === p.user_id)) {
+            newMembers.push({
+              id: p.user_id,
+              name: p.display_name || "User",
+              user_id: p.user_id,
+              avatar_url: p.avatar_url || undefined,
+              is_online: presenceMap.get(p.user_id) || false,
+            });
+          }
+        });
+        setGroupMembers(newMembers);
+      };
+      loadFromInvites();
+    } else {
+      // Load members from the selected plan
+      const loadPlanMembers = async () => {
+        const { data: members } = await supabase
+          .from("plan_members")
+          .select("user_id, role")
+          .eq("plan_id", groupSource);
+
+        const userIds = (members || []).map(m => m.user_id);
+        if (userIds.length === 0) {
+          setGroupMembers([{ id: "me", name: "You" }]);
+          return;
+        }
+
+        const [profilesRes, presenceRes] = await Promise.all([
+          supabase.from("profiles").select("user_id, display_name, avatar_url").in("user_id", userIds),
+          supabase.from("user_presence").select("user_id, is_online").in("user_id", userIds),
+        ]);
+
+        const presenceMap = new Map(presenceRes.data?.map(p => [p.user_id, p.is_online]) || []);
+        const roleMap = new Map((members || []).map(m => [m.user_id, m.role]));
+
+        const newMembers: GroupMember[] = (profilesRes.data || []).map(p => ({
+          id: p.user_id === currentUserId ? "me" : p.user_id,
+          name: p.user_id === currentUserId ? "You" : (p.display_name || "User"),
+          user_id: p.user_id,
+          avatar_url: p.avatar_url || undefined,
+          is_online: presenceMap.get(p.user_id) || false,
+        }));
+
+        // Ensure "You" is first
+        newMembers.sort((a, b) => (a.id === "me" ? -1 : b.id === "me" ? 1 : 0));
+        setGroupMembers(newMembers.length > 0 ? newMembers : [{ id: "me", name: "You" }]);
+      };
+      loadPlanMembers();
+    }
+  }, [groupSource, acceptedInvites, currentUserId]);
 
   const getTripDetails = () => {
     if (!tripInfo.start || !tripInfo.end || !tripInfo.city) return null;
