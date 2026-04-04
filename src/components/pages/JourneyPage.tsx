@@ -501,14 +501,23 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
           <TabsContent value="expenses" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
             {travelMode === "group" ? (
               <>
+                <GroupSourceSelector
+                  currentUserId={currentUserId}
+                  selectedSource={groupSource}
+                  onSourceChange={(src) => {
+                    setGroupSource(src);
+                    setPolls([]);
+                    setGroupExpenses([]);
+                  }}
+                />
                 <GroupMembersManager
                   members={groupMembers}
-                  onMembersChange={setGroupMembers}
-                  onSearchUsers={searchUsers}
-                  onSendInvite={sendInvite}
-                  onRespondToInvite={respondToInvite}
-                  getInviteStatus={getInviteStatusForUser}
-                  pendingInvites={pendingReceived}
+                  onMembersChange={isOthersMode ? setGroupMembers : undefined}
+                  onSearchUsers={isOthersMode ? searchUsers : undefined}
+                  onSendInvite={isOthersMode ? sendInvite : undefined}
+                  onRespondToInvite={isOthersMode ? respondToInvite : undefined}
+                  getInviteStatus={isOthersMode ? getInviteStatusForUser : undefined}
+                  pendingInvites={isOthersMode ? pendingReceived : []}
                 />
                 <ExpenseSplitter expenses={groupExpenses} onExpensesChange={setGroupExpenses} members={groupMembers} />
               </>
