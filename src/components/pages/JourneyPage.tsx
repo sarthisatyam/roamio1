@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import GroupMembersManager, { GroupMember } from "@/components/journey/GroupMembersManager";
 import ActivityPoll, { PollActivity } from "@/components/journey/ActivityPoll";
 import ExpenseSplitter, { GroupExpense } from "@/components/journey/ExpenseSplitter";
+import GroupSourceSelector from "@/components/journey/GroupSourceSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { useJourneyInvites } from "@/hooks/useJourneyInvites";
 
