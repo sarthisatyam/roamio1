@@ -110,7 +110,7 @@ const GroupMembersManager: React.FC<GroupMembersManagerProps> = ({
             <Badge variant="secondary" className="text-[10px]">{members.length}</Badge>
           </div>
           <div className="flex gap-1.5">
-            {pendingInvites.length > 0 && (
+            {canManageMembers && pendingInvites.length > 0 && (
               <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-xl relative" onClick={() => setInvitesDialogOpen(true)}>
                 <Bell className="w-3 h-3 mr-1" /> Invites
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[9px] rounded-full flex items-center justify-center font-bold">
@@ -118,9 +118,11 @@ const GroupMembersManager: React.FC<GroupMembersManagerProps> = ({
                 </span>
               </Button>
             )}
-            <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-xl" onClick={() => { setDialogOpen(true); setSearchQuery(""); setSearchResults([]); }}>
-              <UserPlus className="w-3 h-3 mr-1" /> Add
-            </Button>
+            {canManageMembers && (
+              <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-xl" onClick={() => { setDialogOpen(true); setSearchQuery(""); setSearchResults([]); }}>
+                <UserPlus className="w-3 h-3 mr-1" /> Add
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
