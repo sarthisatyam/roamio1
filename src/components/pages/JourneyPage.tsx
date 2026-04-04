@@ -42,10 +42,13 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
   const [tripInfo, setTripInfo] = useState<{ city: string; start: string; end: string }>({ city: "", start: "", end: "" });
 
   // Group state
+  const [groupSource, setGroupSource] = useState<string>("others");
   const [groupMembers, setGroupMembers] = useState<GroupMember[]>([{ id: "me", name: "You" }]);
   const [polls, setPolls] = useState<PollActivity[]>([]);
   const [currentVoter, setCurrentVoter] = useState("me");
   const [groupExpenses, setGroupExpenses] = useState<GroupExpense[]>([]);
+
+  const isOthersMode = groupSource === "others";
 
   // Auth
   useEffect(() => {
