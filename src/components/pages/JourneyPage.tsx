@@ -381,14 +381,23 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
             {/* Group: Members + Polls | Solo: Activities */}
             {travelMode === "group" ? (
               <>
+                <GroupSourceSelector
+                  currentUserId={currentUserId}
+                  selectedSource={groupSource}
+                  onSourceChange={(src) => {
+                    setGroupSource(src);
+                    setPolls([]);
+                    setGroupExpenses([]);
+                  }}
+                />
                 <GroupMembersManager
                   members={groupMembers}
-                  onMembersChange={setGroupMembers}
-                  onSearchUsers={searchUsers}
-                  onSendInvite={sendInvite}
-                  onRespondToInvite={respondToInvite}
-                  getInviteStatus={getInviteStatusForUser}
-                  pendingInvites={pendingReceived}
+                  onMembersChange={isOthersMode ? setGroupMembers : undefined}
+                  onSearchUsers={isOthersMode ? searchUsers : undefined}
+                  onSendInvite={isOthersMode ? sendInvite : undefined}
+                  onRespondToInvite={isOthersMode ? respondToInvite : undefined}
+                  getInviteStatus={isOthersMode ? getInviteStatusForUser : undefined}
+                  pendingInvites={isOthersMode ? pendingReceived : []}
                 />
                 <ActivityPoll
                   polls={polls}
