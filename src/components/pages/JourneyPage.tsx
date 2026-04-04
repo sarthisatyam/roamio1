@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import GroupMembersManager, { GroupMember } from "@/components/journey/GroupMembersManager";
 import ActivityPoll, { PollActivity } from "@/components/journey/ActivityPoll";
 import ExpenseSplitter, { GroupExpense } from "@/components/journey/ExpenseSplitter";
+import GroupSourceSelector from "@/components/journey/GroupSourceSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { useJourneyInvites } from "@/hooks/useJourneyInvites";
 
@@ -41,10 +42,13 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
   const [tripInfo, setTripInfo] = useState<{ city: string; start: string; end: string }>({ city: "", start: "", end: "" });
 
   // Group state
+  const [groupSource, setGroupSource] = useState<string>("others");
   const [groupMembers, setGroupMembers] = useState<GroupMember[]>([{ id: "me", name: "You" }]);
   const [polls, setPolls] = useState<PollActivity[]>([]);
   const [currentVoter, setCurrentVoter] = useState("me");
   const [groupExpenses, setGroupExpenses] = useState<GroupExpense[]>([]);
+
+  const isOthersMode = groupSource === "others";
 
   // Auth
   useEffect(() => {
@@ -62,43 +66,79 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
     refetch: refetchInvites,
   } = useJourneyInvites(currentUserId);
 
-  // Add accepted invite users to group members
+  // Load group members based on source selection
   useEffect(() => {
     if (!currentUserId) return;
-    const addAccepted = async () => {
-      const otherUserIds = acceptedInvites.map(inv =>
-        inv.from_user_id === currentUserId ? inv.to_user_id : inv.from_user_id
-      );
-      if (otherUserIds.length === 0) return;
 
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("user_id, display_name, avatar_url")
-        .in("user_id", otherUserIds);
-
-      const { data: presence } = await supabase
-        .from("user_presence")
-        .select("user_id, is_online")
-        .in("user_id", otherUserIds);
-
-      const presenceMap = new Map(presence?.map(p => [p.user_id, p.is_online]) || []);
-
-      const newMembers: GroupMember[] = [{ id: "me", name: "You" }];
-      profiles?.forEach(p => {
-        if (!newMembers.some(m => m.user_id === p.user_id)) {
-          newMembers.push({
-            id: p.user_id,
-            name: p.display_name || "User",
-            user_id: p.user_id,
-            avatar_url: p.avatar_url || undefined,
-            is_online: presenceMap.get(p.user_id) || false,
-          });
+    if (groupSource === "others") {
+      // In "Others" mode, load from accepted journey invites
+      const loadFromInvites = async () => {
+        const otherUserIds = acceptedInvites.map(inv =>
+          inv.from_user_id === currentUserId ? inv.to_user_id : inv.from_user_id
+        );
+        if (otherUserIds.length === 0) {
+          setGroupMembers([{ id: "me", name: "You" }]);
+          return;
         }
-      });
-      setGroupMembers(newMembers);
-    };
-    addAccepted();
-  }, [acceptedInvites, currentUserId]);
+
+        const [profilesRes, presenceRes] = await Promise.all([
+          supabase.from("profiles").select("user_id, display_name, avatar_url").in("user_id", otherUserIds),
+          supabase.from("user_presence").select("user_id, is_online").in("user_id", otherUserIds),
+        ]);
+
+        const presenceMap = new Map(presenceRes.data?.map(p => [p.user_id, p.is_online]) || []);
+        const newMembers: GroupMember[] = [{ id: "me", name: "You" }];
+        profilesRes.data?.forEach(p => {
+          if (!newMembers.some(m => m.user_id === p.user_id)) {
+            newMembers.push({
+              id: p.user_id,
+              name: p.display_name || "User",
+              user_id: p.user_id,
+              avatar_url: p.avatar_url || undefined,
+              is_online: presenceMap.get(p.user_id) || false,
+            });
+          }
+        });
+        setGroupMembers(newMembers);
+      };
+      loadFromInvites();
+    } else {
+      // Load members from the selected plan
+      const loadPlanMembers = async () => {
+        const { data: members } = await supabase
+          .from("plan_members")
+          .select("user_id, role")
+          .eq("plan_id", groupSource);
+
+        const userIds = (members || []).map(m => m.user_id);
+        if (userIds.length === 0) {
+          setGroupMembers([{ id: "me", name: "You" }]);
+          return;
+        }
+
+        const [profilesRes, presenceRes] = await Promise.all([
+          supabase.from("profiles").select("user_id, display_name, avatar_url").in("user_id", userIds),
+          supabase.from("user_presence").select("user_id, is_online").in("user_id", userIds),
+        ]);
+
+        const presenceMap = new Map(presenceRes.data?.map(p => [p.user_id, p.is_online]) || []);
+        const roleMap = new Map((members || []).map(m => [m.user_id, m.role]));
+
+        const newMembers: GroupMember[] = (profilesRes.data || []).map(p => ({
+          id: p.user_id === currentUserId ? "me" : p.user_id,
+          name: p.user_id === currentUserId ? "You" : (p.display_name || "User"),
+          user_id: p.user_id,
+          avatar_url: p.avatar_url || undefined,
+          is_online: presenceMap.get(p.user_id) || false,
+        }));
+
+        // Ensure "You" is first
+        newMembers.sort((a, b) => (a.id === "me" ? -1 : b.id === "me" ? 1 : 0));
+        setGroupMembers(newMembers.length > 0 ? newMembers : [{ id: "me", name: "You" }]);
+      };
+      loadPlanMembers();
+    }
+  }, [groupSource, acceptedInvites, currentUserId]);
 
   const getTripDetails = () => {
     if (!tripInfo.start || !tripInfo.end || !tripInfo.city) return null;
@@ -341,14 +381,23 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
             {/* Group: Members + Polls | Solo: Activities */}
             {travelMode === "group" ? (
               <>
+                <GroupSourceSelector
+                  currentUserId={currentUserId}
+                  selectedSource={groupSource}
+                  onSourceChange={(src) => {
+                    setGroupSource(src);
+                    setPolls([]);
+                    setGroupExpenses([]);
+                  }}
+                />
                 <GroupMembersManager
                   members={groupMembers}
-                  onMembersChange={setGroupMembers}
-                  onSearchUsers={searchUsers}
-                  onSendInvite={sendInvite}
-                  onRespondToInvite={respondToInvite}
-                  getInviteStatus={getInviteStatusForUser}
-                  pendingInvites={pendingReceived}
+                  onMembersChange={isOthersMode ? setGroupMembers : undefined}
+                  onSearchUsers={isOthersMode ? searchUsers : undefined}
+                  onSendInvite={isOthersMode ? sendInvite : undefined}
+                  onRespondToInvite={isOthersMode ? respondToInvite : undefined}
+                  getInviteStatus={isOthersMode ? getInviteStatusForUser : undefined}
+                  pendingInvites={isOthersMode ? pendingReceived : []}
                 />
                 <ActivityPoll
                   polls={polls}
@@ -452,14 +501,23 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
           <TabsContent value="expenses" className="flex-1 overflow-y-auto px-4 pt-3 pb-20">
             {travelMode === "group" ? (
               <>
+                <GroupSourceSelector
+                  currentUserId={currentUserId}
+                  selectedSource={groupSource}
+                  onSourceChange={(src) => {
+                    setGroupSource(src);
+                    setPolls([]);
+                    setGroupExpenses([]);
+                  }}
+                />
                 <GroupMembersManager
                   members={groupMembers}
-                  onMembersChange={setGroupMembers}
-                  onSearchUsers={searchUsers}
-                  onSendInvite={sendInvite}
-                  onRespondToInvite={respondToInvite}
-                  getInviteStatus={getInviteStatusForUser}
-                  pendingInvites={pendingReceived}
+                  onMembersChange={isOthersMode ? setGroupMembers : undefined}
+                  onSearchUsers={isOthersMode ? searchUsers : undefined}
+                  onSendInvite={isOthersMode ? sendInvite : undefined}
+                  onRespondToInvite={isOthersMode ? respondToInvite : undefined}
+                  getInviteStatus={isOthersMode ? getInviteStatusForUser : undefined}
+                  pendingInvites={isOthersMode ? pendingReceived : []}
                 />
                 <ExpenseSplitter expenses={groupExpenses} onExpensesChange={setGroupExpenses} members={groupMembers} />
               </>

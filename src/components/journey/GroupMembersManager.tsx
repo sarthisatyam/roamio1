@@ -19,7 +19,7 @@ export interface GroupMember {
 
 interface GroupMembersManagerProps {
   members: GroupMember[];
-  onMembersChange: (members: GroupMember[]) => void;
+  onMembersChange?: (members: GroupMember[]) => void;
   onSearchUsers?: (query: string) => Promise<SearchedUser[]>;
   onSendInvite?: (toUserId: string, message?: string) => Promise<void>;
   onRespondToInvite?: (inviteId: string, status: "accepted" | "declined") => Promise<void>;
@@ -93,9 +93,12 @@ const GroupMembersManager: React.FC<GroupMembersManagerProps> = ({
   };
 
   const handleRemove = (id: string) => {
+    if (!onMembersChange) return;
     if (members.length <= 1) { toast.error("Need at least one member"); return; }
     onMembersChange(members.filter(m => m.id !== id));
   };
+
+  const canManageMembers = !!onMembersChange;
 
   return (
     <>
@@ -107,7 +110,7 @@ const GroupMembersManager: React.FC<GroupMembersManagerProps> = ({
             <Badge variant="secondary" className="text-[10px]">{members.length}</Badge>
           </div>
           <div className="flex gap-1.5">
-            {pendingInvites.length > 0 && (
+            {canManageMembers && pendingInvites.length > 0 && (
               <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-xl relative" onClick={() => setInvitesDialogOpen(true)}>
                 <Bell className="w-3 h-3 mr-1" /> Invites
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[9px] rounded-full flex items-center justify-center font-bold">
@@ -115,9 +118,11 @@ const GroupMembersManager: React.FC<GroupMembersManagerProps> = ({
                 </span>
               </Button>
             )}
-            <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-xl" onClick={() => { setDialogOpen(true); setSearchQuery(""); setSearchResults([]); }}>
-              <UserPlus className="w-3 h-3 mr-1" /> Add
-            </Button>
+            {canManageMembers && (
+              <Button size="sm" variant="outline" className="h-7 text-[10px] rounded-xl" onClick={() => { setDialogOpen(true); setSearchQuery(""); setSearchResults([]); }}>
+                <UserPlus className="w-3 h-3 mr-1" /> Add
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -136,7 +141,7 @@ const GroupMembersManager: React.FC<GroupMembersManagerProps> = ({
                     <span className="absolute -top-0.5 -right-2.5 w-1.5 h-1.5 bg-success rounded-full" />
                   )}
                 </span>
-                {members.length > 1 && m.id !== "me" && (
+                {canManageMembers && members.length > 1 && m.id !== "me" && (
                   <button onClick={() => handleRemove(m.id)} className="ml-0.5 hover:opacity-70">
                     <X className="w-3 h-3" />
                   </button>
