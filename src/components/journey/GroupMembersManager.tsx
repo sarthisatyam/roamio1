@@ -141,7 +141,7 @@ const GroupMembersManager: React.FC<GroupMembersManagerProps> = ({
                     <span className="absolute -top-0.5 -right-2.5 w-1.5 h-1.5 bg-success rounded-full" />
                   )}
                 </span>
-                {members.length > 1 && m.id !== "me" && (
+                {canManageMembers && members.length > 1 && m.id !== "me" && (
                   <button onClick={() => handleRemove(m.id)} className="ml-0.5 hover:opacity-70">
                     <X className="w-3 h-3" />
                   </button>
