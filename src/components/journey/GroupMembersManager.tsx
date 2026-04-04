@@ -19,7 +19,7 @@ export interface GroupMember {
 
 interface GroupMembersManagerProps {
   members: GroupMember[];
-  onMembersChange: (members: GroupMember[]) => void;
+  onMembersChange?: (members: GroupMember[]) => void;
   onSearchUsers?: (query: string) => Promise<SearchedUser[]>;
   onSendInvite?: (toUserId: string, message?: string) => Promise<void>;
   onRespondToInvite?: (inviteId: string, status: "accepted" | "declined") => Promise<void>;
