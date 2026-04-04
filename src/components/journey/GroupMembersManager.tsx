@@ -93,9 +93,12 @@ const GroupMembersManager: React.FC<GroupMembersManagerProps> = ({
   };
 
   const handleRemove = (id: string) => {
+    if (!onMembersChange) return;
     if (members.length <= 1) { toast.error("Need at least one member"); return; }
     onMembersChange(members.filter(m => m.id !== id));
   };
+
+  const canManageMembers = !!onMembersChange;
 
   return (
     <>
