@@ -50,6 +50,29 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
 
   const isOthersMode = groupSource === "others";
 
+  // Handler to remove members - works for both "others" and plan-based groups
+  const handleMembersChange = (newMembers: GroupMember[]) => {
+    if (isOthersMode) {
+      setGroupMembers(newMembers);
+    } else {
+      // Find removed member
+      const removed = groupMembers.find(m => !newMembers.some(nm => nm.id === m.id));
+      if (removed && removed.user_id && currentUserId) {
+        supabase.rpc("remove_plan_member", {
+          p_plan_id: groupSource,
+          p_user_id: removed.user_id,
+        }).then(({ error }) => {
+          if (error) {
+            toast.error("Failed to remove member");
+          } else {
+            setGroupMembers(newMembers);
+            toast.success(`${removed.name} removed from group`);
+          }
+        });
+      }
+    }
+  };
+
   // Auth
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id || null));
