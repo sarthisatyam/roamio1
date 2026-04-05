@@ -535,7 +535,7 @@ const JourneyPage: React.FC<JourneyPageProps> = ({ onNavigateToAccount, external
                 />
                 <GroupMembersManager
                   members={groupMembers}
-                  onMembersChange={isOthersMode ? setGroupMembers : undefined}
+                  onMembersChange={handleMembersChange}
                   onSearchUsers={isOthersMode ? searchUsers : undefined}
                   onSendInvite={isOthersMode ? sendInvite : undefined}
                   onRespondToInvite={isOthersMode ? respondToInvite : undefined}
