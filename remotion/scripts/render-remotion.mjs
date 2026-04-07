@@ -35,4 +35,11 @@ await renderMedia({
 });
 
 await browser.close({ silent: false });
-console.log("Done! Video saved to /mnt/documents/roamio-launch-video.mp4");
+
+// Mux background music with the rendered video
+const { execSync } = await import("child_process");
+execSync(
+  `ffmpeg -y -i /tmp/roamio-video-only.mp4 -i ${path.resolve(__dirname, "../public/audio/bgm.mp3")} -c:v copy -c:a aac -b:a 192k -shortest -map 0:v:0 -map 1:a:0 /mnt/documents/roamio-launch-video-v2.mp4`,
+  { stdio: "inherit" }
+);
+console.log("Done! Video saved to /mnt/documents/roamio-launch-video-v2.mp4");
