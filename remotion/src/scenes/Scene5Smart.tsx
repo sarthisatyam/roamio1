@@ -4,6 +4,7 @@ import { loadFont } from "@remotion/google-fonts/Poppins";
 const { fontFamily } = loadFont("normal", { weights: ["400", "600", "700", "800"], subsets: ["latin"] });
 
 const CORAL = "#d94f6e";
+const CORAL_DARK = "#c44562";
 const TEAL = "#04a5c2";
 
 export const Scene5Smart = () => {
@@ -12,25 +13,27 @@ export const Scene5Smart = () => {
 
   const items = [
     { icon: "🤖", title: "AI Travel Bot", desc: "Ask anything, anytime", delay: 0 },
-    { icon: "🔍", title: "Smart Search", desc: "Hotels, activities, guides", delay: 18 },
-    { icon: "🛡️", title: "Safety First", desc: "Gender filters & parental mode", delay: 36 },
-    { icon: "📊", title: "AI Itineraries", desc: "Personalized suggestions", delay: 54 },
+    { icon: "🔍", title: "Smart Search", desc: "Hotels, activities, guides", delay: 14 },
+    { icon: "🛡️", title: "Safety First", desc: "Gender filters & parental mode", delay: 28 },
+    { icon: "📊", title: "AI Itineraries", desc: "Personalized suggestions", delay: 42 },
+    { icon: "🌐", title: "Join Community", desc: "Share experiences & learn", delay: 56 },
+    { icon: "🗣️", title: "Language Assistant", desc: "Navigate any local language", delay: 70 },
   ];
 
   return (
     <AbsoluteFill style={{
-      background: `linear-gradient(160deg, #0f1923 0%, #1a2332 50%, #162030 100%)`,
+      background: `linear-gradient(160deg, ${CORAL} 0%, ${CORAL_DARK} 50%, ${CORAL} 100%)`,
       fontFamily,
     }}>
       <div style={{
         position: "absolute",
-        top: 180,
+        top: 140,
         left: 60,
         right: 60,
       }}>
         <div style={{
-          background: `${TEAL}22`,
-          border: `1px solid ${TEAL}44`,
+          background: `rgba(255,255,255,0.15)`,
+          border: `1px solid rgba(255,255,255,0.3)`,
           borderRadius: 40,
           padding: "10px 28px",
           color: TEAL,
@@ -45,7 +48,7 @@ export const Scene5Smart = () => {
         </div>
       </div>
 
-      {/* 2x2 grid */}
+      {/* 3x2 grid */}
       {items.map((item, i) => {
         const s = spring({ frame: frame - item.delay - 10, fps, config: { damping: 14 } });
         const scale = interpolate(s, [0, 1], [0.5, 1]);
@@ -58,22 +61,22 @@ export const Scene5Smart = () => {
           <div key={i} style={{
             position: "absolute",
             left: 50 + col * 500,
-            top: 520 + row * 320,
+            top: 440 + row * 230,
             width: 440,
-            height: 270,
-            background: `rgba(255,255,255,0.04)`,
+            height: 200,
+            background: `rgba(255,255,255,0.10)`,
             borderRadius: 28,
-            padding: 32,
-            border: `1px solid rgba(255,255,255,0.08)`,
+            padding: 28,
+            border: `1px solid rgba(255,255,255,0.18)`,
             transform: `scale(${scale})`,
             opacity: op,
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
           }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>{item.icon}</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: "white", marginBottom: 8 }}>{item.title}</div>
-            <div style={{ fontSize: 22, color: "rgba(255,255,255,0.5)" }}>{item.desc}</div>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>{item.icon}</div>
+            <div style={{ fontSize: 26, fontWeight: 700, color: TEAL, marginBottom: 6 }}>{item.title}</div>
+            <div style={{ fontSize: 20, color: "rgba(255,255,255,0.8)" }}>{item.desc}</div>
           </div>
         );
       })}

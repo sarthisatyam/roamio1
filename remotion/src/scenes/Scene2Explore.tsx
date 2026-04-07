@@ -1,9 +1,10 @@
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, Sequence } from "remotion";
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Poppins";
 
 const { fontFamily } = loadFont("normal", { weights: ["400", "600", "700"], subsets: ["latin"] });
 
 const CORAL = "#d94f6e";
+const CORAL_DARK = "#c44562";
 const TEAL = "#04a5c2";
 
 const FeatureCard = ({ title, icon, delay, yPos }: { title: string; icon: string; delay: number; yPos: number }) => {
@@ -21,19 +22,19 @@ const FeatureCard = ({ title, icon, delay, yPos }: { title: string; icon: string
       top: yPos,
       transform: `translateX(${x}px)`,
       opacity: op,
-      background: "rgba(255,255,255,0.06)",
+      background: "rgba(255,255,255,0.12)",
       borderRadius: 24,
       padding: "28px 32px",
       display: "flex",
       alignItems: "center",
       gap: 24,
-      border: "1px solid rgba(255,255,255,0.08)",
+      border: "1px solid rgba(255,255,255,0.2)",
     }}>
       <div style={{
         width: 64,
         height: 64,
         borderRadius: 16,
-        background: `linear-gradient(135deg, ${CORAL}, ${TEAL})`,
+        background: TEAL,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -55,10 +56,9 @@ export const Scene2Explore = () => {
 
   return (
     <AbsoluteFill style={{
-      background: `linear-gradient(160deg, #0f1923 0%, #1a2332 50%, #162030 100%)`,
+      background: `linear-gradient(160deg, ${CORAL} 0%, ${CORAL_DARK} 50%, ${CORAL} 100%)`,
       fontFamily,
     }}>
-      {/* Section badge */}
       <div style={{
         position: "absolute",
         top: 180,
@@ -67,11 +67,11 @@ export const Scene2Explore = () => {
         transform: `translateY(${headerY}px)`,
       }}>
         <div style={{
-          background: `${CORAL}22`,
-          border: `1px solid ${CORAL}44`,
+          background: `rgba(255,255,255,0.15)`,
+          border: `1px solid rgba(255,255,255,0.3)`,
           borderRadius: 40,
           padding: "10px 28px",
-          color: CORAL,
+          color: TEAL,
           fontSize: 22,
           fontWeight: 600,
           display: "inline-block",

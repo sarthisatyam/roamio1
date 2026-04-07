@@ -4,6 +4,7 @@ import { loadFont } from "@remotion/google-fonts/Poppins";
 const { fontFamily } = loadFont("normal", { weights: ["400", "600", "700"], subsets: ["latin"] });
 
 const CORAL = "#d94f6e";
+const CORAL_DARK = "#c44562";
 const TEAL = "#04a5c2";
 
 export const Scene3Companion = () => {
@@ -12,16 +13,15 @@ export const Scene3Companion = () => {
 
   const headerOp = interpolate(frame, [0, 20], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Profile cards stagger in
   const cards = [
-    { name: "Alex, 24", city: "Goa", delay: 15, color: CORAL },
-    { name: "Priya, 22", city: "Manali", delay: 30, color: TEAL },
-    { name: "Jordan, 26", city: "Bali", delay: 45, color: CORAL },
+    { name: "Alex, 24", city: "Goa", delay: 15 },
+    { name: "Priya, 22", city: "Manali", delay: 30 },
+    { name: "Jordan, 26", city: "Bali", delay: 45 },
   ];
 
   return (
     <AbsoluteFill style={{
-      background: `linear-gradient(160deg, #0f1923 0%, #1a2332 50%, #162030 100%)`,
+      background: `linear-gradient(160deg, ${CORAL} 0%, ${CORAL_DARK} 50%, ${CORAL} 100%)`,
       fontFamily,
     }}>
       <div style={{
@@ -32,8 +32,8 @@ export const Scene3Companion = () => {
         opacity: headerOp,
       }}>
         <div style={{
-          background: `${TEAL}22`,
-          border: `1px solid ${TEAL}44`,
+          background: `rgba(255,255,255,0.15)`,
+          border: `1px solid rgba(255,255,255,0.3)`,
           borderRadius: 40,
           padding: "10px 28px",
           color: TEAL,
@@ -49,7 +49,6 @@ export const Scene3Companion = () => {
         </div>
       </div>
 
-      {/* Profile cards */}
       {cards.map((card, i) => {
         const s = spring({ frame: frame - card.delay, fps, config: { damping: 12 } });
         const scale = interpolate(s, [0, 1], [0.6, 1]);
@@ -64,10 +63,10 @@ export const Scene3Companion = () => {
             top: 520 + i * 160,
             transform: `scale(${scale}) rotate(${rot}deg)`,
             opacity: op,
-            background: `linear-gradient(135deg, ${card.color}18, rgba(255,255,255,0.04))`,
+            background: `rgba(255,255,255,0.12)`,
             borderRadius: 28,
             padding: "36px 32px",
-            border: `1px solid ${card.color}33`,
+            border: `1px solid rgba(255,255,255,0.2)`,
             display: "flex",
             alignItems: "center",
             gap: 24,
@@ -76,7 +75,7 @@ export const Scene3Companion = () => {
               width: 72,
               height: 72,
               borderRadius: "50%",
-              background: `linear-gradient(135deg, ${card.color}, ${card.color}88)`,
+              background: TEAL,
               flexShrink: 0,
               display: "flex",
               alignItems: "center",
@@ -89,13 +88,12 @@ export const Scene3Companion = () => {
             </div>
             <div>
               <div style={{ fontSize: 30, fontWeight: 700, color: "white" }}>{card.name}</div>
-              <div style={{ fontSize: 22, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>📍 {card.city}</div>
+              <div style={{ fontSize: 22, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>📍 {card.city}</div>
             </div>
           </div>
         );
       })}
 
-      {/* Like/connect action */}
       <div style={{
         position: "absolute",
         bottom: 350,
@@ -108,13 +106,13 @@ export const Scene3Companion = () => {
       }}>
         <div style={{
           width: 80, height: 80, borderRadius: "50%",
-          background: `${CORAL}22`, border: `2px solid ${CORAL}`,
+          background: `rgba(255,255,255,0.15)`, border: `2px solid white`,
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 36,
         }}>❤️</div>
         <div style={{
           width: 80, height: 80, borderRadius: "50%",
-          background: `${TEAL}22`, border: `2px solid ${TEAL}`,
+          background: `${TEAL}33`, border: `2px solid ${TEAL}`,
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 36,
         }}>💬</div>
