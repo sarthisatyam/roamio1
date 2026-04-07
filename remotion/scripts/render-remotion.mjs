@@ -28,9 +28,9 @@ await renderMedia({
   composition,
   serveUrl: bundled,
   codec: "h264",
-  outputLocation: "/mnt/documents/roamio-launch-video.mp4",
+  outputLocation: "/mnt/documents/roamio-launch-video-v2.mp4",
   puppeteerInstance: browser,
-  muted: true,
+  muted: false,
   concurrency: 1,
 });
 
