@@ -1,9 +1,10 @@
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, staticFile, Img } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Poppins";
 
 const { fontFamily } = loadFont("normal", { weights: ["400", "600", "700", "800"], subsets: ["latin"] });
 
 const CORAL = "#d94f6e";
+const CORAL_DARK = "#c44562";
 const TEAL = "#04a5c2";
 
 export const Scene6CTA = () => {
@@ -19,27 +20,28 @@ export const Scene6CTA = () => {
   const btnS = spring({ frame: frame - 50, fps, config: { damping: 10 } });
   const btnScale = interpolate(btnS, [0, 1], [0.3, 1]);
 
-  // Pulse glow
   const pulse = Math.sin(frame * 0.08) * 0.15 + 0.85;
-
   const urlOp = interpolate(frame, [70, 90], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+  const logoS = spring({ frame: frame - 80, fps, config: { damping: 14 } });
+  const logoScale = interpolate(logoS, [0, 1], [0, 1]);
 
   return (
     <AbsoluteFill style={{
-      background: `linear-gradient(160deg, #0f1923 0%, #1a2332 40%, #0f1923 100%)`,
+      background: `linear-gradient(160deg, ${CORAL} 0%, ${CORAL_DARK} 40%, ${CORAL} 100%)`,
       fontFamily,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
     }}>
-      {/* Glow background */}
+      {/* Glow */}
       <div style={{
         position: "absolute",
         width: 600,
         height: 600,
         borderRadius: "50%",
-        background: `radial-gradient(circle, ${CORAL}22 0%, transparent 70%)`,
+        background: `radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)`,
         opacity: pulse,
       }} />
 
@@ -57,9 +59,7 @@ export const Scene6CTA = () => {
           fontWeight: 800,
           lineHeight: 1.1,
           letterSpacing: -2,
-          background: `linear-gradient(135deg, ${CORAL}, ${TEAL})`,
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
+          color: TEAL,
         }}>
           Adventure
         </div>
@@ -71,7 +71,7 @@ export const Scene6CTA = () => {
       <div style={{
         opacity: subtitleOp,
         fontSize: 30,
-        color: "rgba(255,255,255,0.6)",
+        color: "rgba(255,255,255,0.8)",
         textAlign: "center",
         marginBottom: 50,
         lineHeight: 1.5,
@@ -82,22 +82,35 @@ export const Scene6CTA = () => {
       {/* CTA button */}
       <div style={{
         transform: `scale(${btnScale})`,
-        background: `linear-gradient(135deg, ${CORAL}, ${TEAL})`,
+        background: TEAL,
         padding: "24px 72px",
         borderRadius: 60,
-        boxShadow: `0 20px 60px ${CORAL}50`,
+        boxShadow: `0 20px 60px rgba(0,0,0,0.3)`,
       }}>
         <span style={{ fontSize: 32, fontWeight: 700, color: "white" }}>Try Roamio Free</span>
+      </div>
+
+      {/* Logo */}
+      <div style={{
+        marginTop: 30,
+        width: 60,
+        height: 60,
+        borderRadius: "50%",
+        overflow: "hidden",
+        border: "2px solid white",
+        transform: `scale(${logoScale})`,
+      }}>
+        <Img src={staticFile("images/roamio-logo.jpg")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
 
       <div style={{
         opacity: urlOp,
         fontSize: 26,
         color: TEAL,
-        marginTop: 40,
+        marginTop: 20,
         fontWeight: 600,
       }}>
-        roamio1.lovable.app
+        www.travelwithroamio.com
       </div>
     </AbsoluteFill>
   );

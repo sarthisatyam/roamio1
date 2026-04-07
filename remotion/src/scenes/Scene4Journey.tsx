@@ -4,6 +4,7 @@ import { loadFont } from "@remotion/google-fonts/Poppins";
 const { fontFamily } = loadFont("normal", { weights: ["400", "600", "700"], subsets: ["latin"] });
 
 const CORAL = "#d94f6e";
+const CORAL_DARK = "#c44562";
 const TEAL = "#04a5c2";
 
 export const Scene4Journey = () => {
@@ -22,7 +23,7 @@ export const Scene4Journey = () => {
 
   return (
     <AbsoluteFill style={{
-      background: `linear-gradient(160deg, #0f1923 0%, #1a2332 50%, #162030 100%)`,
+      background: `linear-gradient(160deg, ${CORAL} 0%, ${CORAL_DARK} 50%, ${CORAL} 100%)`,
       fontFamily,
     }}>
       <div style={{
@@ -33,11 +34,11 @@ export const Scene4Journey = () => {
         opacity: headerOp,
       }}>
         <div style={{
-          background: `${CORAL}22`,
-          border: `1px solid ${CORAL}44`,
+          background: `rgba(255,255,255,0.15)`,
+          border: `1px solid rgba(255,255,255,0.3)`,
           borderRadius: 40,
           padding: "10px 28px",
-          color: CORAL,
+          color: TEAL,
           fontSize: 22,
           fontWeight: 600,
           display: "inline-block",
@@ -49,12 +50,10 @@ export const Scene4Journey = () => {
         </div>
       </div>
 
-      {/* Timeline */}
       {features.map((feat, i) => {
         const s = spring({ frame: frame - feat.delay, fps, config: { damping: 15 } });
         const x = interpolate(s, [0, 1], [-400, 0]);
         const op = interpolate(s, [0, 1], [0, 1]);
-
         const dotScale = spring({ frame: frame - feat.delay - 5, fps, config: { damping: 10 } });
 
         return (
@@ -69,17 +68,15 @@ export const Scene4Journey = () => {
             opacity: op,
             transform: `translateX(${x}px)`,
           }}>
-            {/* Timeline dot */}
             <div style={{
               width: 16,
               height: 16,
               borderRadius: "50%",
-              background: i % 2 === 0 ? CORAL : TEAL,
+              background: i % 2 === 0 ? TEAL : "white",
               transform: `scale(${interpolate(dotScale, [0, 1], [0, 1])})`,
               flexShrink: 0,
-              boxShadow: `0 0 20px ${i % 2 === 0 ? CORAL : TEAL}60`,
+              boxShadow: `0 0 20px ${i % 2 === 0 ? TEAL : "rgba(255,255,255,0.5)"}`,
             }} />
-            {/* Line */}
             {i < features.length - 1 && (
               <div style={{
                 position: "absolute",
@@ -87,13 +84,10 @@ export const Scene4Journey = () => {
                 top: 40,
                 width: 2,
                 height: 80,
-                background: `linear-gradient(180deg, ${i % 2 === 0 ? CORAL : TEAL}44, transparent)`,
+                background: `linear-gradient(180deg, ${i % 2 === 0 ? TEAL : "rgba(255,255,255,0.4)"}44, transparent)`,
               }} />
             )}
-            <div style={{
-              fontSize: 34,
-              marginRight: 8,
-            }}>{feat.icon}</div>
+            <div style={{ fontSize: 34, marginRight: 8 }}>{feat.icon}</div>
             <span style={{ fontSize: 28, fontWeight: 600, color: "white" }}>{feat.text}</span>
           </div>
         );

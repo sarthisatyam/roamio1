@@ -1,63 +1,55 @@
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, Sequence } from "remotion";
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, staticFile, Img } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Poppins";
 
 const { fontFamily } = loadFont("normal", { weights: ["600", "700", "800"], subsets: ["latin"] });
 
 const CORAL = "#d94f6e";
+const CORAL_DARK = "#c44562";
 const TEAL = "#04a5c2";
 
 export const Scene1Intro = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Logo circle scale
   const logoScale = spring({ frame, fps, config: { damping: 12, stiffness: 100 } });
-  
-  // Title slide up
   const titleY = interpolate(spring({ frame: frame - 20, fps, config: { damping: 15 } }), [0, 1], [80, 0]);
   const titleOp = interpolate(frame, [20, 45], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  
-  // Tagline
   const tagOp = interpolate(frame, [50, 75], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const tagY = interpolate(spring({ frame: frame - 50, fps, config: { damping: 15 } }), [0, 1], [40, 0]);
-
-  // Decorative line
   const lineWidth = interpolate(frame, [80, 120], [0, 400], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
     <AbsoluteFill style={{
-      background: `linear-gradient(160deg, #0f1923 0%, #1a2332 40%, #1f2d40 100%)`,
+      background: `linear-gradient(160deg, ${CORAL} 0%, ${CORAL_DARK} 40%, ${CORAL} 100%)`,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
       fontFamily,
     }}>
-      {/* Gradient orb behind logo */}
+      {/* Glow behind logo */}
       <div style={{
         position: "absolute",
         width: 500,
         height: 500,
         borderRadius: "50%",
-        background: `radial-gradient(circle, ${CORAL}20 0%, transparent 70%)`,
+        background: `radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%)`,
         top: "25%",
         transform: `scale(${logoScale})`,
       }} />
 
-      {/* Logo circle */}
+      {/* Logo */}
       <div style={{
-        width: 160,
-        height: 160,
+        width: 180,
+        height: 180,
         borderRadius: "50%",
-        background: `linear-gradient(135deg, ${CORAL}, ${TEAL})`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        overflow: "hidden",
         transform: `scale(${logoScale})`,
-        boxShadow: `0 20px 60px ${CORAL}40`,
+        boxShadow: `0 20px 60px rgba(0,0,0,0.3)`,
         marginBottom: 50,
+        border: "4px solid white",
       }}>
-        <span style={{ fontSize: 64, fontWeight: 800, color: "white", letterSpacing: -2 }}>R</span>
+        <Img src={staticFile("images/roamio-logo.jpg")} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
 
       {/* Title */}

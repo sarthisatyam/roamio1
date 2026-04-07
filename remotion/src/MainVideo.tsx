@@ -1,4 +1,4 @@
-import { AbsoluteFill, useCurrentFrame, interpolate, Sequence } from "remotion";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { TransitionSeries, springTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { slide } from "@remotion/transitions/slide";
@@ -10,18 +10,16 @@ import { Scene5Smart } from "./scenes/Scene5Smart";
 import { Scene6CTA } from "./scenes/Scene6CTA";
 
 const CORAL = "#d94f6e";
-const TEAL = "#04a5c2";
-const DARK = "#1a2332";
+const CORAL_DARK = "#b8405a";
 
 export const MainVideo = () => {
   const frame = useCurrentFrame();
 
-  // Persistent floating shapes
   const circleY1 = Math.sin(frame * 0.02) * 30;
   const circleY2 = Math.cos(frame * 0.015) * 40;
 
   return (
-    <AbsoluteFill style={{ background: DARK }}>
+    <AbsoluteFill style={{ background: CORAL }}>
       {/* Persistent floating accents */}
       <div
         style={{
@@ -29,7 +27,7 @@ export const MainVideo = () => {
           width: 300,
           height: 300,
           borderRadius: "50%",
-          background: `radial-gradient(circle, ${CORAL}33, transparent)`,
+          background: `radial-gradient(circle, ${CORAL_DARK}44, transparent)`,
           top: 200 + circleY1,
           right: -80,
           zIndex: 0,
@@ -41,7 +39,7 @@ export const MainVideo = () => {
           width: 250,
           height: 250,
           borderRadius: "50%",
-          background: `radial-gradient(circle, ${TEAL}33, transparent)`,
+          background: `radial-gradient(circle, rgba(255,255,255,0.08), transparent)`,
           bottom: 300 + circleY2,
           left: -60,
           zIndex: 0,
