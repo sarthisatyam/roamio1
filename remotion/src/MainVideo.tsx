@@ -22,8 +22,6 @@ export const MainVideo = () => {
 
   return (
     <AbsoluteFill style={{ background: DARK }}>
-      {/* Background music */}
-      <Audio src={staticFile("audio/bgm.mp3")} volume={0.4} />
       {/* Persistent floating accents */}
       <div
         style={{
