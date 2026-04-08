@@ -60,6 +60,10 @@ export const Scene6CTA = () => {
           lineHeight: 1.1,
           letterSpacing: -2,
           color: TEAL,
+          background: "rgba(255,255,255,0.9)",
+          borderRadius: 12,
+          padding: "4px 24px",
+          display: "inline-block",
         }}>
           Adventure
         </div>
@@ -105,12 +109,14 @@ export const Scene6CTA = () => {
 
       <div style={{
         opacity: urlOp,
-        fontSize: 26,
-        color: TEAL,
         marginTop: 20,
-        fontWeight: 600,
+        background: "rgba(255,255,255,0.9)",
+        borderRadius: 12,
+        padding: "6px 24px",
       }}>
-        www.travelwithroamio.com
+        <span style={{ fontSize: 26, color: TEAL, fontWeight: 600 }}>
+          www.travelwithroamio.com
+        </span>
       </div>
     </AbsoluteFill>
   );

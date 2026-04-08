@@ -67,8 +67,7 @@ export const Scene2Explore = () => {
         transform: `translateY(${headerY}px)`,
       }}>
         <div style={{
-          background: `rgba(255,255,255,0.15)`,
-          border: `1px solid rgba(255,255,255,0.3)`,
+          background: "rgba(255,255,255,0.9)",
           borderRadius: 40,
           padding: "10px 28px",
           color: TEAL,

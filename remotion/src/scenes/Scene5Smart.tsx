@@ -32,8 +32,7 @@ export const Scene5Smart = () => {
         right: 60,
       }}>
         <div style={{
-          background: `rgba(255,255,255,0.15)`,
-          border: `1px solid rgba(255,255,255,0.3)`,
+          background: "rgba(255,255,255,0.9)",
           borderRadius: 40,
           padding: "10px 28px",
           color: TEAL,
@@ -75,7 +74,7 @@ export const Scene5Smart = () => {
             justifyContent: "center",
           }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>{item.icon}</div>
-            <div style={{ fontSize: 26, fontWeight: 700, color: TEAL, marginBottom: 6 }}>{item.title}</div>
+            <div style={{ fontSize: 26, fontWeight: 700, color: TEAL, marginBottom: 6, background: "rgba(255,255,255,0.85)", borderRadius: 8, padding: "2px 10px", display: "inline-block" }}>{item.title}</div>
             <div style={{ fontSize: 20, color: "rgba(255,255,255,0.8)" }}>{item.desc}</div>
           </div>
         );
