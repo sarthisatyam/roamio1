@@ -76,15 +76,21 @@ export const Scene1Intro = () => {
 
       {/* Tagline */}
       <div style={{
-        fontSize: 36,
-        fontWeight: 600,
-        color: TEAL,
+        background: "rgba(255,255,255,0.9)",
+        borderRadius: 16,
+        padding: "14px 36px",
         opacity: tagOp,
         transform: `translateY(${tagY}px)`,
-        textAlign: "center",
-        lineHeight: 1.4,
       }}>
-        Travel Solo,{"\n"}Not Alone
+        <div style={{
+          fontSize: 36,
+          fontWeight: 600,
+          color: TEAL,
+          textAlign: "center",
+          lineHeight: 1.4,
+        }}>
+          Travel Solo,{"\n"}Not Alone
+        </div>
       </div>
     </AbsoluteFill>
   );
