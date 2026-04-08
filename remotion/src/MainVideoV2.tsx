@@ -32,49 +32,49 @@ export const MainVideoV2 = () => {
       }} />
 
       <TransitionSeries>
-        <TransitionSeries.Sequence durationInFrames={130}>
+        <TransitionSeries.Sequence durationInFrames={150}>
           <S1Intro />
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition
           presentation={fade()}
           timing={springTiming({ config: { damping: 200 }, durationInFrames: 20 })}
         />
-        <TransitionSeries.Sequence durationInFrames={160}>
+        <TransitionSeries.Sequence durationInFrames={190}>
           <S2Home />
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition
           presentation={slide({ direction: "from-right" })}
           timing={springTiming({ config: { damping: 200 }, durationInFrames: 20 })}
         />
-        <TransitionSeries.Sequence durationInFrames={160}>
+        <TransitionSeries.Sequence durationInFrames={180}>
           <S3Companion />
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition
           presentation={fade()}
           timing={springTiming({ config: { damping: 200 }, durationInFrames: 20 })}
         />
-        <TransitionSeries.Sequence durationInFrames={150}>
+        <TransitionSeries.Sequence durationInFrames={170}>
           <S4Bookings />
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition
           presentation={slide({ direction: "from-bottom" })}
           timing={springTiming({ config: { damping: 200 }, durationInFrames: 20 })}
         />
-        <TransitionSeries.Sequence durationInFrames={160}>
+        <TransitionSeries.Sequence durationInFrames={180}>
           <S5Journey />
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition
           presentation={fade()}
           timing={springTiming({ config: { damping: 200 }, durationInFrames: 20 })}
         />
-        <TransitionSeries.Sequence durationInFrames={150}>
+        <TransitionSeries.Sequence durationInFrames={170}>
           <S6AIBot />
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition
           presentation={slide({ direction: "from-right" })}
           timing={springTiming({ config: { damping: 200 }, durationInFrames: 20 })}
         />
-        <TransitionSeries.Sequence durationInFrames={180}>
+        <TransitionSeries.Sequence durationInFrames={190}>
           <S7CTA />
         </TransitionSeries.Sequence>
       </TransitionSeries>
