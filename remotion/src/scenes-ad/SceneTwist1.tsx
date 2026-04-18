@@ -26,9 +26,9 @@ export const SceneTwist1 = () => {
     }}>
       {/* Phone frame */}
       <div style={{
-        width: 540, height: 1100, borderRadius: 50, background: "#000", padding: 12,
+        width: 460, height: 900, borderRadius: 44, background: "#000", padding: 10,
         opacity: phoneOp, transform: `scale(${phoneScale}) translateX(${shake}px)`,
-        boxShadow: "0 30px 80px rgba(0,0,0,0.6)", marginTop: 60,
+        boxShadow: "0 30px 80px rgba(0,0,0,0.6)", marginTop: 40,
       }}>
         <div style={{ width: "100%", height: "100%", borderRadius: 40, background: "#ECE5DD", overflow: "hidden", padding: 16 }}>
           <div style={{ background: "#075E54", color: "white", padding: "12px 16px", borderRadius: 10, marginBottom: 14, fontWeight: 700, fontSize: 22, display: "flex", justifyContent: "space-between" }}>
