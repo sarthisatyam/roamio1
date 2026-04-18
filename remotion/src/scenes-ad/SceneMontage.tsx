@@ -35,7 +35,7 @@ const VOLine: React.FC<{ from: number; duration: number; text: string; bottom?: 
     }}>
       <div style={{
         display: "inline-block",
-        background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)",
+        background: "rgba(0,0,0,0.7)",
         padding: "12px 22px", borderRadius: 20,
         color: "white", fontSize: 30, fontWeight: 600,
         textShadow: "0 2px 8px rgba(0,0,0,0.5)",
