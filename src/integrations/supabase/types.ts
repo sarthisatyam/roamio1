@@ -35,6 +35,148 @@ export type Database = {
         }
         Relationships: []
       }
+      community_bookings: {
+        Row: {
+          amount_paid: number
+          commission_amount: number
+          contact_phone: string | null
+          created_at: string
+          emergency_contact: Json | null
+          id: string
+          seats: number
+          status: string
+          stripe_session_id: string | null
+          trip_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number
+          commission_amount?: number
+          contact_phone?: string | null
+          created_at?: string
+          emergency_contact?: Json | null
+          id?: string
+          seats?: number
+          status?: string
+          stripe_session_id?: string | null
+          trip_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number
+          commission_amount?: number
+          contact_phone?: string | null
+          created_at?: string
+          emergency_contact?: Json | null
+          id?: string
+          seats?: number
+          status?: string
+          stripe_session_id?: string | null
+          trip_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_bookings_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "community_trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_trips: {
+        Row: {
+          cancellation_policy: string | null
+          cover_url: string | null
+          created_at: string
+          destination: string
+          end_date: string
+          exclusions: string[] | null
+          gallery_urls: string[] | null
+          group_type: string
+          host_id: string
+          id: string
+          inclusions: string[] | null
+          itinerary: Json | null
+          languages: string[] | null
+          latitude: number | null
+          longitude: number | null
+          meeting_point: string | null
+          price_inr: number
+          seats_left: number
+          seats_total: number
+          start_date: string
+          status: string
+          title: string
+          trip_type: string
+          updated_at: string
+        }
+        Insert: {
+          cancellation_policy?: string | null
+          cover_url?: string | null
+          created_at?: string
+          destination: string
+          end_date: string
+          exclusions?: string[] | null
+          gallery_urls?: string[] | null
+          group_type?: string
+          host_id: string
+          id?: string
+          inclusions?: string[] | null
+          itinerary?: Json | null
+          languages?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          meeting_point?: string | null
+          price_inr: number
+          seats_left: number
+          seats_total: number
+          start_date: string
+          status?: string
+          title: string
+          trip_type?: string
+          updated_at?: string
+        }
+        Update: {
+          cancellation_policy?: string | null
+          cover_url?: string | null
+          created_at?: string
+          destination?: string
+          end_date?: string
+          exclusions?: string[] | null
+          gallery_urls?: string[] | null
+          group_type?: string
+          host_id?: string
+          id?: string
+          inclusions?: string[] | null
+          itinerary?: Json | null
+          languages?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          meeting_point?: string | null
+          price_inr?: number
+          seats_left?: number
+          seats_total?: number
+          start_date?: string
+          status?: string
+          title?: string
+          trip_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_trips_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "host_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companion_connections: {
         Row: {
           created_at: string
@@ -187,6 +329,105 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      host_profiles: {
+        Row: {
+          bio: string | null
+          business_name: string | null
+          city: string | null
+          commission_pct: number
+          created_at: string
+          experience_years: number | null
+          gstin: string | null
+          id: string
+          legal_name: string
+          rating: number | null
+          social_links: Json | null
+          status: string
+          total_trips: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          business_name?: string | null
+          city?: string | null
+          commission_pct?: number
+          created_at?: string
+          experience_years?: number | null
+          gstin?: string | null
+          id?: string
+          legal_name: string
+          rating?: number | null
+          social_links?: Json | null
+          status?: string
+          total_trips?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bio?: string | null
+          business_name?: string | null
+          city?: string | null
+          commission_pct?: number
+          created_at?: string
+          experience_years?: number | null
+          gstin?: string | null
+          id?: string
+          legal_name?: string
+          rating?: number | null
+          social_links?: Json | null
+          status?: string
+          total_trips?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      host_reviews: {
+        Row: {
+          booking_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          reviewer_id: string
+          trip_id: string
+        }
+        Insert: {
+          booking_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          reviewer_id: string
+          trip_id: string
+        }
+        Update: {
+          booking_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewer_id?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "host_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "community_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "host_reviews_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "community_trips"
             referencedColumns: ["id"]
           },
         ]
@@ -747,6 +988,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -761,6 +1023,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       remove_plan_member: {
         Args: { p_plan_id: string; p_user_id: string }
         Returns: undefined
@@ -771,7 +1040,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "host" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -898,6 +1167,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "host", "user"],
+    },
   },
 } as const
