@@ -441,7 +441,7 @@ serve(async (req) => {
       throw new Error("GEMINI_API_KEY is not configured");
     }
 
-    const cacheKey = `${pageContext || "home"}:${normalizedQuery}`;
+    const cacheKey = `${safePageContext}:${normalizedQuery}`;
     const cached = responseCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
       return new Response(JSON.stringify(cached.data), {
