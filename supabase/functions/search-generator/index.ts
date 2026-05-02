@@ -413,22 +413,35 @@ serve(async (req) => {
   }
 
   try {
-    const { query, pageContext } = await req.json();
-    const normalizedQuery = typeof query === "string" ? normalizeQuery(query) : "";
-
-    if (!normalizedQuery) {
-      return new Response(JSON.stringify({ error: "Query is required" }), {
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const { query, pageContext } = body as Record<string, unknown>;
+
+    if (typeof query !== "string" || query.trim().length === 0 || query.length > 200) {
+      return new Response(JSON.stringify({ error: "Invalid query (1-200 chars required)" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const ALLOWED_PAGE_CONTEXTS = new Set(["home", "bookings", "journey", "companion"]);
+    const safePageContext = typeof pageContext === "string" && ALLOWED_PAGE_CONTEXTS.has(pageContext)
+      ? pageContext
+      : "home";
+
+    const normalizedQuery = normalizeQuery(query);
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) {
       throw new Error("GEMINI_API_KEY is not configured");
     }
 
-    const cacheKey = `${pageContext || "home"}:${normalizedQuery}`;
+    const cacheKey = `${safePageContext}:${normalizedQuery}`;
     const cached = responseCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
       return new Response(JSON.stringify(cached.data), {
