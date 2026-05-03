@@ -38,6 +38,7 @@ interface CompanionPageProps {
   onNavigateToAccount?: () => void;
   userCity?: string | null;
   onCreatePlan?: () => void;
+  defaultTab?: string;
 }
 
 const GROUP_CATEGORIES = [
