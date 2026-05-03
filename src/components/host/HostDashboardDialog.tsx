@@ -7,6 +7,7 @@ import { useHostProfile } from "@/hooks/useHostProfile";
 import { useHostTrips } from "@/hooks/useHostTrips";
 import BecomeHostDialog from "./BecomeHostDialog";
 import TripBuilderDialog from "./TripBuilderDialog";
+import TripRosterDialog from "./TripRosterDialog";
 import { Loader2, Plus, Sparkles, Users, IndianRupee, Calendar, Star, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
