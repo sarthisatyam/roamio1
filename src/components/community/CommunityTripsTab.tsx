@@ -209,15 +209,13 @@ const TripDetailDialog: React.FC<{
   open: boolean;
   onClose: () => void;
 }> = ({ trip, open, onClose }) => {
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const { refetch } = useCommunityTrips();
   if (!trip) return null;
   const days = differenceInDays(new Date(trip.end_date), new Date(trip.start_date)) + 1;
   const itinerary = Array.isArray(trip.itinerary) ? trip.itinerary : [];
 
-  const handleBook = () => {
-    toast.info("Booking & payments coming soon", {
-      description: "Stripe checkout will be wired up in the next phase.",
-    });
-  };
+  const handleBook = () => setBookingOpen(true);
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
