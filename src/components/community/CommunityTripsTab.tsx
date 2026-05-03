@@ -209,7 +209,8 @@ const TripDetailDialog: React.FC<{
   trip: CommunityTrip | null;
   open: boolean;
   onClose: () => void;
-}> = ({ trip, open, onClose }) => {
+  onBooked?: () => void;
+}> = ({ trip, open, onClose, onBooked }) => {
   const [bookingOpen, setBookingOpen] = useState(false);
   const { refetch } = useCommunityTrips();
   if (!trip) return null;
