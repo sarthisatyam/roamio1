@@ -707,6 +707,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <VerifyDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen} />
       <SupportDialog open={supportDialogOpen} onOpenChange={setSupportDialogOpen} />
       <HostDashboardDialog open={hostDashboardOpen} onOpenChange={setHostDashboardOpen} />
+      <MyCommunityBookingsDialog open={myBookingsOpen} onOpenChange={setMyBookingsOpen} />
       <TravelGuideDialog open={travelGuideDialogOpen} onOpenChange={setTravelGuideDialogOpen} currentCity={currentCity} />
       <HelpLegalDialog open={helpLegalDialogOpen} onOpenChange={setHelpLegalDialogOpen} />
     </div>
