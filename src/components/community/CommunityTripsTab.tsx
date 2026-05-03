@@ -136,6 +136,7 @@ const CommunityTripsTab: React.FC<Props> = ({ searchQuery }) => {
         trip={selectedTrip}
         open={!!selectedTrip}
         onClose={() => setSelectedTrip(null)}
+        onBooked={refetch}
       />
     </div>
   );
