@@ -127,6 +127,9 @@ const HostDashboardDialog: React.FC<Props> = ({ open, onOpenChange }) => {
                           </div>
                         </div>
                         <div className="flex flex-col gap-1">
+                          <Button size="sm" variant="ghost" onClick={() => setRosterTrip({ id: t.id, title: t.title })}>
+                            Roster
+                          </Button>
                           {t.status === "published" ? (
                             <Button size="sm" variant="outline" onClick={async () => {
                               await updateTripStatus(t.id, "closed");
