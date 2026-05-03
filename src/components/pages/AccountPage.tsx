@@ -79,6 +79,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [supportDialogOpen, setSupportDialogOpen] = useState(false);
   const [hostDashboardOpen, setHostDashboardOpen] = useState(false);
+  const [myBookingsOpen, setMyBookingsOpen] = useState(false);
   const [myTripsDialogOpen, setMyTripsDialogOpen] = useState(false);
   const [travelGuideDialogOpen, setTravelGuideDialogOpen] = useState(false);
   const [coCompanionDialogOpen, setCoCompanionDialogOpen] = useState(false);
