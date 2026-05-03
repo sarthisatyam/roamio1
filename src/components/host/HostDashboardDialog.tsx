@@ -22,6 +22,7 @@ const HostDashboardDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const { trips, loading: tripsLoading, updateTripStatus, refetch: refetchTrips } = useHostTrips(profile?.id ?? null);
   const [applyOpen, setApplyOpen] = useState(false);
   const [builderOpen, setBuilderOpen] = useState(false);
+  const [rosterTrip, setRosterTrip] = useState<{ id: string; title: string } | null>(null);
 
   const totalRevenue = trips.reduce((s, t) => s + (t.revenue ?? 0), 0);
   const totalBookings = trips.reduce((s, t) => s + (t.bookingsCount ?? 0), 0);
