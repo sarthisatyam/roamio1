@@ -154,6 +154,12 @@ const HostDashboardDialog: React.FC<Props> = ({ open, onOpenChange }) => {
 
       <BecomeHostDialog open={applyOpen} onOpenChange={setApplyOpen} onSuccess={refetch} />
       <TripBuilderDialog open={builderOpen} onOpenChange={setBuilderOpen} hostId={profile?.id ?? null} onCreated={refetchTrips} />
+      <TripRosterDialog
+        open={!!rosterTrip}
+        onOpenChange={(o) => !o && setRosterTrip(null)}
+        tripId={rosterTrip?.id ?? null}
+        tripTitle={rosterTrip?.title}
+      />
     </>
   );
 };
