@@ -339,6 +339,12 @@ const TripDetailDialog: React.FC<{
           </div>
         </div>
       </DialogContent>
+      <BookingFlowDialog
+        trip={trip}
+        open={bookingOpen}
+        onOpenChange={setBookingOpen}
+        onBooked={() => { onBooked?.(); onClose(); }}
+      />
     </Dialog>
   );
 };
