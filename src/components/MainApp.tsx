@@ -211,8 +211,8 @@ const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
     <div className="h-screen flex flex-col bg-background">
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} onCreatePlan={() => setShowPlanBuilder(true)} />}
-        {activeTab === 1 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} onCreatePlan={() => setShowPlanBuilder(true)} />}
+        {activeTab === 0 && <HomePage userData={mergedUserData} onNavigateToAccount={handleNavigateToAccount} bookmarkedPlaces={bookmarkedPlaces} onToggleBookmark={handleToggleBookmark} onAddToPlanner={handleAddToPlanner} onLocationToggle={handleLocationToggle} onCreatePlan={() => setShowPlanBuilder(true)} onBrowseCommunityTrips={() => { setCompanionDefaultTab("trips"); setActiveTab(1); }} />}
+        {activeTab === 1 && <CompanionPage onNavigateToAccount={handleNavigateToAccount} userCity={currentCity} onCreatePlan={() => setShowPlanBuilder(true)} defaultTab={companionDefaultTab} />}
         {activeTab === 2 && <BookingsPage />}
         {activeTab === 3 && <JourneyPage onNavigateToAccount={handleNavigateToAccount} externalActivities={plannerActivities} />}
       </div>
