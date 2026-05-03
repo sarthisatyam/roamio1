@@ -275,7 +275,20 @@ const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
 
-        {/* AI Search Results (shown when searching) */}
+        {/* "How do you want to travel?" CTA */}
+        <div className="px-4 pb-3">
+          <Card
+            className="p-3 cursor-pointer rounded-2xl border-0 shadow-soft bg-gradient-primary text-white flex items-center justify-between"
+            onClick={() => setChooserOpen(true)}
+          >
+            <div>
+              <p className="text-sm font-bold">Plan your next trip</p>
+              <p className="text-[11px] opacity-90">Solo, group or join a hosted community trip</p>
+            </div>
+            <ArrowRight className="w-5 h-5" />
+          </Card>
+        </div>
+
         {showAIResults && (
           <section className="px-4 mb-4">
             <AISearchResults
