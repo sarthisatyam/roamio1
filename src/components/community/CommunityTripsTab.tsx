@@ -212,7 +212,6 @@ const TripDetailDialog: React.FC<{
   onBooked?: () => void;
 }> = ({ trip, open, onClose, onBooked }) => {
   const [bookingOpen, setBookingOpen] = useState(false);
-  const { refetch } = useCommunityTrips();
   if (!trip) return null;
   const days = differenceInDays(new Date(trip.end_date), new Date(trip.start_date)) + 1;
   const itinerary = Array.isArray(trip.itinerary) ? trip.itinerary : [];
