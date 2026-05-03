@@ -21,6 +21,7 @@ interface MainAppProps {
 
 const MainApp: React.FC<MainAppProps> = ({ userData, onLogout }) => {
   const [activeTab, setActiveTab] = useState(0);
+  const [companionDefaultTab, setCompanionDefaultTab] = useState<string | undefined>(undefined);
   const [showAccount, setShowAccount] = useState(false);
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
