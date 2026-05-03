@@ -53,6 +53,7 @@ interface HomePageProps {
   onAddToPlanner?: (activity: { title: string; location: string; type: string }) => void;
   onLocationToggle?: (enabled: boolean) => void;
   onCreatePlan?: () => void;
+  onBrowseCommunityTrips?: () => void;
 }
 
 const quickAccessCategories = [
