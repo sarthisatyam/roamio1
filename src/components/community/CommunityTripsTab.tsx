@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { useCommunityTrips, CommunityTrip } from "@/hooks/useCommunityTrips";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import BookingFlowDialog from "./BookingFlowDialog";
 
 const GROUP_TYPES = ["all", "co-ed", "women-only", "male-only"];
 const TRIP_TYPES = ["all", "trek", "road trip", "leisure", "adventure", "cultural", "spiritual"];
