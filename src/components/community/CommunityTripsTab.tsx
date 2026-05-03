@@ -24,7 +24,7 @@ interface Props {
 }
 
 const CommunityTripsTab: React.FC<Props> = ({ searchQuery }) => {
-  const { trips, loading } = useCommunityTrips();
+  const { trips, loading, refetch } = useCommunityTrips();
   const [selectedTrip, setSelectedTrip] = useState<CommunityTrip | null>(null);
   const [groupType, setGroupType] = useState("all");
   const [tripType, setTripType] = useState("all");
