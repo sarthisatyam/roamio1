@@ -39,6 +39,8 @@ import {
   TravelListDialog
 } from "@/components/dialogs/AccountSectionDialogs";
 import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
+import HostDashboardDialog from "@/components/host/HostDashboardDialog";
+import { Sparkles } from "lucide-react";
 import { HelpLegalDialog } from "@/components/dialogs/LegalContactDialogs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -75,6 +77,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [parentalDialogOpen, setParentalDialogOpen] = useState(false);
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
   const [supportDialogOpen, setSupportDialogOpen] = useState(false);
+  const [hostDashboardOpen, setHostDashboardOpen] = useState(false);
   const [myTripsDialogOpen, setMyTripsDialogOpen] = useState(false);
   const [travelGuideDialogOpen, setTravelGuideDialogOpen] = useState(false);
   const [coCompanionDialogOpen, setCoCompanionDialogOpen] = useState(false);
@@ -298,6 +301,14 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       color: "text-primary",
       bgColor: "bg-primary/10",
       action: () => setVerifyDialogOpen(true)
+    },
+    {
+      icon: Sparkles,
+      title: "Host Dashboard",
+      description: "Publish community trips & manage bookings",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      action: () => setHostDashboardOpen(true)
     },
     {
       icon: Headphones,
@@ -685,6 +696,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <ParentalControlDialog open={parentalDialogOpen} onOpenChange={setParentalDialogOpen} />
       <VerifyDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen} />
       <SupportDialog open={supportDialogOpen} onOpenChange={setSupportDialogOpen} />
+      <HostDashboardDialog open={hostDashboardOpen} onOpenChange={setHostDashboardOpen} />
       <TravelGuideDialog open={travelGuideDialogOpen} onOpenChange={setTravelGuideDialogOpen} currentCity={currentCity} />
       <HelpLegalDialog open={helpLegalDialogOpen} onOpenChange={setHelpLegalDialogOpen} />
     </div>
