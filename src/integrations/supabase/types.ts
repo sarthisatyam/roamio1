@@ -97,6 +97,7 @@ export type Database = {
           end_date: string
           exclusions: string[] | null
           gallery_urls: string[] | null
+          group_id: string | null
           group_type: string
           host_id: string
           id: string
@@ -123,6 +124,7 @@ export type Database = {
           end_date: string
           exclusions?: string[] | null
           gallery_urls?: string[] | null
+          group_id?: string | null
           group_type?: string
           host_id: string
           id?: string
@@ -149,6 +151,7 @@ export type Database = {
           end_date?: string
           exclusions?: string[] | null
           gallery_urls?: string[] | null
+          group_id?: string | null
           group_type?: string
           host_id?: string
           id?: string
@@ -1014,6 +1017,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      book_community_trip: {
+        Args: {
+          p_contact_phone: string
+          p_emergency: Json
+          p_seats: number
+          p_trip_id: string
+        }
+        Returns: string
+      }
       handle_join_request: {
         Args: {
           p_action: string
