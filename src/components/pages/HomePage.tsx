@@ -76,7 +76,7 @@ const HomePage: React.FC<HomePageProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
   const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
-  
+  const [chooserOpen, setChooserOpen] = useState(false);
 
   // Popular destinations state
   const [popularDestinations, setPopularDestinations] = useState<AIDestination[]>([]);
