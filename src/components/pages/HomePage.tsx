@@ -71,6 +71,7 @@ const HomePage: React.FC<HomePageProps> = ({
   onAddToPlanner,
   onLocationToggle,
   onCreatePlan,
+  onBrowseCommunityTrips,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
