@@ -7,6 +7,7 @@ import { useHostProfile } from "@/hooks/useHostProfile";
 import { useHostTrips } from "@/hooks/useHostTrips";
 import BecomeHostDialog from "./BecomeHostDialog";
 import TripBuilderDialog from "./TripBuilderDialog";
+import TripRosterDialog from "./TripRosterDialog";
 import { Loader2, Plus, Sparkles, Users, IndianRupee, Calendar, Star, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ const HostDashboardDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const { trips, loading: tripsLoading, updateTripStatus, refetch: refetchTrips } = useHostTrips(profile?.id ?? null);
   const [applyOpen, setApplyOpen] = useState(false);
   const [builderOpen, setBuilderOpen] = useState(false);
+  const [rosterTrip, setRosterTrip] = useState<{ id: string; title: string } | null>(null);
 
   const totalRevenue = trips.reduce((s, t) => s + (t.revenue ?? 0), 0);
   const totalBookings = trips.reduce((s, t) => s + (t.bookingsCount ?? 0), 0);
@@ -125,6 +127,9 @@ const HostDashboardDialog: React.FC<Props> = ({ open, onOpenChange }) => {
                           </div>
                         </div>
                         <div className="flex flex-col gap-1">
+                          <Button size="sm" variant="ghost" onClick={() => setRosterTrip({ id: t.id, title: t.title })}>
+                            Roster
+                          </Button>
                           {t.status === "published" ? (
                             <Button size="sm" variant="outline" onClick={async () => {
                               await updateTripStatus(t.id, "closed");
@@ -149,6 +154,12 @@ const HostDashboardDialog: React.FC<Props> = ({ open, onOpenChange }) => {
 
       <BecomeHostDialog open={applyOpen} onOpenChange={setApplyOpen} onSuccess={refetch} />
       <TripBuilderDialog open={builderOpen} onOpenChange={setBuilderOpen} hostId={profile?.id ?? null} onCreated={refetchTrips} />
+      <TripRosterDialog
+        open={!!rosterTrip}
+        onOpenChange={(o) => !o && setRosterTrip(null)}
+        tripId={rosterTrip?.id ?? null}
+        tripTitle={rosterTrip?.title}
+      />
     </>
   );
 };

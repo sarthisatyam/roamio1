@@ -38,6 +38,7 @@ interface CompanionPageProps {
   onNavigateToAccount?: () => void;
   userCity?: string | null;
   onCreatePlan?: () => void;
+  defaultTab?: string;
 }
 
 const GROUP_CATEGORIES = [
@@ -50,10 +51,14 @@ const INTEREST_LIST = [
   "History", "Nature", "Adventure", "Spiritual", "Beach", "Mountains",
 ];
 
-const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, userCity, onCreatePlan }) => {
+const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, userCity, onCreatePlan, defaultTab }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("discover");
+  const [activeTab, setActiveTab] = useState(defaultTab || "discover");
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (defaultTab) setActiveTab(defaultTab);
+  }, [defaultTab]);
 
   // Auth
   useEffect(() => {

@@ -53,6 +53,7 @@ interface HomePageProps {
   onAddToPlanner?: (activity: { title: string; location: string; type: string }) => void;
   onLocationToggle?: (enabled: boolean) => void;
   onCreatePlan?: () => void;
+  onBrowseCommunityTrips?: () => void;
 }
 
 const quickAccessCategories = [
@@ -70,11 +71,12 @@ const HomePage: React.FC<HomePageProps> = ({
   onAddToPlanner,
   onLocationToggle,
   onCreatePlan,
+  onBrowseCommunityTrips,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
   const [destinationDialogOpen, setDestinationDialogOpen] = useState(false);
-  
+  const [chooserOpen, setChooserOpen] = useState(false);
 
   // Popular destinations state
   const [popularDestinations, setPopularDestinations] = useState<AIDestination[]>([]);
@@ -273,7 +275,20 @@ const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
 
-        {/* AI Search Results (shown when searching) */}
+        {/* "How do you want to travel?" CTA */}
+        <div className="px-4 pb-3">
+          <Card
+            className="p-3 cursor-pointer rounded-2xl border-0 shadow-soft bg-gradient-primary text-white flex items-center justify-between"
+            onClick={() => setChooserOpen(true)}
+          >
+            <div>
+              <p className="text-sm font-bold">Plan your next trip</p>
+              <p className="text-[11px] opacity-90">Solo, group or join a hosted community trip</p>
+            </div>
+            <ArrowRight className="w-5 h-5" />
+          </Card>
+        </div>
+
         {showAIResults && (
           <section className="px-4 mb-4">
             <AISearchResults
@@ -520,6 +535,29 @@ const HomePage: React.FC<HomePageProps> = ({
               {isJoining ? "Sending..." : "Send Request"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>How do you want to travel?</DialogTitle>
+            <DialogDescription>Pick a way to start your next journey.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-2">
+            <Card className="p-3 cursor-pointer hover:shadow-md" onClick={() => setChooserOpen(false)}>
+              <p className="text-sm font-semibold flex items-center gap-2"><Compass className="w-4 h-4 text-primary" /> Travel solo</p>
+              <p className="text-[11px] text-muted-foreground">Use AI guides, bookings & safety on your own.</p>
+            </Card>
+            <Card className="p-3 cursor-pointer hover:shadow-md" onClick={() => { setChooserOpen(false); onCreatePlan?.(); }}>
+              <p className="text-sm font-semibold flex items-center gap-2"><Users className="w-4 h-4 text-primary" /> Create a group</p>
+              <p className="text-[11px] text-muted-foreground">Build a peer trip and invite travellers.</p>
+            </Card>
+            <Card className="p-3 cursor-pointer hover:shadow-md" onClick={() => { setChooserOpen(false); onBrowseCommunityTrips?.(); }}>
+              <p className="text-sm font-semibold flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Join a community trip</p>
+              <p className="text-[11px] text-muted-foreground">Book a seat on a curated, hosted trip.</p>
+            </Card>
+          </div>
         </DialogContent>
       </Dialog>
 

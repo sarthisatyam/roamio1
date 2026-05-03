@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { useCommunityTrips, CommunityTrip } from "@/hooks/useCommunityTrips";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import BookingFlowDialog from "./BookingFlowDialog";
 
 const GROUP_TYPES = ["all", "co-ed", "women-only", "male-only"];
 const TRIP_TYPES = ["all", "trek", "road trip", "leisure", "adventure", "cultural", "spiritual"];
@@ -24,7 +24,7 @@ interface Props {
 }
 
 const CommunityTripsTab: React.FC<Props> = ({ searchQuery }) => {
-  const { trips, loading } = useCommunityTrips();
+  const { trips, loading, refetch } = useCommunityTrips();
   const [selectedTrip, setSelectedTrip] = useState<CommunityTrip | null>(null);
   const [groupType, setGroupType] = useState("all");
   const [tripType, setTripType] = useState("all");
@@ -136,6 +136,7 @@ const CommunityTripsTab: React.FC<Props> = ({ searchQuery }) => {
         trip={selectedTrip}
         open={!!selectedTrip}
         onClose={() => setSelectedTrip(null)}
+        onBooked={refetch}
       />
     </div>
   );
@@ -208,16 +209,14 @@ const TripDetailDialog: React.FC<{
   trip: CommunityTrip | null;
   open: boolean;
   onClose: () => void;
-}> = ({ trip, open, onClose }) => {
+  onBooked?: () => void;
+}> = ({ trip, open, onClose, onBooked }) => {
+  const [bookingOpen, setBookingOpen] = useState(false);
   if (!trip) return null;
   const days = differenceInDays(new Date(trip.end_date), new Date(trip.start_date)) + 1;
   const itinerary = Array.isArray(trip.itinerary) ? trip.itinerary : [];
 
-  const handleBook = () => {
-    toast.info("Booking & payments coming soon", {
-      description: "Stripe checkout will be wired up in the next phase.",
-    });
-  };
+  const handleBook = () => setBookingOpen(true);
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -340,6 +339,12 @@ const TripDetailDialog: React.FC<{
           </div>
         </div>
       </DialogContent>
+      <BookingFlowDialog
+        trip={trip}
+        open={bookingOpen}
+        onOpenChange={setBookingOpen}
+        onBooked={() => { onBooked?.(); onClose(); }}
+      />
     </Dialog>
   );
 };
