@@ -31,8 +31,6 @@ import GroupChatDialog from "@/components/dialogs/GroupChatDialog";
 import DirectChatDialog from "@/components/dialogs/DirectChatDialog";
 import { format, formatDistanceToNow } from "date-fns";
 import { useLikedCompanions } from "@/hooks/useLikedCompanions";
-import CommunityTripsTab from "@/components/community/CommunityTripsTab";
-import { Mountain } from "lucide-react";
 
 interface CompanionPageProps {
   onNavigateToAccount?: () => void;
@@ -142,10 +140,6 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
             <Compass className="w-3.5 h-3.5" />
             Discover
           </TabsTrigger>
-          <TabsTrigger value="trips" className="flex-1 rounded-lg text-[11px] gap-1 data-[state=active]:bg-background">
-            <Mountain className="w-3.5 h-3.5" />
-            Trips
-          </TabsTrigger>
           <TabsTrigger value="plangroups" className="flex-1 rounded-lg text-[11px] gap-1 data-[state=active]:bg-background">
             <UsersRound className="w-3.5 h-3.5" />
             Groups
@@ -158,10 +152,6 @@ const CompanionPage: React.FC<CompanionPageProps> = ({ onNavigateToAccount, user
 
         <TabsContent value="discover" className="flex-1 overflow-y-auto mt-0 pb-24">
           <DiscoverTab currentUserId={currentUserId} searchQuery={searchQuery} />
-        </TabsContent>
-
-        <TabsContent value="trips" className="flex-1 overflow-y-auto mt-0 pb-24">
-          <CommunityTripsTab searchQuery={searchQuery} />
         </TabsContent>
 
         <TabsContent value="plangroups" className="flex-1 overflow-y-auto mt-0 pb-24">

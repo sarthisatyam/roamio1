@@ -33,6 +33,7 @@ import AISearchResults from "@/components/AISearchResults";
 import { supabase } from "@/integrations/supabase/client";
 
 import { usePlans, Plan } from "@/hooks/usePlans";
+import CommunityTripsStrip from "@/components/community/CommunityTripsStrip";
 import { format } from "date-fns";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -503,6 +504,27 @@ const HomePage: React.FC<HomePageProps> = ({
               })}
             </div>
           )}
+        </section>
+
+        {/* Community Trips (hosted) — horizontal swipe */}
+        <section className="px-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-sm font-semibold">Community Trips</h2>
+              <p className="text-[10px] text-muted-foreground">Curated trips by verified hosts</p>
+            </div>
+            {onBrowseCommunityTrips && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 text-xs text-primary"
+                onClick={onBrowseCommunityTrips}
+              >
+                See all <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </Button>
+            )}
+          </div>
+          <CommunityTripsStrip />
         </section>
       </div>
 
