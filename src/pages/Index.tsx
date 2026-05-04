@@ -30,15 +30,18 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Auth UI temporarily hidden — auto sign-in as anonymous guest if no session.
   useEffect(() => {
     if (!loading && !user) {
-      navigate("/auth");
+      supabase.auth.signInAnonymously().then(({ error }) => {
+        if (error) console.error("Anonymous sign-in failed:", error);
+      });
     }
-  }, [loading, user, navigate]);
+  }, [loading, user]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/auth");
+    // Will auto re-sign-in as guest via the effect above.
   };
 
   if (loading) {
