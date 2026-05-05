@@ -1291,10 +1291,12 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredGroups.map(group => (
+          {filteredGroups.map(group => {
+            const styleVar = getCategoryStyle(group.category);
+            return (
             <Card key={group.id} className="p-3 rounded-2xl shadow-soft border-0 bg-card">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center text-lg flex-shrink-0">
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0", styleVar.tile)}>
                   {getCategoryIcon(group.category)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -1305,7 +1307,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Badge variant="secondary" className="text-[10px] py-0 px-1.5 rounded-md">{group.category}</Badge>
+                    <Badge variant="secondary" className={cn("text-[10px] py-0 px-1.5 rounded-md", styleVar.badge)}>{group.category}</Badge>
                     <span className="text-[10px] text-muted-foreground">{group.member_count} members</span>
                     {group.last_activity && (
                       <span className="text-[10px] text-muted-foreground">
