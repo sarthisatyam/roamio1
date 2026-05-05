@@ -40,8 +40,8 @@ import {
 } from "@/components/dialogs/AccountSectionDialogs";
 import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
 import HostDashboardDialog from "@/components/host/HostDashboardDialog";
-import MyCommunityBookingsDialog from "@/components/community/MyCommunityBookingsDialog";
-import { Sparkles } from "lucide-react";
+import { useMyBookings } from "@/hooks/useMyBookings";
+import { Sparkles, Mountain, IndianRupee } from "lucide-react";
 import { HelpLegalDialog } from "@/components/dialogs/LegalContactDialogs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -81,6 +81,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [hostDashboardOpen, setHostDashboardOpen] = useState(false);
   const [myBookingsOpen, setMyBookingsOpen] = useState(false);
   const [myTripsDialogOpen, setMyTripsDialogOpen] = useState(false);
+  const { bookings: communityBookings, refetch: refetchCommunityBookings } = useMyBookings();
   const [travelGuideDialogOpen, setTravelGuideDialogOpen] = useState(false);
   const [coCompanionDialogOpen, setCoCompanionDialogOpen] = useState(false);
   const [interestsDialogOpen, setInterestsDialogOpen] = useState(false);
@@ -252,7 +253,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       description: "View and manage your trips",
       color: "text-primary",
       bgColor: "bg-primary/10",
-      action: () => { setMyTripsDialogOpen(true); fetchMyPlans(); }
+      action: () => { setMyTripsDialogOpen(true); fetchMyPlans(); refetchCommunityBookings(); }
     },
     {
       icon: Users,
@@ -306,19 +307,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     },
     {
       icon: Sparkles,
-      title: "Host Dashboard",
+      title: "Business",
       description: "Publish community trips & manage bookings",
       color: "text-primary",
       bgColor: "bg-primary/10",
       action: () => setHostDashboardOpen(true)
-    },
-    {
-      icon: Sparkles,
-      title: "My Community Trips",
-      description: "Hosted trips you've booked a seat on",
-      color: "text-secondary",
-      bgColor: "bg-secondary/10",
-      action: () => setMyBookingsOpen(true)
     },
     {
       icon: Headphones,
@@ -493,6 +486,41 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
+            {communityBookings.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                  <Mountain className="w-3.5 h-3.5" /> Community Trips
+                </h4>
+                {communityBookings.map((b) => (
+                  <Card key={b.id} className="overflow-hidden rounded-2xl border-0 shadow-soft">
+                    {b.trip?.cover_url && (
+                      <div className="h-24 w-full">
+                        <img src={b.trip.cover_url} alt={b.trip.title} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="p-3 space-y-1.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <h5 className="font-semibold text-sm">{b.trip?.title}</h5>
+                        <Badge variant={b.status === "paid" ? "default" : "secondary"} className="text-[10px] capitalize">{b.status}</Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{b.trip?.destination}</span>
+                        {b.trip?.start_date && (
+                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(b.trip.start_date), "d MMM")}</span>
+                        )}
+                        <span className="flex items-center gap-1"><Users className="w-3 h-3" />{b.seats}</span>
+                        <span className="flex items-center gap-1 text-primary font-medium"><IndianRupee className="w-3 h-3" />{b.amount_paid.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                <div className="border-t pt-2 mt-2">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" /> My Plans
+                  </h4>
+                </div>
+              </div>
+            )}
             {myPlans.length === 0 ? (
               <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
                 <Calendar className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
@@ -707,7 +735,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       <VerifyDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen} />
       <SupportDialog open={supportDialogOpen} onOpenChange={setSupportDialogOpen} />
       <HostDashboardDialog open={hostDashboardOpen} onOpenChange={setHostDashboardOpen} />
-      <MyCommunityBookingsDialog open={myBookingsOpen} onOpenChange={setMyBookingsOpen} />
+      
       <TravelGuideDialog open={travelGuideDialogOpen} onOpenChange={setTravelGuideDialogOpen} currentCity={currentCity} />
       <HelpLegalDialog open={helpLegalDialogOpen} onOpenChange={setHelpLegalDialogOpen} />
     </div>
