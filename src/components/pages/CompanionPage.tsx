@@ -1232,6 +1232,8 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
   const getCategoryIcon = (category: string) => {
     switch (category.toLowerCase()) {
       case "plan": return "📋";
+      case "host community": return "🏆";
+      case "host trip": return "⛺";
       case "backpacking": return "🎒";
       case "road trips": return "🚗";
       case "weekend trips": return "🏕️";
@@ -1242,8 +1244,20 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
     }
   };
 
+  const getCategoryStyle = (category: string) => {
+    switch (category.toLowerCase()) {
+      case "host community":
+        return { tile: "bg-gradient-to-br from-amber-400 to-orange-500", badge: "bg-amber-100 text-amber-700 border-amber-300" };
+      case "host trip":
+        return { tile: "bg-gradient-to-br from-emerald-400 to-teal-600", badge: "bg-emerald-100 text-emerald-700 border-emerald-300" };
+      default:
+        return { tile: "bg-gradient-primary", badge: "" };
+    }
+  };
+
   const filteredGroups = useMemo(() => {
-    const nonPlanGroups = groups.filter(g => !g.plan_id);
+    // Host Trip groups belong in the Groups tab, not Community
+    const nonPlanGroups = groups.filter(g => !g.plan_id && g.category?.toLowerCase() !== "host trip");
     if (!searchQuery.trim()) return nonPlanGroups;
     const q = searchQuery.toLowerCase();
     return nonPlanGroups.filter(g =>
