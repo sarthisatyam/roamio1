@@ -873,20 +873,42 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
       ) : (
         <div className="space-y-3">
           {planGroups.map(group => (
-            <Card key={group.id} className="p-3 rounded-2xl shadow-soft border-0 bg-card">
+            <Card key={group.id} className={cn(
+              "p-3 rounded-2xl shadow-soft border-0 bg-card",
+              group.category?.toLowerCase() === "host trip" && "ring-2 ring-emerald-400/40"
+            )}>
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center text-lg flex-shrink-0">
-                  📋
+                <div className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0",
+                  group.category?.toLowerCase() === "host trip"
+                    ? "bg-gradient-to-br from-emerald-400 to-teal-600"
+                    : "bg-gradient-primary"
+                )}>
+                  {group.category?.toLowerCase() === "host trip" ? "⛺" : "📋"}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h4 className="font-semibold text-sm truncate">{group.name}</h4>
+                    {group.category?.toLowerCase() === "host trip" && (
+                      <Badge className="text-[9px] py-0 px-1.5 bg-emerald-100 text-emerald-700 border-emerald-300 hover:bg-emerald-100">Approved</Badge>
+                    )}
                     {group.last_activity && (
                       <div className="w-2 h-2 rounded-full bg-success animate-pulse flex-shrink-0" />
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Badge variant="secondary" className="text-[10px] py-0 px-1.5 rounded-md">Plan</Badge>
+                    <Badge variant="secondary" className={cn(
+                      "text-[10px] py-0 px-1.5 rounded-md",
+                      group.category?.toLowerCase() === "host trip" && "bg-emerald-100 text-emerald-700 border-emerald-300"
+                    )}>
+                      {group.category?.toLowerCase() === "host trip" ? "Hosted Trip" : "Plan"}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">{group.member_count} members</span>
+                    {group.last_activity && (
+                      <span className="text-[10px] text-muted-foreground">
+                        • {formatDistanceToNow(new Date(group.last_activity), { addSuffix: true })}
+                      </span>
+                    )}
                     <span className="text-[10px] text-muted-foreground">{group.member_count} members</span>
                     {group.last_activity && (
                       <span className="text-[10px] text-muted-foreground">
