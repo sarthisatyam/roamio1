@@ -253,7 +253,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
       description: "View and manage your trips",
       color: "text-primary",
       bgColor: "bg-primary/10",
-      action: () => { setMyTripsDialogOpen(true); fetchMyPlans(); }
+      action: () => { setMyTripsDialogOpen(true); fetchMyPlans(); refetchCommunityBookings(); }
     },
     {
       icon: Users,
