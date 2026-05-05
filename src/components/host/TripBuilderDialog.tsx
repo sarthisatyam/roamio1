@@ -80,7 +80,12 @@ const TripBuilderDialog: React.FC<Props> = ({ open, onOpenChange, hostId, onCrea
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create a community trip</DialogTitle>
-          <DialogDescription>List your trip and start accepting bookings.</DialogDescription>
+          <DialogDescription>
+            List your trip and start accepting bookings.
+            <span className="block mt-1 text-[11px] text-amber-600">
+              Tip: For the same destination, dates must not overlap. Same itinerary → same price; different itinerary → different price.
+            </span>
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">

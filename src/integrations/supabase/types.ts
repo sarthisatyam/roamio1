@@ -46,6 +46,7 @@ export type Database = {
           seats: number
           status: string
           stripe_session_id: string | null
+          travellers: Json
           trip_id: string
           updated_at: string
           user_id: string
@@ -60,6 +61,7 @@ export type Database = {
           seats?: number
           status?: string
           stripe_session_id?: string | null
+          travellers?: Json
           trip_id: string
           updated_at?: string
           user_id: string
@@ -74,6 +76,7 @@ export type Database = {
           seats?: number
           status?: string
           stripe_session_id?: string | null
+          travellers?: Json
           trip_id?: string
           updated_at?: string
           user_id?: string
@@ -1017,15 +1020,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      book_community_trip: {
-        Args: {
-          p_contact_phone: string
-          p_emergency: Json
-          p_seats: number
-          p_trip_id: string
-        }
-        Returns: string
-      }
+      book_community_trip:
+        | {
+            Args: {
+              p_contact_phone: string
+              p_emergency: Json
+              p_seats: number
+              p_trip_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_contact_phone: string
+              p_emergency: Json
+              p_seats: number
+              p_travellers?: Json
+              p_trip_id: string
+            }
+            Returns: string
+          }
       handle_join_request: {
         Args: {
           p_action: string

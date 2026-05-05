@@ -843,9 +843,11 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
     }
   };
 
-  // Filter only plan-based groups where user is a member
+  // Filter only plan-based or hosted-trip groups where user is a member
   const planGroups = useMemo(() => {
-    const filtered = groups.filter(g => g.plan_id && g.is_member);
+    const filtered = groups.filter(g =>
+      g.is_member && (g.plan_id || g.category?.toLowerCase() === "host trip")
+    );
     if (!searchQuery.trim()) return filtered;
     const q = searchQuery.toLowerCase();
     return filtered.filter(g =>
@@ -871,20 +873,42 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
       ) : (
         <div className="space-y-3">
           {planGroups.map(group => (
-            <Card key={group.id} className="p-3 rounded-2xl shadow-soft border-0 bg-card">
+            <Card key={group.id} className={cn(
+              "p-3 rounded-2xl shadow-soft border-0 bg-card",
+              group.category?.toLowerCase() === "host trip" && "ring-2 ring-emerald-400/40"
+            )}>
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center text-lg flex-shrink-0">
-                  📋
+                <div className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0",
+                  group.category?.toLowerCase() === "host trip"
+                    ? "bg-gradient-to-br from-emerald-400 to-teal-600"
+                    : "bg-gradient-primary"
+                )}>
+                  {group.category?.toLowerCase() === "host trip" ? "⛺" : "📋"}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h4 className="font-semibold text-sm truncate">{group.name}</h4>
+                    {group.category?.toLowerCase() === "host trip" && (
+                      <Badge className="text-[9px] py-0 px-1.5 bg-emerald-100 text-emerald-700 border-emerald-300 hover:bg-emerald-100">Approved</Badge>
+                    )}
                     {group.last_activity && (
                       <div className="w-2 h-2 rounded-full bg-success animate-pulse flex-shrink-0" />
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Badge variant="secondary" className="text-[10px] py-0 px-1.5 rounded-md">Plan</Badge>
+                    <Badge variant="secondary" className={cn(
+                      "text-[10px] py-0 px-1.5 rounded-md",
+                      group.category?.toLowerCase() === "host trip" && "bg-emerald-100 text-emerald-700 border-emerald-300"
+                    )}>
+                      {group.category?.toLowerCase() === "host trip" ? "Hosted Trip" : "Plan"}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">{group.member_count} members</span>
+                    {group.last_activity && (
+                      <span className="text-[10px] text-muted-foreground">
+                        • {formatDistanceToNow(new Date(group.last_activity), { addSuffix: true })}
+                      </span>
+                    )}
                     <span className="text-[10px] text-muted-foreground">{group.member_count} members</span>
                     {group.last_activity && (
                       <span className="text-[10px] text-muted-foreground">
@@ -1232,6 +1256,8 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
   const getCategoryIcon = (category: string) => {
     switch (category.toLowerCase()) {
       case "plan": return "📋";
+      case "host community": return "🏆";
+      case "host trip": return "⛺";
       case "backpacking": return "🎒";
       case "road trips": return "🚗";
       case "weekend trips": return "🏕️";
@@ -1242,8 +1268,20 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
     }
   };
 
+  const getCategoryStyle = (category: string) => {
+    switch (category.toLowerCase()) {
+      case "host community":
+        return { tile: "bg-gradient-to-br from-amber-400 to-orange-500", badge: "bg-amber-100 text-amber-700 border-amber-300" };
+      case "host trip":
+        return { tile: "bg-gradient-to-br from-emerald-400 to-teal-600", badge: "bg-emerald-100 text-emerald-700 border-emerald-300" };
+      default:
+        return { tile: "bg-gradient-primary", badge: "" };
+    }
+  };
+
   const filteredGroups = useMemo(() => {
-    const nonPlanGroups = groups.filter(g => !g.plan_id);
+    // Host Trip groups belong in the Groups tab, not Community
+    const nonPlanGroups = groups.filter(g => !g.plan_id && g.category?.toLowerCase() !== "host trip");
     if (!searchQuery.trim()) return nonPlanGroups;
     const q = searchQuery.toLowerCase();
     return nonPlanGroups.filter(g =>
@@ -1277,10 +1315,12 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredGroups.map(group => (
+          {filteredGroups.map(group => {
+            const styleVar = getCategoryStyle(group.category);
+            return (
             <Card key={group.id} className="p-3 rounded-2xl shadow-soft border-0 bg-card">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center text-lg flex-shrink-0">
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0", styleVar.tile)}>
                   {getCategoryIcon(group.category)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -1291,7 +1331,7 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <Badge variant="secondary" className="text-[10px] py-0 px-1.5 rounded-md">{group.category}</Badge>
+                    <Badge variant="secondary" className={cn("text-[10px] py-0 px-1.5 rounded-md", styleVar.badge)}>{group.category}</Badge>
                     <span className="text-[10px] text-muted-foreground">{group.member_count} members</span>
                     {group.last_activity && (
                       <span className="text-[10px] text-muted-foreground">
@@ -1351,7 +1391,8 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
                 </div>
               </div>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
 
