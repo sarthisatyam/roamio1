@@ -843,9 +843,11 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
     }
   };
 
-  // Filter only plan-based groups where user is a member
+  // Filter only plan-based or hosted-trip groups where user is a member
   const planGroups = useMemo(() => {
-    const filtered = groups.filter(g => g.plan_id && g.is_member);
+    const filtered = groups.filter(g =>
+      g.is_member && (g.plan_id || g.category?.toLowerCase() === "host trip")
+    );
     if (!searchQuery.trim()) return filtered;
     const q = searchQuery.toLowerCase();
     return filtered.filter(g =>
