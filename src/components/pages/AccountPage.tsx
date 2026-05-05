@@ -81,6 +81,7 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
   const [hostDashboardOpen, setHostDashboardOpen] = useState(false);
   const [myBookingsOpen, setMyBookingsOpen] = useState(false);
   const [myTripsDialogOpen, setMyTripsDialogOpen] = useState(false);
+  const { bookings: communityBookings, refetch: refetchCommunityBookings } = useMyBookings();
   const [travelGuideDialogOpen, setTravelGuideDialogOpen] = useState(false);
   const [coCompanionDialogOpen, setCoCompanionDialogOpen] = useState(false);
   const [interestsDialogOpen, setInterestsDialogOpen] = useState(false);
