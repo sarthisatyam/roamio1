@@ -486,6 +486,41 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
+            {communityBookings.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                  <Mountain className="w-3.5 h-3.5" /> Community Trips
+                </h4>
+                {communityBookings.map((b) => (
+                  <Card key={b.id} className="overflow-hidden rounded-2xl border-0 shadow-soft">
+                    {b.trip?.cover_url && (
+                      <div className="h-24 w-full">
+                        <img src={b.trip.cover_url} alt={b.trip.title} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="p-3 space-y-1.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <h5 className="font-semibold text-sm">{b.trip?.title}</h5>
+                        <Badge variant={b.status === "paid" ? "default" : "secondary"} className="text-[10px] capitalize">{b.status}</Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{b.trip?.destination}</span>
+                        {b.trip?.start_date && (
+                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(b.trip.start_date), "d MMM")}</span>
+                        )}
+                        <span className="flex items-center gap-1"><Users className="w-3 h-3" />{b.seats}</span>
+                        <span className="flex items-center gap-1 text-primary font-medium"><IndianRupee className="w-3 h-3" />{b.amount_paid.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                <div className="border-t pt-2 mt-2">
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" /> My Plans
+                  </h4>
+                </div>
+              </div>
+            )}
             {myPlans.length === 0 ? (
               <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
                 <Calendar className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
