@@ -40,8 +40,8 @@ import {
 } from "@/components/dialogs/AccountSectionDialogs";
 import TravelGuideDialog from "@/components/dialogs/TravelGuideDialog";
 import HostDashboardDialog from "@/components/host/HostDashboardDialog";
-import MyCommunityBookingsDialog from "@/components/community/MyCommunityBookingsDialog";
-import { Sparkles } from "lucide-react";
+import { useMyBookings } from "@/hooks/useMyBookings";
+import { Sparkles, Mountain, IndianRupee } from "lucide-react";
 import { HelpLegalDialog } from "@/components/dialogs/LegalContactDialogs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
