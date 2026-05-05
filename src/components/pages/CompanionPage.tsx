@@ -1367,7 +1367,8 @@ const GroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = ({ c
                 </div>
               </div>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
 
