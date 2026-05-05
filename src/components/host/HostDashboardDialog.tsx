@@ -33,7 +33,7 @@ const HostDashboardDialog: React.FC<Props> = ({ open, onOpenChange }) => {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" /> Host Dashboard
+              <Sparkles className="w-5 h-5 text-primary" /> Business
             </DialogTitle>
             <DialogDescription>
               {profile ? "Manage your community trips and bookings." : "Apply to become a host and start publishing trips."}
