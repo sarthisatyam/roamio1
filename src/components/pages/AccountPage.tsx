@@ -306,19 +306,11 @@ const AccountPage: React.FC<AccountPageProps> = ({ userData, onNavigateBack, onL
     },
     {
       icon: Sparkles,
-      title: "Host Dashboard",
+      title: "Business",
       description: "Publish community trips & manage bookings",
       color: "text-primary",
       bgColor: "bg-primary/10",
       action: () => setHostDashboardOpen(true)
-    },
-    {
-      icon: Sparkles,
-      title: "My Community Trips",
-      description: "Hosted trips you've booked a seat on",
-      color: "text-secondary",
-      bgColor: "bg-secondary/10",
-      action: () => setMyBookingsOpen(true)
     },
     {
       icon: Headphones,
