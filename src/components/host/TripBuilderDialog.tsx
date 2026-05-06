@@ -38,10 +38,32 @@ const TripBuilderDialog: React.FC<Props> = ({ open, onOpenChange, hostId, onCrea
     inclusions: [],
     exclusions: [],
     itinerary: [],
+    recurrence_type: "one_time",
+    recurrence_days: [],
+    recurrence_dates: [],
+    duration_nights: 1,
+    pickup_location: "",
+    dropoff_location: "",
   });
   const [inclusionInput, setInclusionInput] = useState("");
   const [exclusionInput, setExclusionInput] = useState("");
   const [dayInput, setDayInput] = useState("");
+  const [customDateInput, setCustomDateInput] = useState("");
+
+  const DOW = [
+    { v: 0, l: "Sun" }, { v: 1, l: "Mon" }, { v: 2, l: "Tue" }, { v: 3, l: "Wed" },
+    { v: 4, l: "Thu" }, { v: 5, l: "Fri" }, { v: 6, l: "Sat" },
+  ];
+
+  const toggleDow = (d: number) => {
+    const cur = form.recurrence_days ?? [];
+    u("recurrence_days", cur.includes(d) ? cur.filter(x => x !== d) : [...cur, d]);
+  };
+  const addCustomDate = () => {
+    if (!customDateInput) return;
+    u("recurrence_dates", [...(form.recurrence_dates ?? []), customDateInput]);
+    setCustomDateInput("");
+  };
 
   const u = (k: string, v: any) => setForm((f) => ({ ...f, [k]: v }));
 
