@@ -1,52 +1,114 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  MapPin, Calendar, Users, Star, ShieldCheck,
+  MapPin, Users, Star, ShieldCheck,
   IndianRupee, Clock, Loader2, Sparkles, Mountain,
+  Moon, Sun, Repeat, ArrowRightLeft, X,
 } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
 import { useCommunityTrips, CommunityTrip } from "@/hooks/useCommunityTrips";
 import { cn } from "@/lib/utils";
 import BookingFlowDialog from "./BookingFlowDialog";
+import { toast } from "sonner";
+
+const DOW_LABEL = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const tripNights = (t: CommunityTrip) => {
+  if (t.duration_nights && t.duration_nights > 0) return t.duration_nights;
+  return Math.max(1, differenceInDays(new Date(t.end_date), new Date(t.start_date)));
+};
+const tripDays = (t: CommunityTrip) => tripNights(t) + 1;
+
+const scheduleLabel = (t: CommunityTrip) => {
+  if (t.recurrence_type === "weekly" && t.recurrence_days?.length) {
+    return `Every ${t.recurrence_days.map(d => DOW_LABEL[d]).join(", ")}`;
+  }
+  if (t.recurrence_type === "custom" && t.recurrence_dates?.length) {
+    return `${t.recurrence_dates.length} departures`;
+  }
+  return `${tripNights(t)}N / ${tripDays(t)}D`;
+};
 
 const CommunityTripsStrip: React.FC = () => {
   const { trips, loading, refetch } = useCommunityTrips();
   const [selectedTrip, setSelectedTrip] = useState<CommunityTrip | null>(null);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-6">
-        <Loader2 className="w-5 h-5 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const toggleCompare = (id: string) => {
+    setCompareIds(prev => {
+      if (prev.includes(id)) return prev.filter(x => x !== id);
+      if (prev.length >= 4) {
+        toast.error("You can compare up to 4 trips");
+        return prev;
+      }
+      return [...prev, id];
+    });
+  };
 
-  if (trips.length === 0) {
-    return (
-      <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
-        <Mountain className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-        <p className="text-sm font-medium text-muted-foreground">No community trips yet</p>
-        <p className="text-[10px] text-muted-foreground mt-1">Check back soon for hosted trips!</p>
-      </Card>
-    );
-  }
+  const compareTrips = useMemo(
+    () => trips.filter(t => compareIds.includes(t.id)),
+    [trips, compareIds]
+  );
 
   return (
     <>
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
-        {trips.map((trip) => (
-          <CommunityTripCard
-            key={trip.id}
-            trip={trip}
-            onOpen={() => setSelectedTrip(trip)}
-          />
-        ))}
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-base font-bold">Community Trips</h2>
+        <div className="flex items-center gap-1">
+          {compareMode && (
+            <>
+              <Button size="sm" variant="ghost" className="h-7 text-[11px]"
+                onClick={() => { setCompareMode(false); setCompareIds([]); }}>
+                Cancel
+              </Button>
+              <Button size="sm" className="h-7 text-[11px] gap-1"
+                disabled={compareIds.length < 2}
+                onClick={() => setCompareOpen(true)}>
+                Compare ({compareIds.length})
+              </Button>
+            </>
+          )}
+          {!compareMode && (
+            <Button size="sm" variant="outline" className="h-7 text-[11px] gap-1 rounded-lg"
+              onClick={() => setCompareMode(true)} disabled={trips.length < 2}>
+              <ArrowRightLeft className="w-3 h-3" /> Compare
+            </Button>
+          )}
+        </div>
       </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-6">
+          <Loader2 className="w-5 h-5 animate-spin text-primary" />
+        </div>
+      ) : trips.length === 0 ? (
+        <Card className="p-6 text-center rounded-2xl border-0 shadow-soft">
+          <Mountain className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm font-medium text-muted-foreground">No community trips yet</p>
+          <p className="text-[10px] text-muted-foreground mt-1">Check back soon for hosted trips!</p>
+        </Card>
+      ) : (
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scrollbar-hide">
+          {trips.map((trip) => (
+            <CommunityTripCard
+              key={trip.id}
+              trip={trip}
+              compareMode={compareMode}
+              checked={compareIds.includes(trip.id)}
+              onToggleCompare={() => toggleCompare(trip.id)}
+              onOpen={() => !compareMode && setSelectedTrip(trip)}
+            />
+          ))}
+        </div>
+      )}
 
       <TripDetailDialog
         trip={selectedTrip}
@@ -54,19 +116,40 @@ const CommunityTripsStrip: React.FC = () => {
         onClose={() => setSelectedTrip(null)}
         onBooked={refetch}
       />
+
+      <CompareTripsDialog
+        trips={compareTrips}
+        open={compareOpen}
+        onClose={() => setCompareOpen(false)}
+      />
     </>
   );
 };
 
-const CommunityTripCard: React.FC<{ trip: CommunityTrip; onOpen: () => void }> = ({ trip, onOpen }) => {
-  const days = differenceInDays(new Date(trip.end_date), new Date(trip.start_date)) + 1;
+const CommunityTripCard: React.FC<{
+  trip: CommunityTrip;
+  compareMode: boolean;
+  checked: boolean;
+  onToggleCompare: () => void;
+  onOpen: () => void;
+}> = ({ trip, compareMode, checked, onToggleCompare, onOpen }) => {
   const seatsLowPct = trip.seats_left / Math.max(trip.seats_total, 1);
+  const nights = tripNights(trip);
+  const days = tripDays(trip);
 
   return (
     <Card
-      className="overflow-hidden cursor-pointer hover:shadow-elegant transition-shadow rounded-2xl border-0 shadow-soft shrink-0 w-64 snap-start"
-      onClick={onOpen}
+      className={cn(
+        "overflow-hidden cursor-pointer hover:shadow-elegant transition-shadow rounded-2xl border-0 shadow-soft shrink-0 w-64 snap-start relative",
+        checked && "ring-2 ring-primary"
+      )}
+      onClick={() => (compareMode ? onToggleCompare() : onOpen())}
     >
+      {compareMode && (
+        <div className="absolute top-2 right-2 z-10 bg-background/90 rounded-md p-1">
+          <Checkbox checked={checked} onCheckedChange={onToggleCompare} />
+        </div>
+      )}
       <div className="relative h-32 bg-gradient-hero">
         {trip.cover_url ? (
           <img src={trip.cover_url} alt={trip.title} className="w-full h-full object-cover" loading="lazy" />
@@ -79,7 +162,7 @@ const CommunityTripCard: React.FC<{ trip: CommunityTrip; onOpen: () => void }> =
           <Sparkles className="w-3 h-3" />
           Hosted
         </Badge>
-        {seatsLowPct <= 0.3 && trip.seats_left > 0 && (
+        {!compareMode && seatsLowPct <= 0.3 && trip.seats_left > 0 && (
           <Badge variant="destructive" className="absolute top-2 right-2 text-[10px]">
             {trip.seats_left} left
           </Badge>
@@ -98,8 +181,15 @@ const CommunityTripCard: React.FC<{ trip: CommunityTrip; onOpen: () => void }> =
           <span className="truncate">{trip.destination}</span>
         </div>
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(trip.start_date), "d MMM")} • {days}D</span>
-          <span className="flex items-center gap-1"><Users className="w-3 h-3" />{trip.seats_left}/{trip.seats_total}</span>
+          <span className="flex items-center gap-1">
+            <Moon className="w-3 h-3" />{nights}N
+            <Sun className="w-3 h-3 ml-0.5" />{days}D
+          </span>
+          {(trip.recurrence_type === "weekly" || trip.recurrence_type === "custom") && (
+            <span className="flex items-center gap-1 text-emerald-600">
+              <Repeat className="w-3 h-3" /> {scheduleLabel(trip)}
+            </span>
+          )}
         </div>
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center text-primary font-bold text-sm">
@@ -121,8 +211,9 @@ const TripDetailDialog: React.FC<{
 }> = ({ trip, open, onClose, onBooked }) => {
   const [bookingOpen, setBookingOpen] = useState(false);
   if (!trip) return null;
-  const days = differenceInDays(new Date(trip.end_date), new Date(trip.start_date)) + 1;
   const itinerary = Array.isArray(trip.itinerary) ? trip.itinerary : [];
+  const nights = tripNights(trip);
+  const days = tripDays(trip);
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -148,10 +239,10 @@ const TripDetailDialog: React.FC<{
 
           <div className="grid grid-cols-2 gap-2 text-xs">
             <Card className="p-2 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-primary" />
+              <Moon className="w-4 h-4 text-primary" />
               <div>
-                <p className="font-medium">{format(new Date(trip.start_date), "d MMM")}</p>
-                <p className="text-[10px] text-muted-foreground">{days} days</p>
+                <p className="font-medium">{nights}N / {days}D</p>
+                <p className="text-[10px] text-muted-foreground">{scheduleLabel(trip)}</p>
               </div>
             </Card>
             <Card className="p-2 flex items-center gap-2">
@@ -177,6 +268,23 @@ const TripDetailDialog: React.FC<{
             </Card>
           </div>
 
+          {(trip.pickup_location || trip.dropoff_location) && (
+            <div className="grid grid-cols-2 gap-2">
+              {trip.pickup_location && (
+                <div>
+                  <p className="text-xs font-semibold mb-0.5 text-emerald-600">Pickup</p>
+                  <p className="text-[11px] text-muted-foreground">{trip.pickup_location}</p>
+                </div>
+              )}
+              {trip.dropoff_location && (
+                <div>
+                  <p className="text-xs font-semibold mb-0.5 text-rose-600">Drop-off</p>
+                  <p className="text-[11px] text-muted-foreground">{trip.dropoff_location}</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {itinerary.length > 0 && (
             <div>
               <p className="text-xs font-semibold mb-2 flex items-center gap-1">
@@ -185,7 +293,7 @@ const TripDetailDialog: React.FC<{
               <div className="space-y-2">
                 {itinerary.map((d: any, i: number) => (
                   <div key={i} className="border-l-2 border-primary/40 pl-3 py-0.5">
-                    <p className="text-xs font-medium">Day {d.day || i + 1}: {d.title}</p>
+                    <p className="text-xs font-medium">Day {d.day || i + 1}: {d.title || d.plan}</p>
                     {d.description && (
                       <p className="text-[11px] text-muted-foreground">{d.description}</p>
                     )}
@@ -247,6 +355,62 @@ const TripDetailDialog: React.FC<{
         onOpenChange={setBookingOpen}
         onBooked={() => { onBooked?.(); onClose(); }}
       />
+    </Dialog>
+  );
+};
+
+const CompareTripsDialog: React.FC<{
+  trips: CommunityTrip[];
+  open: boolean;
+  onClose: () => void;
+}> = ({ trips, open, onClose }) => {
+  if (!trips.length) return null;
+  const rows: { label: string; render: (t: CommunityTrip) => React.ReactNode }[] = [
+    { label: "Destination", render: t => t.destination },
+    { label: "Duration", render: t => `${tripNights(t)}N / ${tripDays(t)}D` },
+    { label: "Schedule", render: t => scheduleLabel(t) },
+    { label: "Price", render: t => `₹${t.price_inr.toLocaleString()}` },
+    { label: "Seats left", render: t => `${t.seats_left}/${t.seats_total}` },
+    { label: "Group", render: t => t.group_type },
+    { label: "Type", render: t => t.trip_type },
+    { label: "Pickup", render: t => t.pickup_location || "—" },
+    { label: "Drop-off", render: t => t.dropoff_location || "—" },
+    { label: "Rating", render: t => t.host?.rating ? `${t.host.rating.toFixed(1)}★` : "New" },
+    { label: "Host", render: t => t.host?.business_name || t.host?.legal_name || "—" },
+    { label: "Inclusions", render: t => t.inclusions?.join(", ") || "—" },
+  ];
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ArrowRightLeft className="w-4 h-4" /> Compare trips
+          </DialogTitle>
+          <DialogDescription>Side-by-side details</DialogDescription>
+        </DialogHeader>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left p-2 font-medium text-muted-foreground sticky left-0 bg-background">Feature</th>
+                {trips.map(t => (
+                  <th key={t.id} className="text-left p-2 font-semibold min-w-[140px]">{t.title}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, i) => (
+                <tr key={i} className="border-b">
+                  <td className="p-2 font-medium text-muted-foreground sticky left-0 bg-background">{r.label}</td>
+                  {trips.map(t => (
+                    <td key={t.id} className="p-2 align-top">{r.render(t)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 };
