@@ -38,9 +38,11 @@ export type Database = {
       community_bookings: {
         Row: {
           amount_paid: number
+          billing_details: Json | null
           commission_amount: number
           contact_phone: string | null
           created_at: string
+          departure_date: string | null
           emergency_contact: Json | null
           id: string
           seats: number
@@ -53,9 +55,11 @@ export type Database = {
         }
         Insert: {
           amount_paid?: number
+          billing_details?: Json | null
           commission_amount?: number
           contact_phone?: string | null
           created_at?: string
+          departure_date?: string | null
           emergency_contact?: Json | null
           id?: string
           seats?: number
@@ -68,9 +72,11 @@ export type Database = {
         }
         Update: {
           amount_paid?: number
+          billing_details?: Json | null
           commission_amount?: number
           contact_phone?: string | null
           created_at?: string
+          departure_date?: string | null
           emergency_contact?: Json | null
           id?: string
           seats?: number
@@ -97,6 +103,8 @@ export type Database = {
           cover_url: string | null
           created_at: string
           destination: string
+          dropoff_location: string | null
+          duration_nights: number | null
           end_date: string
           exclusions: string[] | null
           gallery_urls: string[] | null
@@ -110,7 +118,11 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           meeting_point: string | null
+          pickup_location: string | null
           price_inr: number
+          recurrence_dates: string[] | null
+          recurrence_days: number[] | null
+          recurrence_type: string
           seats_left: number
           seats_total: number
           start_date: string
@@ -124,6 +136,8 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           destination: string
+          dropoff_location?: string | null
+          duration_nights?: number | null
           end_date: string
           exclusions?: string[] | null
           gallery_urls?: string[] | null
@@ -137,7 +151,11 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           meeting_point?: string | null
+          pickup_location?: string | null
           price_inr: number
+          recurrence_dates?: string[] | null
+          recurrence_days?: number[] | null
+          recurrence_type?: string
           seats_left: number
           seats_total: number
           start_date: string
@@ -151,6 +169,8 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           destination?: string
+          dropoff_location?: string | null
+          duration_nights?: number | null
           end_date?: string
           exclusions?: string[] | null
           gallery_urls?: string[] | null
@@ -164,7 +184,11 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           meeting_point?: string | null
+          pickup_location?: string | null
           price_inr?: number
+          recurrence_dates?: string[] | null
+          recurrence_days?: number[] | null
+          recurrence_type?: string
           seats_left?: number
           seats_total?: number
           start_date?: string
@@ -1033,6 +1057,18 @@ export type Database = {
         | {
             Args: {
               p_contact_phone: string
+              p_emergency: Json
+              p_seats: number
+              p_travellers?: Json
+              p_trip_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_billing?: Json
+              p_contact_phone: string
+              p_departure_date?: string
               p_emergency: Json
               p_seats: number
               p_travellers?: Json

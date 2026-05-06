@@ -909,12 +909,6 @@ const PlanGroupsTab: React.FC<{ currentUserId: string; searchQuery: string }> = 
                         • {formatDistanceToNow(new Date(group.last_activity), { addSuffix: true })}
                       </span>
                     )}
-                    <span className="text-[10px] text-muted-foreground">{group.member_count} members</span>
-                    {group.last_activity && (
-                      <span className="text-[10px] text-muted-foreground">
-                        • {formatDistanceToNow(new Date(group.last_activity), { addSuffix: true })}
-                      </span>
-                    )}
                   </div>
                   {group.description && (
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{group.description}</p>

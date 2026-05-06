@@ -25,6 +25,12 @@ export interface CommunityTrip {
   gallery_urls: string[] | null;
   status: string;
   created_at: string;
+  recurrence_type?: "one_time" | "weekly" | "custom" | string;
+  recurrence_days?: number[] | null;
+  recurrence_dates?: string[] | null;
+  duration_nights?: number | null;
+  pickup_location?: string | null;
+  dropoff_location?: string | null;
   host?: {
     legal_name: string;
     business_name: string | null;

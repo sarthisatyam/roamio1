@@ -18,6 +18,12 @@ export interface HostTripInput {
   exclusions?: string[];
   cover_url?: string;
   status?: "draft" | "published";
+  recurrence_type?: "one_time" | "weekly" | "custom";
+  recurrence_days?: number[];
+  recurrence_dates?: string[];
+  duration_nights?: number;
+  pickup_location?: string;
+  dropoff_location?: string;
 }
 
 export function useHostTrips(hostId: string | null) {
