@@ -119,14 +119,78 @@ const TripBuilderDialog: React.FC<Props> = ({ open, onOpenChange, hostId, onCrea
             <Label>Destination *</Label>
             <Input value={form.destination} onChange={(e) => u("destination", e.target.value)} />
           </div>
+          <div className="rounded-lg border p-3 space-y-3 bg-muted/30">
+            <Label className="text-xs font-semibold">Schedule</Label>
+            <Select value={form.recurrence_type} onValueChange={(v) => u("recurrence_type", v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="one_time">One-time trip</SelectItem>
+                <SelectItem value="weekly">Weekly recurring (e.g. every Friday)</SelectItem>
+                <SelectItem value="custom">Multiple custom dates</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {form.recurrence_type === "weekly" && (
+              <div className="space-y-2">
+                <Label className="text-[11px]">Pick departure day(s)</Label>
+                <div className="flex flex-wrap gap-1">
+                  {DOW.map(d => (
+                    <Badge key={d.v}
+                      variant={(form.recurrence_days ?? []).includes(d.v) ? "default" : "outline"}
+                      className="cursor-pointer" onClick={() => toggleDow(d.v)}>{d.l}</Badge>
+                  ))}
+                </div>
+                <div>
+                  <Label className="text-[11px]">Duration (nights)</Label>
+                  <Input type="number" min={1} value={form.duration_nights ?? 1}
+                    onChange={(e) => u("duration_nights", parseInt(e.target.value) || 1)} />
+                </div>
+              </div>
+            )}
+
+            {form.recurrence_type === "custom" && (
+              <div className="space-y-2">
+                <Label className="text-[11px]">Departure dates</Label>
+                <div className="flex gap-2">
+                  <Input type="date" value={customDateInput} onChange={(e) => setCustomDateInput(e.target.value)} />
+                  <Button type="button" size="icon" variant="outline" onClick={addCustomDate}><Plus className="w-4 h-4" /></Button>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {(form.recurrence_dates ?? []).map((d, i) => (
+                    <Badge key={i} variant="secondary" className="cursor-pointer"
+                      onClick={() => u("recurrence_dates", form.recurrence_dates!.filter((_, idx) => idx !== i))}>
+                      {d} ×
+                    </Badge>
+                  ))}
+                </div>
+                <div>
+                  <Label className="text-[11px]">Duration (nights)</Label>
+                  <Input type="number" min={1} value={form.duration_nights ?? 1}
+                    onChange={(e) => u("duration_nights", parseInt(e.target.value) || 1)} />
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-[11px]">{form.recurrence_type === "one_time" ? "Start date *" : "First departure *"}</Label>
+                <Input type="date" value={form.start_date} onChange={(e) => u("start_date", e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-[11px]">{form.recurrence_type === "one_time" ? "End date *" : "Series end *"}</Label>
+                <Input type="date" value={form.end_date} onChange={(e) => u("end_date", e.target.value)} />
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Start date *</Label>
-              <Input type="date" value={form.start_date} onChange={(e) => u("start_date", e.target.value)} />
+              <Label>Pickup location</Label>
+              <Input value={form.pickup_location} onChange={(e) => u("pickup_location", e.target.value)} placeholder="e.g. Delhi ISBT" />
             </div>
             <div>
-              <Label>End date *</Label>
-              <Input type="date" value={form.end_date} onChange={(e) => u("end_date", e.target.value)} />
+              <Label>Drop-off location</Label>
+              <Input value={form.dropoff_location} onChange={(e) => u("dropoff_location", e.target.value)} placeholder="e.g. Manali Mall Rd" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
