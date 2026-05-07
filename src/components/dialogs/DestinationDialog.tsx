@@ -325,70 +325,62 @@ const DestinationTripsStrip: React.FC<{ destination: string }> = ({ destination 
   if (!communityTrips.length && !groupPlans.length) return null;
 
   return (
-    <div className="space-y-4">
-      {communityTrips.length > 0 && (
-        <div>
-          <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
-            <Sparkles className="w-4 h-4 text-amber-500" /> Community Trips here
-          </h3>
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-            {communityTrips.map((t) => (
-              <Card key={t.id} className="shrink-0 w-44 overflow-hidden rounded-xl border-0 shadow-soft">
-                <div className="h-20 bg-gradient-hero">
-                  {t.cover_url ? (
-                    <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Mountain className="w-6 h-6 text-primary-foreground/60" />
-                    </div>
-                  )}
+    <div>
+      <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+        <Sparkles className="w-4 h-4 text-amber-500" /> Trips to {destination}
+      </h3>
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+        {communityTrips.map((t) => (
+          <Card key={`c-${t.id}`} className="shrink-0 w-44 overflow-hidden rounded-xl border-0 shadow-soft relative">
+            <Badge className="absolute top-1.5 left-1.5 z-10 bg-amber-500 text-white text-[9px] px-1.5 py-0">
+              <Sparkles className="w-2.5 h-2.5 mr-0.5" />Community
+            </Badge>
+            <div className="h-20 bg-gradient-hero">
+              {t.cover_url ? (
+                <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Mountain className="w-6 h-6 text-primary-foreground/60" />
                 </div>
-                <div className="p-2 space-y-1">
-                  <p className="text-[11px] font-semibold line-clamp-2 leading-tight">{t.title}</p>
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="text-muted-foreground">
-                      {t.duration_nights ? `${t.duration_nights}N` : "Trip"}
-                    </span>
-                    <span className="font-bold text-primary flex items-center">
-                      <IndianRupee className="w-3 h-3" />{t.price_inr.toLocaleString()}
-                    </span>
-                  </div>
+              )}
+            </div>
+            <div className="p-2 space-y-1">
+              <p className="text-[11px] font-semibold line-clamp-2 leading-tight">{t.title}</p>
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="text-muted-foreground">
+                  {t.duration_nights ? `${t.duration_nights}N` : "Trip"}
+                </span>
+                <span className="font-bold text-primary flex items-center">
+                  <IndianRupee className="w-3 h-3" />{t.price_inr.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </Card>
+        ))}
+        {groupPlans.map((p) => (
+          <Card key={`g-${p.id}`} className="shrink-0 w-44 overflow-hidden rounded-xl border-0 shadow-soft relative">
+            <Badge className="absolute top-1.5 left-1.5 z-10 bg-primary text-primary-foreground text-[9px] px-1.5 py-0">
+              <Users className="w-2.5 h-2.5 mr-0.5" />Group
+            </Badge>
+            <div className="h-20 bg-muted">
+              {p.cover_image_url ? (
+                <img src={p.cover_image_url} alt={p.plan_name} className="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                  <MapPin className="w-6 h-6 text-primary/40" />
                 </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {groupPlans.length > 0 && (
-        <div>
-          <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
-            <Users className="w-4 h-4 text-primary" /> Group Trips here
-          </h3>
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-            {groupPlans.map((p) => (
-              <Card key={p.id} className="shrink-0 w-44 overflow-hidden rounded-xl border-0 shadow-soft">
-                <div className="h-20 bg-muted">
-                  {p.cover_image_url ? (
-                    <img src={p.cover_image_url} alt={p.plan_name} className="w-full h-full object-cover" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-                      <MapPin className="w-6 h-6 text-primary/40" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-2 space-y-1">
-                  <p className="text-[11px] font-semibold line-clamp-2 leading-tight">{p.plan_name}</p>
-                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                    <Calendar className="w-3 h-3" />
-                    {format(new Date(p.start_date), "MMM dd")}–{format(new Date(p.end_date), "MMM dd")}
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
+              )}
+            </div>
+            <div className="p-2 space-y-1">
+              <p className="text-[11px] font-semibold line-clamp-2 leading-tight">{p.plan_name}</p>
+              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <Calendar className="w-3 h-3" />
+                {format(new Date(p.start_date), "MMM dd")}–{format(new Date(p.end_date), "MMM dd")}
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };
