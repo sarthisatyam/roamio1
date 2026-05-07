@@ -235,7 +235,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
                   Travel Guide
                 </h3>
                 <div className="space-y-2.5">
-                  {destination.travelGuide.map((item, idx) => {
+                  {destination.travelGuide.slice(0, 3).map((item, idx) => {
                     const icon = item.category === 'do'
                       ? <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
                       : item.category === 'dont'
