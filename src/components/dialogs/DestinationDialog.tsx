@@ -222,48 +222,8 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
 
           <Separator />
 
-          {/* Eateries */}
-          {destination.eateries && destination.eateries.length > 0 && (
-            <div>
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Utensils className="w-4 h-4 text-primary" />
-                Popular Eateries
-              </h3>
-              <div className="space-y-3">
-                {destination.eateries.map((eatery, idx) => (
-                  <Card key={idx} className="p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium text-sm">{eatery.name}</h4>
-                          <Badge variant="outline" className="text-[10px]">
-                            {eatery.type}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-current text-yellow-500" />
-                            <span>{eatery.rating}</span>
-                          </div>
-                          <span>•</span>
-                          <span>{eatery.priceRange}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Known for: {eatery.specialty}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 flex-shrink-0"
-                        onClick={() => handleAddEateryToPlanner(eatery)}
-                      >
-                        <Plus className="w-4 h-4 text-primary" />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Trips for this destination */}
+          <DestinationTripsStrip destination={destination.name} />
 
           {/* Travel Guide */}
           {destination.travelGuide && destination.travelGuide.length > 0 && (
