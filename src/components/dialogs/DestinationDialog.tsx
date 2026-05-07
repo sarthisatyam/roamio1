@@ -268,4 +268,129 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
   );
 };
 
+interface DestTrip {
+  id: string;
+  title: string;
+  cover_url: string | null;
+  price_inr: number;
+  seats_left: number;
+  duration_nights: number | null;
+  start_date: string;
+  end_date: string;
+}
+
+interface DestPlan {
+  id: string;
+  plan_name: string;
+  cover_image_url: string | null;
+  destination_name: string;
+  start_date: string;
+  end_date: string;
+  max_members: number;
+}
+
+const DestinationTripsStrip: React.FC<{ destination: string }> = ({ destination }) => {
+  const [communityTrips, setCommunityTrips] = useState<DestTrip[]>([]);
+  const [groupPlans, setGroupPlans] = useState<DestPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const [ct, gp] = await Promise.all([
+        supabase
+          .from("community_trips")
+          .select("id,title,cover_url,price_inr,seats_left,duration_nights,start_date,end_date")
+          .eq("status", "published")
+          .ilike("destination", `%${destination}%`)
+          .limit(8),
+        supabase
+          .from("plans")
+          .select("id,plan_name,cover_image_url,destination_name,start_date,end_date,max_members")
+          .eq("status", "open")
+          .ilike("destination_name", `%${destination}%`)
+          .gte("start_date", new Date().toISOString().split("T")[0])
+          .limit(8),
+      ]);
+      if (cancelled) return;
+      setCommunityTrips((ct.data as any) || []);
+      setGroupPlans((gp.data as any) || []);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [destination]);
+
+  if (loading) return null;
+  if (!communityTrips.length && !groupPlans.length) return null;
+
+  return (
+    <div className="space-y-4">
+      {communityTrips.length > 0 && (
+        <div>
+          <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+            <Sparkles className="w-4 h-4 text-amber-500" /> Community Trips here
+          </h3>
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+            {communityTrips.map((t) => (
+              <Card key={t.id} className="shrink-0 w-44 overflow-hidden rounded-xl border-0 shadow-soft">
+                <div className="h-20 bg-gradient-hero">
+                  {t.cover_url ? (
+                    <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Mountain className="w-6 h-6 text-primary-foreground/60" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-2 space-y-1">
+                  <p className="text-[11px] font-semibold line-clamp-2 leading-tight">{t.title}</p>
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-muted-foreground">
+                      {t.duration_nights ? `${t.duration_nights}N` : "Trip"}
+                    </span>
+                    <span className="font-bold text-primary flex items-center">
+                      <IndianRupee className="w-3 h-3" />{t.price_inr.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {groupPlans.length > 0 && (
+        <div>
+          <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+            <Users className="w-4 h-4 text-primary" /> Group Trips here
+          </h3>
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+            {groupPlans.map((p) => (
+              <Card key={p.id} className="shrink-0 w-44 overflow-hidden rounded-xl border-0 shadow-soft">
+                <div className="h-20 bg-muted">
+                  {p.cover_image_url ? (
+                    <img src={p.cover_image_url} alt={p.plan_name} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                      <MapPin className="w-6 h-6 text-primary/40" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-2 space-y-1">
+                  <p className="text-[11px] font-semibold line-clamp-2 leading-tight">{p.plan_name}</p>
+                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <Calendar className="w-3 h-3" />
+                    {format(new Date(p.start_date), "MMM dd")}–{format(new Date(p.end_date), "MMM dd")}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default DestinationDialog;
