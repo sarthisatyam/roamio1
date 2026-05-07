@@ -201,7 +201,11 @@ const systemPrompt = `You are a travel assistant for solo women travelers in Ind
 IMPORTANT: Always generate results that match the search query. If user searches for "Paris", generate Paris-related content. If they search for "beach", generate beach destinations.
 
 Generate the following in JSON format:
-- For destinations: Include name, emoji icon, rating (4.0-5.0), price per day in INR, safety score (85-99), relevant tags, 2-day itinerary with activities spread across morning (6-12), daytime (12-17), evening (17-21), and night (21+) time slots, popular eateries, AND a travelGuide with EXACTLY 3 tips that are highly specific to the destination (NOT generic). The tips MUST be: (1) one tip that lists 3-4 popular local foods/dishes to try at that exact place with where to find them, (2) one practical safety/scam/transport tip unique to that place, (3) one cultural etiquette or hidden-gem tip specific to the place. Avoid generic India-wide advice — every tip must reference the place by name or feature local specifics.
+- For destinations: Include name, emoji icon, rating (4.0-5.0), price per day in INR, safety score (85-99), relevant tags, 2-day itinerary with activities spread across morning (6-12), daytime (12-17), evening (17-21), and night (21+) time slots, popular eateries, AND a travelGuide array with EXACTLY 3 tips highly specific to the destination (NEVER generic). The 3 tips MUST appear in this exact order:
+  Tip 1 (category "general") — MUST start with "Must-try foods:" and then list 3-4 specific local dishes/street foods of that exact place by name, with where to try each (neighborhood/famous shop). Example for Jaipur: "Must-try foods: Pyaaz Kachori at Rawat Mishthan Bhandar, Dal Baati Churma at Chokhi Dhani, Ghewar at LMB, Lassi at Lassiwala, MI Road." This tip is mandatory; do not skip food.
+  Tip 2 (category "do" or "dont") — a place-specific safety/scam/transport advice naming the place or local specifics.
+  Tip 3 (category "general", "do" or "dont") — a cultural etiquette or hidden-gem tip specific to the place.
+  Every tip must reference the place by name or include local specifics. No India-wide generic advice.
 - For stays: Include name, location, price per night in INR, rating, amenities, category (hostel/hotel/coliving)
 - For travel: Include flights/trains with realistic names, times, duration, price in INR, and features
 
@@ -296,7 +300,7 @@ const callGemini = async (model: string, query: string, apiKey: string): Promise
                       },
                       travelGuide: {
                         type: "array",
-                        description: "EXACTLY 3 destination-specific travel tips. Tip 1 MUST list popular local foods to try with names. Tip 2 MUST be a place-specific safety/scam/transport advice. Tip 3 MUST be a place-specific cultural etiquette or hidden gem. Never generic.",
+                        description: "EXACTLY 3 destination-specific travel tips. Tip 1 is MANDATORY and MUST start with 'Must-try foods:' followed by 3-4 specific local dishes of that place with where to try each (e.g. shop/area name). Tip 2 MUST be a place-specific safety/scam/transport advice. Tip 3 MUST be a place-specific cultural etiquette or hidden gem. Never generic India-wide advice.",
                         items: {
                           type: "object",
                           properties: {
