@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Star, Shield, Clock, Utensils, Calendar, Plus, CloudSun, BookOpen, CheckCircle, XCircle, Lightbulb } from "lucide-react";
+import { Star, Clock, Calendar, Plus, CloudSun, BookOpen, CheckCircle, XCircle, Lightbulb, Sparkles, Users, MapPin, IndianRupee, Mountain } from "lucide-react";
 import { toast } from "sonner";
 import { useWeather } from "@/hooks/useWeather";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
 // Opening hours for popular attractions
 // const attractionHours: Record<string, string> = {
@@ -220,48 +222,8 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
 
           <Separator />
 
-          {/* Eateries */}
-          {destination.eateries && destination.eateries.length > 0 && (
-            <div>
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Utensils className="w-4 h-4 text-primary" />
-                Popular Eateries
-              </h3>
-              <div className="space-y-3">
-                {destination.eateries.map((eatery, idx) => (
-                  <Card key={idx} className="p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium text-sm">{eatery.name}</h4>
-                          <Badge variant="outline" className="text-[10px]">
-                            {eatery.type}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-current text-yellow-500" />
-                            <span>{eatery.rating}</span>
-                          </div>
-                          <span>•</span>
-                          <span>{eatery.priceRange}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Known for: {eatery.specialty}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 flex-shrink-0"
-                        onClick={() => handleAddEateryToPlanner(eatery)}
-                      >
-                        <Plus className="w-4 h-4 text-primary" />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Trips for this destination */}
+          <DestinationTripsStrip destination={destination.name} />
 
           {/* Travel Guide */}
           {destination.travelGuide && destination.travelGuide.length > 0 && (
@@ -273,7 +235,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
                   Travel Guide
                 </h3>
                 <div className="space-y-2.5">
-                  {destination.travelGuide.map((item, idx) => {
+                  {destination.travelGuide.slice(0, 3).map((item, idx) => {
                     const icon = item.category === 'do'
                       ? <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
                       : item.category === 'dont'
@@ -303,6 +265,131 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onOpenChang
         </div>
       </DialogContent>
     </Dialog>
+  );
+};
+
+interface DestTrip {
+  id: string;
+  title: string;
+  cover_url: string | null;
+  price_inr: number;
+  seats_left: number;
+  duration_nights: number | null;
+  start_date: string;
+  end_date: string;
+}
+
+interface DestPlan {
+  id: string;
+  plan_name: string;
+  cover_image_url: string | null;
+  destination_name: string;
+  start_date: string;
+  end_date: string;
+  max_members: number;
+}
+
+const DestinationTripsStrip: React.FC<{ destination: string }> = ({ destination }) => {
+  const [communityTrips, setCommunityTrips] = useState<DestTrip[]>([]);
+  const [groupPlans, setGroupPlans] = useState<DestPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const [ct, gp] = await Promise.all([
+        supabase
+          .from("community_trips")
+          .select("id,title,cover_url,price_inr,seats_left,duration_nights,start_date,end_date")
+          .eq("status", "published")
+          .ilike("destination", `%${destination}%`)
+          .limit(8),
+        supabase
+          .from("plans")
+          .select("id,plan_name,cover_image_url,destination_name,start_date,end_date,max_members")
+          .eq("status", "open")
+          .ilike("destination_name", `%${destination}%`)
+          .gte("start_date", new Date().toISOString().split("T")[0])
+          .limit(8),
+      ]);
+      if (cancelled) return;
+      setCommunityTrips((ct.data as any) || []);
+      setGroupPlans((gp.data as any) || []);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [destination]);
+
+  if (loading) return null;
+  if (!communityTrips.length && !groupPlans.length) return null;
+
+  return (
+    <div className="space-y-4">
+      {communityTrips.length > 0 && (
+        <div>
+          <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+            <Sparkles className="w-4 h-4 text-amber-500" /> Community Trips here
+          </h3>
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+            {communityTrips.map((t) => (
+              <Card key={t.id} className="shrink-0 w-44 overflow-hidden rounded-xl border-0 shadow-soft">
+                <div className="h-20 bg-gradient-hero">
+                  {t.cover_url ? (
+                    <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Mountain className="w-6 h-6 text-primary-foreground/60" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-2 space-y-1">
+                  <p className="text-[11px] font-semibold line-clamp-2 leading-tight">{t.title}</p>
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-muted-foreground">
+                      {t.duration_nights ? `${t.duration_nights}N` : "Trip"}
+                    </span>
+                    <span className="font-bold text-primary flex items-center">
+                      <IndianRupee className="w-3 h-3" />{t.price_inr.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {groupPlans.length > 0 && (
+        <div>
+          <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+            <Users className="w-4 h-4 text-primary" /> Group Trips here
+          </h3>
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+            {groupPlans.map((p) => (
+              <Card key={p.id} className="shrink-0 w-44 overflow-hidden rounded-xl border-0 shadow-soft">
+                <div className="h-20 bg-muted">
+                  {p.cover_image_url ? (
+                    <img src={p.cover_image_url} alt={p.plan_name} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                      <MapPin className="w-6 h-6 text-primary/40" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-2 space-y-1">
+                  <p className="text-[11px] font-semibold line-clamp-2 leading-tight">{p.plan_name}</p>
+                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <Calendar className="w-3 h-3" />
+                    {format(new Date(p.start_date), "MMM dd")}–{format(new Date(p.end_date), "MMM dd")}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
