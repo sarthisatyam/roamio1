@@ -296,7 +296,7 @@ const callGemini = async (model: string, query: string, apiKey: string): Promise
                       },
                       travelGuide: {
                         type: "array",
-                        description: "Exactly 5 travel tips mixing general suggestions, DOs, and DON'Ts",
+                        description: "EXACTLY 3 destination-specific travel tips. Tip 1 MUST list popular local foods to try with names. Tip 2 MUST be a place-specific safety/scam/transport advice. Tip 3 MUST be a place-specific cultural etiquette or hidden gem. Never generic.",
                         items: {
                           type: "object",
                           properties: {
