@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Star, Shield, Clock, Utensils, Calendar, Plus, CloudSun, BookOpen, CheckCircle, XCircle, Lightbulb } from "lucide-react";
+import { Star, Clock, Calendar, Plus, CloudSun, BookOpen, CheckCircle, XCircle, Lightbulb, Sparkles, Users, MapPin, IndianRupee, Mountain } from "lucide-react";
 import { toast } from "sonner";
 import { useWeather } from "@/hooks/useWeather";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
 // Opening hours for popular attractions
 // const attractionHours: Record<string, string> = {
