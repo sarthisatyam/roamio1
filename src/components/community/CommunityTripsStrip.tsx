@@ -25,13 +25,34 @@ const tripNights = (t: CommunityTrip) => {
 };
 const tripDays = (t: CommunityTrip) => tripNights(t) + 1;
 
-const scheduleLabel = (t: CommunityTrip) => {
-  if (t.recurrence_type === "weekly" && t.recurrence_days?.length) {
-    return `Every ${t.recurrence_days.map(d => DOW_LABEL[d]).join(", ")}`;
-  }
+const fmtDate = (d: Date) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+
+const upcomingDates = (t: CommunityTrip, max = 3): string[] => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   if (t.recurrence_type === "custom" && t.recurrence_dates?.length) {
-    return `${t.recurrence_dates.length} departures`;
+    return t.recurrence_dates
+      .map((s) => new Date(s))
+      .filter((d) => d >= today)
+      .sort((a, b) => a.getTime() - b.getTime())
+      .slice(0, max)
+      .map(fmtDate);
   }
+  if (t.recurrence_type === "weekly" && t.recurrence_days?.length) {
+    const out: Date[] = [];
+    for (let i = 0; i < 60 && out.length < max; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      if (t.recurrence_days.includes(d.getDay())) out.push(d);
+    }
+    return out.map(fmtDate);
+  }
+  return [fmtDate(new Date(t.start_date))];
+};
+
+const scheduleLabel = (t: CommunityTrip) => {
+  const dates = upcomingDates(t, 3);
+  if (dates.length) return `Starts ${dates.join(" • ")}`;
   return `${tripNights(t)}N / ${tripDays(t)}D`;
 };
 
